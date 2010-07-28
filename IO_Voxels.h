@@ -12,7 +12,7 @@
 
 
 template<class Edge, class Cut, class Dual, class Pants, class Image>
-class IO_Tet {
+class IO_Voxels {
 private:
 
 public:
@@ -22,12 +22,12 @@ public:
   vector<Cut *> cuts;
 
   /*! Constructor given an image */
-  IO_Tet(const Image & i) : image(i),
+  IO_Voxels(const Image & i) : image(i),
 			    Dual_G(0, false), Pants_G(0, true) {
   }
 
   /*! destructor */
-  ~IO_Tet() {
+  ~IO_Voxels() {
     Dual_G.delete_ptr();
     Pants_G.delete_ptr();
     for(std::vector<Cut *>::iterator c = cuts.begin(); c != cuts.end(); ++c)
