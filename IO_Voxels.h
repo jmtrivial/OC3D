@@ -11,14 +11,28 @@
 #include <vector>
 
 
-template<class Edge, class Cut, class Dual, class Pants>
+template<class Edge, class Cut, class Dual, class Pants, class Image>
 class IO_Tet {
 private:
 
 public:
+  Image image;
   Dual Dual_G;
   Pants Pants_G;
   vector<Cut *> cuts;
+
+  /*! Constructor given an image */
+  IO_Tet(const Image & i) : image(i),
+			    Dual_G(0, false), Pants_G(0, true) {
+  }
+
+  /*! destructor */
+  ~IO_Tet() {
+    Dual_G.delete_ptr();
+    Pants_G.delete_ptr();
+    for(std::vector<Cut *>::iterator c = cuts.begin(); c != cuts.end(); ++c)
+      delete *c;
+  }
 
 
   /*! Gets the source, -1 if it doesn't exist */
