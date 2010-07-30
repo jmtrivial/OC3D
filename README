@@ -1,7 +1,7 @@
   ///         Optimal Cutting 3D           \\\
 
 
-==== Prerequirement: TeteMeshLib ====
+==== Prerequirement: TetMeshLib ====
 Download TetMeshLib, and add it in the contrib/ directory (contrib/TetMeshLib/)
 Build this library (it require several tools, i.e. gmake, makedepend, etc.):
  - "cd contrib/TetMeshLib"
