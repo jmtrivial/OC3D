@@ -11,6 +11,8 @@
 #include <list>
 #include "Structures.h"
 
+namespace sgl
+{
 /*!  
  Basic processing functor: do nothing while processing a vertex and visit an edge toward v iff v is not visited
 \see Proc ADT
@@ -215,5 +217,6 @@ public:
 		}
 	}
 };
+}
 
 #endif

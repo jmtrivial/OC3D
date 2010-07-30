@@ -12,13 +12,14 @@
 #include "Structures.h"
 #include "Search.h"
 
+namespace sgl
+{
 /*!  Creates an edge with flow and capacity: 
 \li oriented in the network 
 \li <b> non oriented in the residual graph </b> */
 template<typename type_flow = int> class Edge_Flow
 { 
-        // TODO: change the "int" to something less architecture-dependant (in 64 bits, int is too small to describe pointers)
-	const int v_, w_;
+	const int v_, w_; 
 	type_flow cap_;
 	type_flow flow_;
 public:
@@ -78,39 +79,6 @@ public:
 	\returns True */
 	bool noPath() { return true; }
 };
-
-//template<class Edge = Edge_Base<> > class SelectNullCap
-//{
-//	int V;
-//	std::list<Edge*> &selected;
-//	std::vector<bool> visited;
-//public:
-//	SelectNullCap(int V, std::list<Edge*> &toSelect): V(V), selected(toSelect), visited(V, false) { };
-//	void init(int source)
-//	{
-//		visited[source] = true;
-//	}
-//	bool trait(int v)  {return false;}
-//	bool toVisit(Edge *e, int toVertex)
-//	{
-//		if(e->w() != toVertex) // on ne regarde que les arêtes de s vers t
-//			return false;
-//		if(e->capRto(toVertex) == 0)
-//		{
-//			selected.push_back(e);
-//			return false;
-//		}
-//		if(!visited[toVertex])
-//		{
-//			visited[toVertex] = true;
-//			return true;
-//		}
-//		return false;
-//	}
-//	/*! Process end if no path was found 
-//	\returns True */
-//	bool noPath() { return true; }
-//};
 
 /*!  Find the max flow using Ford %Fulkerson algorithm
 \param Search_Path Path-augmentating search algorithm type
@@ -238,28 +206,6 @@ public:
 			e->set_flow(static_cast<type_flow>(0));
 	}
 };
-//template<class Edge = Edge_Flow<>, class Graph = Graph_List<Edge> > class Cut
-//{
-//	const Graph &G;
-//public: std::list<Edge*> cut; ///< List of the edges of the mnimum cut
-//private: SelectNullCap<Edge> select;
-//		 BFS<Edge, SelectNullCap<Edge>, Graph> bfs_select;
-//public:
-//	Cut(const Graph &G) : G(G), cut(), select(G.V(), cut), bfs_select(G, select) { };
-//	/// Computes the minimum cut of a network
-//	void operator()(int source) 
-//	{ 
-//		bfs_select(source);
-//	}
-//	/// Gets the total capacity of the min cut
-//	int get_mincut()
-//	{
-//		int res = 0;
-//		for(typename std::list<Edge*>::iterator it = cut.begin(); it != cut.end(); ++it)
-//			res += (*it)->cap();
-//		return res;
-//	}
-//};
 
 /*! Computes the minimum cut of a network <b> with a maxflow </b> and stores it in cut, 
 searching the connected component of the source in the residual graph 
@@ -326,12 +272,6 @@ public:
 };
 /*! \example mincut.cpp
 \image html exflow.jpg */
-
-///*! Computes the minimum cut of a network
-//\see Cut_Vertices
-//\see Fulkerson */
-//template<typename type_flow = int, class Flow = Edge_Flow<type_flow>, class Graph = Graph_List<Flow>, 
-//class MaxFlow = Fulkerson<type_flow>, class Cut = Cut_Vertices<Flow, Graph> > class MaxFlow_MinCut
-//{
+}
 
 #endif

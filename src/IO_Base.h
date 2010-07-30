@@ -4,24 +4,22 @@
 #include <iostream>
 #include "Search.h"
 
-using namespace std;
-
 namespace oc3d
 {
-const string PREFIX = "";
+const std::string PREFIX = "";
 
-void show(string s)
+void show(std::string s)
 {
-	cout<<(PREFIX + s)<<endl;
+	std::cout<<(PREFIX + s)<<std::endl;
 }
 
-template<typename type> string toString(type x)
+template<typename type> std::string toString(type x)
 {
-	ostringstream os;
+	std::ostringstream os;
 	os << x;
 	return os.str();
 }
-template<typename type> bool fromString(const string &s, type &x)
+template<typename type> bool fromString(const std::string &s, type &x)
 {
 	std::istringstream is(s);
 	return is >> x;
@@ -67,7 +65,7 @@ protected:
 	/*! Removes edges in a cut 
 	\param cut Cut to remove
 	\param delEdges List where deleted edges are stored */
-	void remove(Cut *cut, list<Edge*> &delEdges)
+	void remove(Cut *cut, std::list<Edge*> &delEdges)
 	{
 		typename Cut::iterator it(cut);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
@@ -99,11 +97,11 @@ protected:
 public:
 	Dual Dual_G;
 	Pants Pants_G;
-	vector<Cut *> cuts;
-	string base_name; // base name used to write and read by default
-	void set_base_name(string &s) { base_name = s; }
+	std::vector<Cut *> cuts;
+	std::string base_name; // base name used to write and read by default
+	void set_base_name(std::string &s) { base_name = s; }
 	
-	IO_Base(string base_name) : Dual_G(0, false), Pants_G(0, true), base_name(base_name) { }
+	IO_Base(std::string base_name) : Dual_G(0, false), Pants_G(0, true), base_name(base_name) { }
 
 	/*! Gets the source, -1 if it doesn't exist */
 	inline int get_s() const
@@ -122,12 +120,12 @@ public:
 
 	/*! Saves cut number num as a .cut file fileName: <br/> 
 	first line is the number of edges, every other line contains the extremities of one edge */
-	void cut_to_filecut(int num, string fileName = "")
+	void cut_to_filecut(int num, std::string fileName = "")
 	{
 		Cut *cut = cuts[num];
 		if(fileName == "")
 			fileName = (base_name + "_cut_" + toString(num) + ".cut");
-		ofstream outfile(fileName.c_str(), ios::out | ios::binary); 
+		std::ofstream outfile(fileName.c_str(), ios::out | ios::binary); 
 		outfile<<cut->E()<<endl;
 		typename Cut::iterator it(cut);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
@@ -137,12 +135,12 @@ public:
 	}
 	/*! Loads cut number num as a .cut file: <br/> 
 	first line is the number of edges, every other line contains the extremities of one edge */
-	void filecut_to_cut(int num, string fileName = "")
+	void filecut_to_cut(int num, std::string fileName = "")
 	{
 		Cut *cut = new_cut(num);
 		if(fileName == "")
 			fileName = base_name + "_cut_" + toString(num) + ".cut";
-		ifstream file(fileName.c_str(), ios::in);
+		std::ifstream file(fileName.c_str(), ios::in);
 		int nEdges = 0;
 		file>>nEdges;
 		for(int i = 0; i < nEdges; i++)
@@ -173,7 +171,7 @@ public:
 			cuts[i]->set_v(-1);
 			cuts[i]->set_w(-1);
 		}
-		list<Edge*> delEdges;
+		std::list<Edge*> delEdges;
 		for(int i = 0; i < cuts.size(); i++)
 			remove(cuts[i], delEdges);
 

@@ -12,7 +12,7 @@
 /*! Edge in the dual graph */
 namespace oc3d
 {
-template<typename type_flow = double, typename type_wt = type_flow> class Edge_Dual : public Edge_Flow<type_flow>
+	template<typename type_flow = double, typename type_wt = type_flow> class Edge_Dual : public sgl::Edge_Flow<type_flow>
 {
 	type_wt wt_;
 	Edge_Dual *revEdge;
@@ -22,7 +22,7 @@ public:
 	\param cap Capacity of the edge (area of the dual face, probability of a link...), used by max flow algorithms
 	\param wt Weight of the edge, used by shortest path algorithms
 	\param create_rev If true, the reverse edge is created and set suitably */
-	Edge_Dual(int v, int w, type_flow cap, type_wt wt, bool create_rev = true) : Edge_Flow<type_flow>(v,w,cap), wt_(wt), revEdge(0), num(-1)
+	Edge_Dual(int v, int w, type_flow cap, type_wt wt, bool create_rev = true) : sgl::Edge_Flow<type_flow>(v,w,cap), wt_(wt), revEdge(0), num(-1)
 	{
 		if(create_rev)
 			create_RevEdge();

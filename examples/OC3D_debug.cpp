@@ -11,6 +11,8 @@
 #include <iostream>
 
 using namespace std;
+using namespace oc3d;
+using namespace sgl;
 
 typedef double type_flow;
 typedef Edge_Dual<type_flow> Edge;
@@ -99,8 +101,6 @@ int main(int argc, char *argv[])
 				OptimalNPants<>::optimize(num, io, fulkerson, cut_vertices);
 			}
 		}
-		/*else if(tokens[0] == "opt")
-			OptimalNPants<>::optimize(io);*/
 		else if(tokens[0] == "load_cut")
 		{
 			int num = 0;
@@ -132,5 +132,7 @@ int main(int argc, char *argv[])
 			break;
 		else 
 			help();
+
+		cout<<"END"<<endl;
 	}
 }

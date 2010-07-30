@@ -7,6 +7,8 @@
 #include <vector>
 
 using namespace std;
+using namespace oc3d;
+using namespace sgl;
 
 typedef double type_flow;
 typedef Edge_Dual<type_flow> Edge;

@@ -38,9 +38,9 @@ private:
 	}
 
 public:
-	vector<TetFace *> numToFace;
-	vector<Edge *> numToEdge;
-	vector<Tetrahedron *> vertexToTet;
+	std::vector<TetFace *> numToFace;
+	std::vector<Edge *> numToEdge;
+	std::vector<Tetrahedron *> vertexToTet;
 	Tetrahedrization &mesh;
 
 	~IO_Tet()
@@ -48,7 +48,7 @@ public:
 		IO_B::Dual_G.delete_ptr();
 		IO_B::Pants_G.delete_ptr();
 	}
-	IO_Tet(Tetrahedrization &mesh, string base_name) :
+	IO_Tet(Tetrahedrization &mesh, std::string base_name) :
 	mesh(mesh), IO_B(base_name) 
 	{  }
 
@@ -121,13 +121,13 @@ public:
 	\param fileName Name of the .OFF file, if not provided the default path is used 
 	\remarks Keep the order of the vertices
 	\warning The dual graph must exist */
-	void dual_to_OFF(string offName =  "")
+	void dual_to_OFF(std::string offName =  "")
 	{
 		if(offName == "")
 			offName = IO_B::base_name + "_dual.off";
 		/*if(dualName == "")
 			dualName = base_name + ".dual";*/
-		ofstream offFile(offName.c_str(), ios::out | ios::binary)/*, dualFile(dualName.c_str(), ios::out | ios::binary)*/;
+		std::ofstream offFile(offName.c_str(), ios::out | ios::binary);
 		offFile<<"OFF"<<endl;
 		offFile<<(IO_B::Dual_G.V()-2)<<" "<<IO_B::Dual_G.E()<<" "<<0<<endl; // -2: we don't want s and t
 		for(int i = 0; i < IO_B::Dual_G.V() - 2; i++)
@@ -148,11 +148,11 @@ public:
 
 	/*! Exports the first extremities of edges in cut to a .OFF file (used to debug) 
 	\param fileName Name of the .OFF file, if not provided the default path is used */
-	void vertices_to_OFF(Cut *cut, string fileName = "")
+	void vertices_to_OFF(Cut *cut, std::string fileName = "")
 	{
 		if(fileName == "")
 			fileName = IO_B::base_name + "_vertices_cut.off";
-		ofstream outfile(fileName.c_str(), ios::out | ios::binary);  
+		std::ofstream outfile(fileName.c_str(), ios::out | ios::binary);  
 		outfile<<"OFF"<<endl;
 		outfile<<cut->E()<<" 0 0"<<endl;
 
@@ -171,17 +171,17 @@ public:
 	\warning: it doesn't set the extremities of the cut
 	\warning If num is correct, a cut may be deleted
 	\see init_pants */
-	void OFF_to_cut(int num = -1, string fileName = "")
+	void OFF_to_cut(int num = -1, std::string fileName = "")
 	{
 		Cut *cut = IO_B::new_cut(num);
 		if(fileName == "")
 			fileName = IO_B::base_name + "_cut_" + toString(num) + ".off";
-		ifstream file(fileName.c_str(), ios::in);
-		string line;
+		std::ifstream file(fileName.c_str(), ios::in);
+		std::string line;
 		getline(file, line);
 		int nFaces = 0, nVertices = 0, nEdges = 0;
 		file>>nVertices>>nFaces>>nEdges;
-		vector<vect> vertices;
+		std::vector<vect> vertices;
 
 		for(int i = 0; i < nVertices; i++)
 		{
@@ -298,12 +298,12 @@ public:
 	\param fileName Name of the .OFF files <br/> If fileName == "" the default path is used 
 	\warning Vertices order are not kept
 	\see cuts_to_OFF */
-	void cut_to_OFF(int num, string fileName = "")
+	void cut_to_OFF(int num, std::string fileName = "")
 	{
 		assert(num <= IO_B::cuts.size() && num >= 0);
 		Cut *cut = IO_B::cuts[num];
-		vector<vect> vertices; // index to vect
-		vector<int> numToIndex(IO_B::Dual_G.V(), -1); // numToIndex[v] == -1 iff v was not added
+		std::vector<vect> vertices; // index to vect
+		std::vector<int> numToIndex(IO_B::Dual_G.V(), -1); // numToIndex[v] == -1 iff v was not added
 		int index = 0;
 		typename Cut::iterator it_all(cut); 
 		for(Edge *e = it_all.beg(); !it_all.end(); e = it_all.nxt()) // Search for all vertices (but neither s nor t)
@@ -329,7 +329,7 @@ public:
 		if(fileName == "")
 			fileName = (IO_B::base_name + "_cut_" + toString(num) + ".off");
 
-		ofstream outfile(fileName.c_str(), ios::out | ios::binary);  
+		std::ofstream outfile(fileName.c_str(), ios::out | ios::binary);  
 		outfile<<"OFF"<<endl;
 		outfile<<vertices.size()<<" "<<cut->E()<<" "<<0<<endl;
 		for(int i = 0; i < vertices.size(); i++)
@@ -345,7 +345,7 @@ public:
 	/*! Exports first fileNames.size() cuts as .OFF files
 	\param fileNames Names of the .OFF files <br/> If fileNames[k] == "" the default path is used 
 	\see cut_to_OFF */
-	void cuts_to_OFF(vector<string> fileNames)
+	void cuts_to_OFF(std::vector<std::string> fileNames)
 	{
 		assert(fileNames.size() <= IO_B::cuts.size());
 		for(int i = 0; i < fileNames.size(); i++)

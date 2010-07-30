@@ -14,6 +14,8 @@
 #include "Structures.h"
 #include "Search.h"
 
+namespace sgl
+{
 /*! Computes a minimum spanning tree and stores it in a <b> graph MST (not rooted) <\b> */
 template<typename type_wt = int, class Edge = Edge_Base<type_wt>, class Graph = Graph_List<Edge>, class Tree = Tree_List<Edge> > 
 class Kruskal
@@ -445,4 +447,5 @@ public:
 		}
 	}
 };
+}
 #endif

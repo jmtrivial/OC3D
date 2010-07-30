@@ -14,6 +14,9 @@
 
 #include <limits>
 //#include <climits>
+
+namespace sgl
+{
 template<typename type_wt> inline type_wt max_val() // for old compilators (acm-icpc)...
 {
 	//return INT_MAX;
@@ -649,6 +652,7 @@ public:
 	/*! \returns The color of the vertex (0 or 1) */
 	int color(int v) const { return vc[v]; }
 };
+}
 
 #endif
 
