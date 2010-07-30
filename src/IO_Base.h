@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace oc3d
+{
 const string PREFIX = "";
 
 void show(string s)
@@ -229,5 +231,6 @@ public:
 		show(toString(curPant) + " pants found");
 	}
 };
+}
 
 #endif

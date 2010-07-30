@@ -6,8 +6,8 @@
 #ifndef IO_TET_H
 #define IO_TET_H
 
-#include "TetFace.h"
-#include "TetMesh.h"
+#include "include/TetFace.h"
+#include "include/TetMesh.h"
 #include <vector>
 #include <string>
 #include <fstream>
@@ -16,6 +16,8 @@
 #include "IO_Base.h"
 #include "Search.h"
 
+namespace oc3d
+{
 template<class Edge, class Cut, class Dual, class Pants> class IO_Tet : public IO_Base<Edge, Cut, Dual, Pants>
 {
 private:
@@ -74,7 +76,7 @@ public:
 				t1 = f->t1();
 				t2 = f->t2();
 				// Use area as weight too?
-				Edge *e = new Edge((long int)t1->getInfo(), (long int)t2->getInfo(), f->area(), f->area());
+				Edge *e = new Edge((int)t1->getInfo(), (int)t2->getInfo(), f->area(), f->area());
 
 				IO_B::Dual_G.insert(e);
 				IO_B::Dual_G.insert(e->get_RevEdge());
@@ -352,5 +354,6 @@ public:
 
 	
 };
+}
 
 #endif

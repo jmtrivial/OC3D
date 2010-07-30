@@ -12,13 +12,14 @@
 #include "Structures.h"
 #include "Flow.h"
 #include "ShortestPaths.h"
-#include <algorithm>
 #include <queue>
 #include <list>
 #include <assert.h>
 
 using namespace std;
 
+namespace oc3d
+{
 template<typename type_flow = double, typename type_wt = type_flow, class Edge = Edge_Dual<type_flow>, class Cut = Edge_Cut<type_wt, Edge>,
 class Dual = Graph_List<Edge>, class Pants = Graph_List<Cut>, class MaxFlow = Fulkerson<type_flow, Edge, NoNullCap<Edge>, Dual>, class Cut_Find = Cut_Vertices<Edge, Dual>, class IO = IO_Base<Edge, Cut, Dual, Pants> > 
 class OptimalNPants
@@ -409,5 +410,6 @@ public:
 	}
 
 };
+}
 
 #endif

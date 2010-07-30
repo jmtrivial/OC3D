@@ -8,6 +8,8 @@
 
 #include <list>
 
+namespace oc3d
+{
 /*! Cut class, as an edge in the pant graph */
 template<typename type_wt, class Edge> class Edge_Cut
 { 
@@ -144,5 +146,6 @@ public:
 		Cut->replace(pos, e);
 	}
 };
+}
 
 #endif

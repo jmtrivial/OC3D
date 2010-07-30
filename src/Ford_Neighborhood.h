@@ -7,6 +7,8 @@
 
 using namespace std;
 
+namespace oc3d
+{
 template<typename type_flow = int, class Edge = Edge_Flow<type_flow>, class Graph = Graph_List<Edge> > 
 class Ford_Neighborhood
 {
@@ -99,6 +101,6 @@ public:
 			e->set_flow(static_cast<type_flow>(0));
 	}
 };
-
+}
 
 #endif
