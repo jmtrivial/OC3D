@@ -1,0 +1,27 @@
+  ///         Optimal Cutting 3D           \\\
+
+
+==== Prerequirement: TeteMeshLib ====
+Download TetMeshLib, and add it in the contrib/ directory (contrib/TetMeshLib/)
+Build this library (it require several tools, i.e. gmake, makedepend, etc.):
+ - "cd contrib/TetMeshLib"
+ - if you're using a 64 bits system, please add "-DIS64BITPLATFORM" CFLAGS in "src/Makefile"
+ - "make"
+Notes:
+ - the compilation may not works with recent g++ version. Please edit CheckAndRepair.cpp, and rename in line 176 and following the variable "or" (by using for example "or_")
+ - the compilation may not works on 64 bits systems. Please modify the following lines:
+   - in "TetMesh.cpp", line 423, 424, 425, replace "(int)" by "(j_voidint)"
+
+==== Compilation ====
+The compilation of OC3D is performed using cmake (see http://www.cmake.org/):
+ - create a directory build/
+ - "cd build/"
+ - "ccmake .." to check for dependancies
+ - "make" will build all the binaries
+
+ - the compilation may not works on 64 bits systems. Please modify the following lines (may not works perfectly, it's just a workaround):
+   - in "IO_Tet.h", line 77, replace "(int)" by "(long int)"
+
+
+
+

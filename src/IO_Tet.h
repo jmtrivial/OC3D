@@ -6,8 +6,8 @@
 #ifndef IO_TET_H
 #define IO_TET_H
 
-#include "include/TetFace.h"
-#include "include/TetMesh.h"
+#include "TetFace.h"
+#include "TetMesh.h"
 #include <vector>
 #include <string>
 #include <fstream>
@@ -74,7 +74,7 @@ public:
 				t1 = f->t1();
 				t2 = f->t2();
 				// Use area as weight too?
-				Edge *e = new Edge((int)t1->getInfo(), (int)t2->getInfo(), f->area(), f->area());
+				Edge *e = new Edge((long int)t1->getInfo(), (long int)t2->getInfo(), f->area(), f->area());
 
 				IO_B::Dual_G.insert(e);
 				IO_B::Dual_G.insert(e->get_RevEdge());

@@ -12,6 +12,7 @@
 #include "Structures.h"
 #include "Flow.h"
 #include "ShortestPaths.h"
+#include <algorithm>
 #include <queue>
 #include <list>
 #include <assert.h>
