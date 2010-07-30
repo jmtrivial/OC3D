@@ -17,7 +17,8 @@
 \li <b> non oriented in the residual graph </b> */
 template<typename type_flow = int> class Edge_Flow
 { 
-	const int v_, w_; 
+        // TODO: change the "int" to something less architecture-dependant (in 64 bits, int is too small to describe pointers)
+	const int v_, w_;
 	type_flow cap_;
 	type_flow flow_;
 public:
