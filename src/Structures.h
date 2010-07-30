@@ -178,7 +178,7 @@ public:
 	}
 	int dist(int v) 
 	{ 
-		assert(distance[v] != -1);
+		if(distance[v] == -1) return max_val<int>();
 		return distance[v]; 
 	}
 	void set_source(int s) 
@@ -284,7 +284,8 @@ public:
 		for(res = 0, it.beg(); !it.end(); res++, it.nxt());
 		return res;
 	}
-	/*! Delete every edge pointer */
+	/*! Delete every edge pointer 
+	\see clear to remove edges without deleting them */
 	void delete_ptr()
 	{
 		for(int i = 0; i < adj.size(); i++)
@@ -359,7 +360,8 @@ public:
 			Edge *e = cur->e;
 			if(!digraph)
 				remove(e, e->other(v));
-			delete cur->e; // delete?
+			delete e; // delete?
+			Ecnt--;
 			delete cur;
 			cur = nxt;
 		}
@@ -384,7 +386,29 @@ public:
 	\returns Number of elements removed */ 
 	inline int remove(Edge *e)
 	{
-		return remove(e, e->v()) + remove(e, e->w());
+		int removed = remove(e, e->v()) + remove(e, e->w());
+		if(removed) Ecnt--;
+		return removed;
+	}
+
+	/*! Clear the graph without deleting any edge pointer 
+	\see delete_ptr to delete edge pointers*/
+	void clear()
+	{
+		for(int i = 0; i < adj.size(); i++)
+		{
+			node *cur = adj[i], *nxt = 0;
+			while(cur != 0) 
+			{
+				nxt = cur->next;
+				delete cur;
+				cur = nxt;
+			}
+			adj[i] = 0;
+		}
+		for(int i = 0; i < adj.size(); i++)
+			adj[i] = 0;
+		Ecnt = 0;
 	}
 	class iterator;
 	friend class iterator;

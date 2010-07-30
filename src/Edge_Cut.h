@@ -90,8 +90,10 @@ public:
 	/*! Creates and sets the reverse cut RevCut (and sets reverse cut of RevCut) */
 	void create_RevCut()
 	{
-		revEdge_Cut = new Edge_Cut(w(), v());
-
+		if(revEdge_Cut == NULL)
+			revEdge_Cut = new Edge_Cut(w(), v());
+		else
+			revEdge_Cut->clear();
 		iterator it(this);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			revEdge_Cut->insert(e->get_RevEdge());
