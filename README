@@ -5,6 +5,7 @@
 Download TetMeshLib, and add it in the contrib/ directory (contrib/TetMeshLib/)
 Build this library (it require several tools, i.e. gmake, makedepend, etc.):
  - "cd contrib/TetMeshLib"
+ - if you are in an Unix system, please rename "include/tetface.h" as "include/TetFace.h"
  - if you're using a 64 bits system, please add "-DIS64BITPLATFORM" CFLAGS in "src/Makefile"
  - "make"
 Notes:
