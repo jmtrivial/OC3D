@@ -22,7 +22,7 @@ public:
 	\param cap Capacity of the edge (area of the dual face, probability of a link...), used by max flow algorithms
 	\param wt Weight of the edge, used by shortest path algorithms
 	\param create_rev If true, the reverse edge is created and set suitably */
-	Edge_Dual(int v, int w, type_flow cap, type_wt wt, bool create_rev = true) : sgl::Edge_Flow<type_flow>(v,w,cap), wt_(wt), revEdge(0), num(-1)
+	Edge_Dual(int v, int w, type_flow cap, type_wt wt, int num = -1, bool create_rev = true) : sgl::Edge_Flow<type_flow>(v,w,cap), wt_(wt), revEdge(0), num(num)
 	{
 		if(create_rev)
 			create_RevEdge();
@@ -53,7 +53,7 @@ public:
 	/*! Creates and sets the reverse edge RevEdge (and sets reverse cut of RevEdge) */
 	void create_RevEdge()
 	{
-		revEdge = new Edge_Dual(this->w(), this->v(), this->cap(), this->wt(), false);
+		revEdge = new Edge_Dual(this->w(), this->v(), this->cap(), this->wt(), num, false);
 		revEdge->set_RevEdge(this);
 	}
 

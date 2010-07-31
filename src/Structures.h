@@ -318,7 +318,7 @@ public:
 	/*! \returns True iff directed */
 	inline bool directed() const { return digraph; }
 	/*! \returns \li A pointer to a edge from v to w if it exists
-	\li 0 otherwise
+	\li NULL otherwise
 	\warning See Graph_Matrix for better performances
 	*/
 	inline Edge* edge(int v, int w) const 
@@ -327,7 +327,7 @@ public:
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			if(e->other(v) == w)
 					   return e;
-		return (Edge*)0;
+		return NULL;
 	}
 	/*! Insert an edge <br>
 	If directed: create a new pointer for the reverse edge 
@@ -431,11 +431,11 @@ public:
 	If directed, all edges are out of v */
 	iterator(const Graph_List<Edge> &G, int v) : G(G), v(v), t(0) {}
 	/*!  Begins an iteration */
-	inline Edge* beg() { t = G.adj[v]; return t ? t->e : 0; }
-	/*! \returns Next edge, 0 if there is no more edge */
-	inline Edge* nxt() { if (t) t = t->next; return t ? t->e : 0; }
+	inline Edge* beg() { t = G.adj[v]; return t ? t->e : NULL; }
+	/*! \returns Next edge, NULL if there is no more edge */
+	inline Edge* nxt() { if (t) t = t->next; return t ? t->e : NULL; }
 	/*! \returns true if there is no more edge */
-	inline bool end() { return t == 0; }
+	inline bool end() { return t == NULL; }
 };
 
 /*!  Ierates through all edges */

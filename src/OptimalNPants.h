@@ -35,19 +35,19 @@ class OptimalNPants
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 		{
 			if(link_s)
-				io.Dual_G.insert(new Edge(s, e->w(), max_val<type_wt>(), e->wt()));
+				io.dual.insert(new Edge(s, e->w(), max_val<type_wt>(), e->wt()));
 			else
-				io.Dual_G.insert(new Edge(e->v(), t, max_val<type_wt>(), e->wt()));
+				io.dual.insert(new Edge(e->v(), t, max_val<type_wt>(), e->wt()));
 			if(insert_reverse)
 			{
 				if(link_s)
-					io.Dual_G.insert(new Edge(s, e->v(), max_val<type_wt>(), e->wt()));
+					io.dual.insert(new Edge(s, e->v(), max_val<type_wt>(), e->wt()));
 				else
-					io.Dual_G.insert(new Edge(e->w(), t, max_val<type_wt>(), e->wt()));
+					io.dual.insert(new Edge(e->w(), t, max_val<type_wt>(), e->wt()));
 			}
 		}
 	}
-	/*! Removes edges from Dual_G and stores them
+	/*! Removes edges from dual and stores them
 	\param cut Cut to remove
 	\param delEdges Stores deleted edges */
 	static void remove(Cut *cut, std::list<Edge*> &delEdges, IO &io)
@@ -55,9 +55,9 @@ class OptimalNPants
 		typename Cut::iterator it(cut);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 		{
-			if(io.Dual_G.remove(e) != 0)
+			if(io.dual.remove(e) != 0)
 				delEdges.push_back(e); 
-			if(io.Dual_G.remove(e->get_RevEdge()) != 0)
+			if(io.dual.remove(e->get_RevEdge()) != 0)
 				delEdges.push_back(e->get_RevEdge());
 		}
 	}
@@ -69,7 +69,7 @@ class OptimalNPants
 	for(Edge *e = it_cut.beg(); !it_cut.end(); e = it_cut.nxt()) 
 	// We put an infinite capacity to each edge adjacent to the cut not moved, to have a good new cut
 	{
-	typename Dual::iterator it(Dual_G, e->v());
+	typename Dual::iterator it(dual, e->v());
 	for(Edge *adjEdge = it.beg(); !it.end(); adjEdge = it.nxt())
 	{
 	if(adjEdge->cap() == max_val<type_flow>()) 
@@ -85,7 +85,7 @@ class OptimalNPants
 	\param store Stores adjacent cuts */
 	static void findAdjacentCuts(int pant, std::vector<Cut *> &store, IO &io, Cut *different, Cut *different2 = NULL)
 	{
-		typename Pants::iterator it(io.Pants_G, pant);
+		typename Pants::iterator it(io.pants, pant);
 		for(Cut *cut = it.beg(); !it.end(); cut = it.nxt())
 			if(different != cut && different2 != cut)
 				store.push_back(cut);
@@ -102,7 +102,7 @@ class OptimalNPants
 			// Searches among all shortest paths from a point next to cutStart
 		{
 			int from = start->v();
-			sgl::Bellman<false, type_wt, Edge, Dual> bellman(io.Dual_G);
+			sgl::Bellman<false, type_wt, Edge, Dual> bellman(io.dual);
 			bellman(from);
 
 			int shortestVertex = -1; // The best current vertex
@@ -167,7 +167,7 @@ class OptimalNPants
 	/*! Add neighbors cuts of next in Q */
 	static void addNeighborsToQ(int pant, std::queue<Cut *> &Q, std::vector<bool> &inQ, Cut *next, IO &io)
 	{
-		typename Pants::iterator it(io.Pants_G, pant);
+		typename Pants::iterator it(io.pants, pant);
 		for(Cut *cut = it.beg(); !it.end(); cut = it.nxt()) // Add the neighbors cuts to the queue (the min cuts may change)
 			if(cut != next && !inQ[cut->get_num()] && cut != next->get_RevCut())
 			{
@@ -198,12 +198,12 @@ class OptimalNPants
 			std::list<Edge *> curDelEdges;
 			remove(*it, curDelEdges);
 			remove((*it)->get_RevCut(), curDelEdges);
-			Proc_Base<Edge> proc(io.Dual_G.V());
-			BFS<Edge, Proc_Base<Edge>, Dual> bfs(io.Dual_G, proc);
+			Proc_Base<Edge> proc(io.dual.V());
+			BFS<Edge, Proc_Base<Edge>, Dual> bfs(io.dual, proc);
 			assert(!curDelEdges.empty());
 			bfs((*(curDelEdges.begin()))->v());
 			bool allVisited = true;
-			for(int v = 0; v < io.Dual_G.V() - 2; v++) // -2 for s and t
+			for(int v = 0; v < io.dual.V() - 2; v++) // -2 for s and t
 				if(proc.tPred.isolated(v))
 					allVisited = false;
 
@@ -214,7 +214,7 @@ class OptimalNPants
 			}
 			else
 				for(typename list<Edge *>::const_iterator it = curDelEdges.begin(); it != curDelEdges.end(); ++it)
-					io.Dual_G.insert(*it);
+					io.dual.insert(*it);
 		}
 	}
 
@@ -226,7 +226,7 @@ class OptimalNPants
 		for(Edge *e = it_cut.beg(); !it_cut.end(); e = it_cut.nxt()) 
 			// We put an infinite capacity to each edge adjacent to the cut not moved, to have a good new cut
 		{
-			typename Dual::iterator it(io.Dual_G, e->v());
+			typename Dual::iterator it(io.dual, e->v());
 			for(Edge *adjEdge = it.beg(); !it.end(); adjEdge = it.nxt())
 			{
 				if(adjEdge->cap() == sgl::max_val<type_flow>()) 
@@ -240,15 +240,15 @@ class OptimalNPants
 
 
 public:
-	/*! \param Dual_G Dual graph
-	\param Pants_G Pants graph
+	/*! \param dual Dual graph
+	\param pants Pants graph
 	\param MaxFlow Max flow algorithm
 	\param cut_Find Finds the min cut in a graph
 	\param s Number associated to the source
 	\param t Number associated to the sink
 	\param allCuts Initial set of cuts
 	\param stats If true, the algorithm will print statistics */
-	/*OptimalNPants(Dual &Dual_G, Pants &Pants_G, vector<Cut *> &allCuts, MaxFlow &maxFlow, Cut_Find &cut_Find) : Dual_G(Dual_G), Pants_G(Pants_G), allCuts(allCuts), maxFlow(maxFlow), cut_Find(cut_Find)	{}*/
+	/*OptimalNPants(Dual &dual, Pants &pants, vector<Cut *> &allCuts, MaxFlow &maxFlow, Cut_Find &cut_Find) : dual(dual), pants(pants), allCuts(allCuts), maxFlow(maxFlow), cut_Find(cut_Find)	{}*/
 
 	/*! Optimize a cut
 	\param next Cut to optimize
@@ -310,7 +310,7 @@ public:
 			for( int i = 0; i != - 1; i = shortestPathToAllCuts(i, cutsToVisit, true, shortestPath, io) );  
 
 			for(typename std::list<int>::const_iterator it = shortestPath.begin(); it != shortestPath.end(); ++it)
-				io.Dual_G.insert(new Edge(s, *it, max_val<type_wt>(), 0)); 
+				io.dual.insert(new Edge(s, *it, max_val<type_wt>(), 0)); 
 
 			shortestPath.clear();
 			cutsToVisit = wCut;
@@ -318,7 +318,7 @@ public:
 			for( int i = 0; i != - 1; i = shortestPathToAllCuts(i, cutsToVisit, false, shortestPath, io) ); 
 
 			for(typename std::list<int>::const_iterator it = shortestPath.begin(); it != shortestPath.end(); ++it)
-				io.Dual_G.insert(new Edge(*it, t, max_val<type_wt>(), 0)); // Links the shortest path from cutStart to cutEnd, to t
+				io.dual.insert(new Edge(*it, t, max_val<type_wt>(), 0)); // Links the shortest path from cutStart to cutEnd, to t
 
 			///////////////////////////////////////////
 			//     Links boundaries to s (and t)     //
@@ -363,11 +363,11 @@ public:
 		//     Erases the edges from s and to t, adds the edges on the boundaries previously removed   //
 		/////////////////////////////////////////////////////////////////////////////////////////////////
 
-		io.Dual_G.remove(s);
-		io.Dual_G.remove(t);
+		io.dual.remove(s);
+		io.dual.remove(t);
 
 		for(typename std::list<Edge *>::const_iterator it = delEdges.begin(); it != delEdges.end(); ++it)
-			io.Dual_G.insert(*it);
+			io.dual.insert(*it);
 
 		for(typename std::list< std::pair<Edge *, type_flow> >::const_iterator it = changedCap.begin(); it != changedCap.end(); ++it)
 			it->first->set_cap(it->second);

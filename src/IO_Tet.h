@@ -6,8 +6,8 @@
 #ifndef IO_TET_H
 #define IO_TET_H
 
-#include "include/TetFace.h"
-#include "include/TetMesh.h"
+#include "TetFace.h"
+#include "TetMesh.h"
 #include <vector>
 #include <string>
 #include <fstream>
@@ -45,8 +45,8 @@ public:
 
 	~IO_Tet()
 	{
-		IO_B::Dual_G.delete_ptr();
-		IO_B::Pants_G.delete_ptr();
+		IO_B::dual.delete_ptr();
+		IO_B::pants.delete_ptr();
 	}
 	IO_Tet(Tetrahedrization &mesh, std::string base_name) :
 	mesh(mesh), IO_B(base_name) 
@@ -56,9 +56,9 @@ public:
 	\warning mesh must be loaded by the user */
 	void make_dual()
 	{
-		IO_B::Dual_G.resize(mesh.Tets().size() + 2);
+		IO_B::dual.resize(mesh.Tets().size() + 2);
 		int index = 0;
-		for(Tetrahedra::const_iterator i = mesh.Tets().begin(); i != mesh.Tets().end(); i++)
+		for(Tetrahedra::const_iterator i = mesh.Tets().begin(); i != mesh.Tets().end(); ++i)
 		{
 			vertexToTet.push_back(*i); 
 			(*i)->setInfo((const void *)index); 
@@ -68,7 +68,7 @@ public:
 		TetFace *f;
 		Tetrahedron *t1, *t2;
 		index = 0;
-		for (TetFaces::const_iterator j = mesh.Faces().begin(); j != mesh.Faces().end(); j++)
+		for (TetFaces::const_iterator j = mesh.Faces().begin(); j != mesh.Faces().end(); ++j)
 		{
 			f = (*j);
 			if (!f->isOnBoundary())
@@ -76,23 +76,22 @@ public:
 				t1 = f->t1();
 				t2 = f->t2();
 				// Use area as weight too?
-				Edge *e = new Edge((int)t1->getInfo(), (int)t2->getInfo(), f->area(), f->area());
+				Edge *e = new Edge((int)t1->getInfo(), (int)t2->getInfo(), f->area(), f->area(), index);
 
-				IO_B::Dual_G.insert(e);
-				IO_B::Dual_G.insert(e->get_RevEdge());
+				IO_B::dual.insert(e);
+				IO_B::dual.insert(e->get_RevEdge());
 
 				numToEdge.push_back(e);
 				numToFace.push_back(f);
 
-				e->set_num(index);
 				f->setInfo((const void *)index);
 
 				index++;
 			}
 		}
 		show("Dual created");
-		show("Number of vertices: " + toString(IO_B::Dual_G.V()));
-		show("Number of edges: " + toString(IO_B::Dual_G.E()));
+		show("Number of vertices: " + toString(IO_B::dual.V()));
+		show("Number of edges: " + toString(IO_B::dual.E()));
 	}
 
 	/*! Loads dual graph from a .OFF file
@@ -109,7 +108,7 @@ public:
 		int nFaces = 0, nVertices = 0, nEdges = 0;
 		offFile>>nVertices>>nFaces>>nEdges;
 		vector<vect> vertices;
-		Dual_G.resize(nVertices + 2);
+		dual.resize(nVertices + 2);
 		for(int i = 0; i < nVertices; i++)
 		{
 			double x,y,z;
@@ -129,13 +128,13 @@ public:
 			dualName = base_name + ".dual";*/
 		std::ofstream offFile(offName.c_str(), ios::out | ios::binary);
 		offFile<<"OFF"<<endl;
-		offFile<<(IO_B::Dual_G.V()-2)<<" "<<IO_B::Dual_G.E()<<" "<<0<<endl; // -2: we don't want s and t
-		for(int i = 0; i < IO_B::Dual_G.V() - 2; i++)
+		offFile<<(IO_B::dual.V()-2)<<" "<<IO_B::dual.E()<<" "<<0<<endl; // -2: we don't want s and t
+		for(int i = 0; i < IO_B::dual.V() - 2; i++)
 		{
 			Vector tet_center = vertexToTet[i]->getCenter();
 			offFile<<tet_center.x<<" "<<tet_center.y<<" "<<tet_center.z<<endl;
 		}
-		typename Dual::iterator_all it(IO_B::Dual_G);
+		typename Dual::iterator_all it(IO_B::dual);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 		{
 			offFile<<2<<" "<<e->v()<<" "<< e->w()<<endl;
@@ -270,7 +269,7 @@ public:
 			}
 			assert(j != vertexToTet.size()); // Check if we found an edge
 
-			typename Dual::iterator it(IO_B::Dual_G, j);
+			typename Dual::iterator it(IO_B::dual, j);
 			Edge *e = it.beg();
 			if(aFound)
 			{
@@ -303,7 +302,7 @@ public:
 		assert(num <= IO_B::cuts.size() && num >= 0);
 		Cut *cut = IO_B::cuts[num];
 		std::vector<vect> vertices; // index to vect
-		std::vector<int> numToIndex(IO_B::Dual_G.V(), -1); // numToIndex[v] == -1 iff v was not added
+		std::vector<int> numToIndex(IO_B::dual.V(), -1); // numToIndex[v] == -1 iff v was not added
 		int index = 0;
 		typename Cut::iterator it_all(cut); 
 		for(Edge *e = it_all.beg(); !it_all.end(); e = it_all.nxt()) // Search for all vertices (but neither s nor t)
