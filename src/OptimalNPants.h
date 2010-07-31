@@ -240,16 +240,6 @@ class OptimalNPants
 
 
 public:
-	/*! \param dual Dual graph
-	\param pants Pants graph
-	\param MaxFlow Max flow algorithm
-	\param cut_Find Finds the min cut in a graph
-	\param s Number associated to the source
-	\param t Number associated to the sink
-	\param allCuts Initial set of cuts
-	\param stats If true, the algorithm will print statistics */
-	/*OptimalNPants(Dual &dual, Pants &pants, vector<Cut *> &allCuts, MaxFlow &maxFlow, Cut_Find &cut_Find) : dual(dual), pants(pants), allCuts(allCuts), maxFlow(maxFlow), cut_Find(cut_Find)	{}*/
-
 	/*! Optimize a cut
 	\param next Cut to optimize
 	\returns True if the cut was moved */

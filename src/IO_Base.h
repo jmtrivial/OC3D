@@ -45,10 +45,10 @@ protected:
 		remove(cut, delEdges);
 
 		typedef Proc_Base<Edge, Tree_Dist<Edge> > Proc;
-		Proc proc_v(Dual_G.V() - 2);
+		Proc proc_v(dual.V() - 2);
 		proc_v.source = start->v();
 		proc_v.tPred.set_source(start->v());
-		BFS<Edge, Proc, Dual> bfs_v(Dual_G, proc_v);
+		BFS<Edge, Proc, Dual> bfs_v(dual, proc_v);
 		bfs_v(start->v());
 
 		for(Edge *e = it.nxt(); !it.end(); e = it.nxt())
@@ -58,7 +58,7 @@ protected:
 				it.replace(e->get_RevEdge());
 		}
 		for(typename list<Edge*>::const_iterator it_del = delEdges.begin(); it_del != delEdges.end(); ++it_del)
-			Dual_G.insert(*it_del);
+			dual.insert(*it_del);
 		// vertices_to_OFF(cut); // debug
 	}
 
@@ -70,9 +70,9 @@ protected:
 		typename Cut::iterator it(cut);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 		{
-			if(Dual_G.remove(e) != 0)
+			if(dual.remove(e) != 0)
 				delEdges.push_back(e); 
-			if(Dual_G.remove(e->get_RevEdge()) != 0)
+			if(dual.remove(e->get_RevEdge()) != 0)
 				delEdges.push_back(e->get_RevEdge());
 		}
 	}
@@ -95,26 +95,26 @@ protected:
 	}
 
 public:
-	Dual Dual_G;
-	Pants Pants_G;
+	Dual dual;
+	Pants pants;
 	std::vector<Cut *> cuts;
 	std::string base_name; // base name used to write and read by default
 	void set_base_name(std::string &s) { base_name = s; }
 	
-	IO_Base(std::string base_name) : Dual_G(0, false), Pants_G(0, true), base_name(base_name) { }
+	IO_Base(std::string base_name) : dual(0, false), pants(0, true), base_name(base_name) { }
 
 	/*! Gets the source, -1 if it doesn't exist */
 	inline int get_s() const
 	{ 
-		if(Dual_G.V() >= 2)
-			return Dual_G.V()-2; 
+		if(dual.V() >= 2)
+			return dual.V()-2; 
 		return -1;
 	}
 	/*! Gets the sink, -1 if it doesn't exist*/
 	inline int get_t() const
 	{ 
-		if(Dual_G.V() >= 1)
-			return Dual_G.V()-1;
+		if(dual.V() >= 1)
+			return dual.V()-1;
 		return -1;
 	}
 
@@ -147,7 +147,7 @@ public:
 		{
 			int u, v;
 			file>>u>>v;
-			typename Dual::iterator it(Dual_G, u);
+			typename Dual::iterator it(dual, u);
 			Edge *e = it.beg();
 			for(; !it.end() && (e->other(u) != v) ; e = it.nxt()); // Search for the corresponding edge
 			assert(!it.end()); // Check if we found the edge
@@ -191,9 +191,9 @@ public:
 
 			int start = (cut->v() == -1) ? e->v() : e->w();
 			typedef Proc_Base<Edge> Proc;
-			Proc proc(Dual_G.V() - 2);
+			Proc proc(dual.V() - 2);
 			proc.source = start;
-			BFS<Edge, Proc, Dual> bfs(Dual_G, proc);
+			BFS<Edge, Proc, Dual> bfs(dual, proc);
 			bfs(start);
 
 			for(int j = firstCut; j < cuts.size(); j++) // Sets every cut found by bfs
@@ -217,14 +217,14 @@ public:
 		} // for(int curPant = 0; ; curPant++) 
 
 		for(typename list<Edge*>::const_iterator it_del = delEdges.begin(); it_del != delEdges.end(); ++it_del)
-			Dual_G.insert(*it_del);
+			dual.insert(*it_del);
 
-		Pants_G.clear();
-		Pants_G.resize(curPant);
+		pants.clear();
+		pants.resize(curPant);
 		for(int i = 0; i < cuts.size(); i++)
 		{
-			Pants_G.insert(cuts[i]);
-			Pants_G.insert(cuts[i]->get_RevCut());
+			pants.insert(cuts[i]);
+			pants.insert(cuts[i]->get_RevCut());
 		}
 		show(toString(curPant) + " pants found");
 	}

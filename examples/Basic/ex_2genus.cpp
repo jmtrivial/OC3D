@@ -2,13 +2,11 @@
 #include "Structures.h"
 #include "Flow.h"
 #include "IO_Base.h"
-#include <time.h>
-
 #include <vector>
 
 using namespace std;
-using namespace oc3d;
 using namespace sgl;
+using namespace oc3d;
 
 typedef double type_flow;
 typedef Edge_Dual<type_flow> Edge;
@@ -18,19 +16,15 @@ typedef Graph_List<Cut> Pants;
 
 int main()
 {
-	int s = 64, t = 65; // source and sink
-	double cap = 1; 
+	double cap = 1.;
 	IO_Base<Edge, Cut, Dual, Pants> io("");
+	io.dual.resize(32 + 2); // The last but one vertex is s, the last is t
+	io.pants.resize(3);
 
-	io.Dual_G.resize(64 + 2); // The last but one vertex is s, the last is t
-	io.Pants_G.resize(3);
-	io.cuts.push_back(new Cut(0,0));
+	io.cuts.push_back(new Cut(2,0));
 	io.cuts.push_back(new Cut(0,1));
 	io.cuts.push_back(new Cut(1,1));
 	io.cuts.push_back(new Cut(0,2));
-	io.cuts.push_back(new Cut(1,2));
-	io.cuts.push_back(new Cut(1,2));
-
 	vector<Edge *> e;
 
 	e.push_back(new Edge(0, 1, cap, 1));
@@ -43,8 +37,6 @@ int main()
 	e.push_back(new Edge(4, 6, cap, 1));
 	io.cuts[0]->insert(*(e.end() - 1));
 	e.push_back(new Edge(5, 7, cap, 1));
-	io.cuts[0]->insert(*(e.end() - 1));
-	e.push_back(new Edge(5, 6, cap, 1));
 	io.cuts[0]->insert(*(e.end() - 1));
 	e.push_back(new Edge(6, 7, cap, 1));
 	e.push_back(new Edge(7, 8, cap, 1));
@@ -95,14 +87,15 @@ int main()
 	e.push_back(new Edge(25, 7, cap, 1));
 	e.push_back(new Edge(26, 6, cap, 1));
 
-	e.push_back(new Edge(25, 62, cap, 1));
-	e.push_back(new Edge(62, 27, cap, 1));
-
+	e.push_back(new Edge(25, 27, cap, 1));
 	e.push_back(new Edge(26, 28, cap, 1));
 	e.push_back(new Edge(27, 28, cap, 1));
-	e.push_back(new Edge(27, 29, cap, 1));
+	e.push_back(new Edge(27, 29, cap, 5));
+	io.cuts[3]->insert(*(e.end() - 1));
 	e.push_back(new Edge(28, 30, cap, 1));
+	io.cuts[3]->insert(*(e.end() - 1));
 	e.push_back(new Edge(29, 30, cap, 1));
+
 	e.push_back(new Edge(30, 0, cap, 1));
 	e.push_back(new Edge(29, 0, cap, 1));
 
@@ -110,86 +103,19 @@ int main()
 	e.push_back(new Edge(31, 22, cap, 1));
 	e.push_back(new Edge(31, 23, cap, 1));
 
-	e.push_back(new Edge(0, 61, cap, 1));
-	e.push_back(new Edge(1, 61, cap, 1));
-	e.push_back(new Edge(1, 58, cap, 1));
-	io.cuts[3]->insert(*(e.end() - 1));
-	e.push_back(new Edge(61, 58, cap, 1));
-	io.cuts[3]->insert(*(e.end() - 1));
-	e.push_back(new Edge(61, 60, cap, 1));
-	io.cuts[3]->insert(*(e.end() - 1));
-	e.push_back(new Edge(58, 56, cap, 1));
-	e.push_back(new Edge(58, 59, cap, 1));
-	e.push_back(new Edge(60, 59, cap, 1));
-	e.push_back(new Edge(57, 59, cap, 1));
-	e.push_back(new Edge(56, 59, cap, 1));
-	e.push_back(new Edge(56, 57, cap, 1));
-	e.push_back(new Edge(56, 54, cap, 1));
-	e.push_back(new Edge(54, 55, cap, 1));
-	e.push_back(new Edge(57, 55, cap, 1));
-	e.push_back(new Edge(54, 51, cap, 1));
-	e.push_back(new Edge(63, 55, cap, 1));
-
-	e.push_back(new Edge(63, 52, cap, 1));
-	e.push_back(new Edge(63, 55, cap, 1));
-	e.push_back(new Edge(55, 53, cap, 1));
-	e.push_back(new Edge(53, 52, cap, 1));
-	e.push_back(new Edge(52, 49, cap, 1));
-	e.push_back(new Edge(53, 52, cap, 1));
-	e.push_back(new Edge(51, 50, cap, 1));
-	e.push_back(new Edge(49, 50, cap, 1));
-	e.push_back(new Edge(50, 48, cap, 1));
-	e.push_back(new Edge(49, 47, cap, 1));
-	e.push_back(new Edge(48, 47, cap, 1));
-
-	e.push_back(new Edge(46, 48, cap, 1));
-	io.cuts[5]->insert(*(e.end() - 1));
-	e.push_back(new Edge(38, 47, cap, 1));
-	io.cuts[5]->insert(*(e.end() - 1));
-	e.push_back(new Edge(38, 46, cap, 1));
-	e.push_back(new Edge(38, 37, cap, 1));
-	e.push_back(new Edge(38, 39, cap, 1));
-
-	e.push_back(new Edge(45, 63, cap, 1));
-	e.push_back(new Edge(43, 45, cap, 1));
-	e.push_back(new Edge(44, 45, cap, 1));
-	e.push_back(new Edge(41, 43, cap, 1));
-	io.cuts[4]->insert(*(e.end() - 1));
-	e.push_back(new Edge(42, 44, cap, 1));
-	io.cuts[4]->insert(*(e.end() - 1));
-	e.push_back(new Edge(40, 42, cap, 1));
-	e.push_back(new Edge(39, 41, cap, 1));
-	e.push_back(new Edge(39, 40, cap, 1));
-	e.push_back(new Edge(37, 36, cap, 1));
-	e.push_back(new Edge(37, 35, cap, 1));
-	e.push_back(new Edge(40, 36, cap, 1));
-	e.push_back(new Edge(35, 36, cap, 1));
-	e.push_back(new Edge(35, 33, cap, 1));
-	e.push_back(new Edge(34, 36, cap, 1));
-	e.push_back(new Edge(33, 34, cap, 1));
-	e.push_back(new Edge(33, 32, cap, 1));
-	e.push_back(new Edge(34, 17, cap, 1));
-	e.push_back(new Edge(32, 34, cap, 1));
-	e.push_back(new Edge(32, 20, cap, 1));
-	
 	for(int i = 0; i < e.size(); i++) // We insert edges and their reverse
 	{
-		io.Dual_G.insert(e[i]);
-		io.Dual_G.insert(e[i]->get_RevEdge());
+		io.dual.insert(e[i]);
+		io.dual.insert(e[i]->get_RevEdge());
 	}
 
 	for(int i = 0; i < io.cuts.size(); i++) // We insert io.cuts and their reverse
 	{
 		io.cuts[i]->create_RevCut();
 		io.cuts[i]->set_num(i);
-		io.Pants_G.insert(io.cuts[i]);
-		io.Pants_G.insert(io.cuts[i]->get_RevCut());
+		io.pants.insert(io.cuts[i]);
+		io.pants.insert(io.cuts[i]->get_RevCut());
 	}
-
-	NoNullCap<Edge> noNull(io.Dual_G.V(),io.get_t()); 
-	Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io.Dual_G, noNull);
-	Cut_Vertices<Edge, Dual> cut_vertices(io.Dual_G);
-
 	cout<<"Initial cuts:"<<endl;
 	for(int i = 0; i < io.cuts.size(); i++) // Display found io.cuts
 	{
@@ -198,13 +124,12 @@ int main()
 			cout<<e->v()<<" -- "<<e->cap()<<" --> "<<e->w()<<"; ";
 		cout<<endl;
 	}
-	cout<<endl;
 
-	srand(time(NULL));
-	time_t t1 = clock();
+	NoNullCap<Edge> noNull(io.dual.V(), io.get_t()); 
+    Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io.dual, noNull);
+	Cut_Vertices<Edge, Dual> cut_vertices(io.dual);
+
 	OptimalNPants<>::optimize(io, fulkerson, cut_vertices);
-	time_t t2 = clock();
-	cout<<(double)(t2-t1)/CLOCKS_PER_SEC<<endl;
 	cout<<"Optimal cuts:"<<endl;
 	for(int i = 0; i < io.cuts.size(); i++) // Display found io.cuts
 	{

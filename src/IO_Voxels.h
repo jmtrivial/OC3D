@@ -17,19 +17,19 @@ private:
 
 public:
   Image image;
-  Dual Dual_G;
-  Pants Pants_G;
+  Dual dual;
+  Pants pants;
   vector<Cut *> cuts;
 
   /*! Constructor given an image */
   IO_Voxels(const Image & i) : image(i),
-			    Dual_G(0, false), Pants_G(0, true) {
+			    dual(0, false), pants(0, true) {
   }
 
   /*! destructor */
   ~IO_Voxels() {
-    Dual_G.delete_ptr();
-    Pants_G.delete_ptr();
+    dual.delete_ptr();
+    pants.delete_ptr();
     for(std::vector<Cut *>::iterator c = cuts.begin(); c != cuts.end(); ++c)
       delete *c;
   }

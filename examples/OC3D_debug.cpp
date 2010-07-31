@@ -95,9 +95,9 @@ int main(int argc, char *argv[])
 				help();
 			else
 			{
-				NoNullCap<Edge> noNull(io.Dual_G.V(), io.get_t()); 
-				Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io.Dual_G, noNull);
-				Cut_Vertices<Edge, Dual> cut_vertices(io.Dual_G);
+				NoNullCap<Edge> noNull(io.dual.V(), io.get_t()); 
+				Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io.dual, noNull);
+				Cut_Vertices<Edge, Dual> cut_vertices(io.dual);
 				OptimalNPants<>::optimize(num, io, fulkerson, cut_vertices);
 			}
 		}
