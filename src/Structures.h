@@ -23,24 +23,16 @@ template<typename type_wt> inline type_wt max_val() // for old compilators (acm-
 	return std::numeric_limits<type_wt>::max() / (type_wt) 2;
 }
 
-/*!  Basic edge with weight 
-\todo Class Vertex */
-template<typename type_wt = int> class Edge_Base
+class Edge_Base
 { 
 	const int v_,w_; // Must be const for Graph
-	type_wt wt_; 
 public:
-	Edge_Base(): v_(0), w_(0), wt_(0) { };
 	/*! Creates an edge from v to w with weight wt */
-	Edge_Base(int v, int w, type_wt wt): v_(v), w_(w), wt_(wt) { };
+	Edge_Base(int v, int w): v_(v), w_(w) { };
 	/*! \returns Start vertex */ 
 	inline int v() const { return v_; } 
 	/*! \returns End vertex */ 
 	inline int w() const { return w_; } 
-	/*! \returns weight */
-	inline type_wt wt() const { return wt_; } 
-	/*! Sets a new weight */
-	inline void set_wt(type_wt wt) { wt_ = wt; }
 	/*! \returns the extremity different from u */
 	inline int other(int u) const 
 	{
@@ -55,21 +47,35 @@ public:
 	{
 		return (e.v() == v_ && e.w() == w_) || (e.w() == v_ && e.v() == w_);
 	}
-	bool operator<(const Edge_Base &e) const
-	{
-		return wt < e.wt;
-	}
 };
 
-template<typename type_wt> std::ostream &operator<<(std::ostream &os, const Edge_Base<type_wt> &e)
+template<typename type_wt> std::ostream &operator<<(std::ostream &os, const Edge_Base &e)
 {
 	os<<e.v()<<" -- "<<e.wt()<<" --> " <<e.w();
 	return os;
 };
 
+/*!  Basic edge with weight 
+\todo Class Vertex */
+template<typename type_wt = int> class Edge_Weight : public Edge_Base
+{
+	type_wt wt_; 
+public:
+	Edge_Weight(int v, int w, type_wt wt): Edge_Base(v, w), wt_(wt) { }
+	/*! \returns weight */
+	inline type_wt wt() const { return wt_; } 
+	/*! Sets a new weight */
+	inline void set_wt(type_wt wt) { wt_ = wt; }
+
+	bool operator<(const Edge_Base &e) const
+	{
+		return wt < e.wt || (wt == e.wt && v() < e.v()) || (wt == e.wt && v() == e.v() && w() < e.w());
+	}
+};
+
 /*! Tree_List, slighty different from Graph ADT (insert)
 \warning Direction in the Tree_List may not correspond to the direction of the edges (from e->v() to e->w()) */
-template<class Edge = Edge_Base<> > class Tree_List
+template<class Edge = Edge_Base> class Tree_List
 {
 	int Vcnt, Ecnt;
 	struct node
@@ -167,7 +173,7 @@ public:
 	friend class iterator_all;
 };
 
-template<class Edge = Edge_Base<>, class Tree = Tree_List<Edge> > class Tree_Dist : public Tree
+template<class Edge = Edge_Base, class Tree = Tree_List<Edge> > class Tree_Dist : public Tree
 {
 	std::vector<int> distance; // Distance from source
 public:
@@ -192,7 +198,7 @@ public:
 
 /*! Ierates through the \b successors of a vertex 
 \see Tree_List::pred */
-template<class Edge = Edge_Base<> > class Tree_List<Edge>::iterator
+template<class Edge = Edge_Base > class Tree_List<Edge>::iterator
 { 
 	const Tree_List<Edge> &T;
 	int v; 
@@ -209,7 +215,7 @@ public:
 };
 
 /*! Ierates through all edges */
-template<class Edge = Edge_Base<> > class Tree_List<Edge>::iterator_all
+template<class Edge = Edge_Base > class Tree_List<Edge>::iterator_all
 { 
 	const Tree_List<Edge> &T;
 	int i;
@@ -236,7 +242,7 @@ public:
 
 /*! Adjacency list graph
 \todo Use list instead of node */
-template<class Edge = Edge_Base<> > class Graph_List
+template<class Edge = Edge_Base > class Graph_List
 { 
 	int Vcnt, Ecnt; bool digraph;
 	struct node
@@ -421,7 +427,7 @@ public:
 };
 
 /*!  Ierates through the edges from a vertex */
-template<class Edge = Edge_Base<> > class Graph_List<Edge>::iterator
+template<class Edge = Edge_Base > class Graph_List<Edge>::iterator
 { 
 	const Graph_List<Edge> &G;
 	int v; 
@@ -439,7 +445,7 @@ public:
 };
 
 /*!  Ierates through all edges */
-template<class Edge = Edge_Base<> > class Graph_List<Edge>::iterator_all
+template<class Edge = Edge_Base > class Graph_List<Edge>::iterator_all
 { 
 	const Graph_List<Edge> &G;
 	int pos;
@@ -494,7 +500,7 @@ public:
 };
 
 /*!  Matrix adjacency graph */
-template<class Edge = Edge_Base<> > class Graph_Matrix
+template<class Edge = Edge_Base > class Graph_Matrix
 { 
 	int Vcnt, Ecnt; bool digraph;
 	std::vector< std::vector <Edge *> > adj;
@@ -558,7 +564,7 @@ public:
 };
 
 /*! Ierates through the edges from a vertex */
-template<class Edge = Edge_Base<> > class Graph_Matrix<Edge>::iterator
+template<class Edge = Edge_Base > class Graph_Matrix<Edge>::iterator
 { 
 	const Graph_Matrix<Edge> &G;
 	int i; // Current vertex
@@ -580,7 +586,7 @@ public:
 };
 
 /*! Ierates through all edges */
-template<class Edge = Edge_Base<> > class Graph_Matrix<Edge>::iterator_all
+template<class Edge = Edge_Base > class Graph_Matrix<Edge>::iterator_all
 {
 	const Graph_Matrix<Edge> &G;
 	int i, j;
@@ -606,7 +612,7 @@ public:
 };
 
 /*! Bipartite adjacency list graph */
-template<class Edge = Edge_Base<> > class Bipartite_list : public Graph_List<Edge>
+template<class Edge = Edge_Base > class Bipartite_list : public Graph_List<Edge>
 {
 public:
 	/*!  List of vertices in each partition */
@@ -622,7 +628,7 @@ public:
 
 /*! Determines if a graph is bipartite 
 \todo Comment */
-template <class Edge = Edge_Base<>, class Graph = Graph_List<Edge> > class isBipartite
+template <class Edge = Edge_Base, class Graph = Graph_List<Edge> > class isBipartite
 { 
 	const Graph &G;
 	bool OK;

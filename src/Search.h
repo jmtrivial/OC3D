@@ -17,7 +17,7 @@ namespace sgl
  Basic processing functor: do nothing while processing a vertex and visit an edge toward v iff v is not visited
 \see Proc ADT
 */
-template <class Edge = Edge_Base<>, class Tree = Tree_List<Edge> > class Proc_Base
+template <class Edge = Edge_Base, class Tree = Tree_List<Edge> > class Proc_Base
 {
 public:
 	int source;
@@ -43,7 +43,7 @@ public:
 /*!  
  Search a target
 */
-template<class Edge = Edge_Base<> > class SearchVertex : public Proc_Base<Edge>
+template<class Edge = Edge_Base > class SearchVertex : public Proc_Base<Edge>
 {
 	int target;
 public:
@@ -61,7 +61,7 @@ public:
  Depth first search
 \param Proc Functor
 */
-template<class Edge = Edge_Base<>, class Proc = Proc_Base<Edge>, class Graph = Graph_List<Edge> > class DFS
+template<class Edge = Edge_Base, class Proc = Proc_Base<Edge>, class Graph = Graph_List<Edge> > class DFS
 {
 	const Graph &G;
 	Proc &proc;
@@ -100,7 +100,7 @@ public:
  breadth first search
 \param Proc Functor
 */
-template<class Edge = Edge_Base<>, class Proc = Proc_Base<Edge>, class Graph = Graph_List<Edge> > class BFS
+template<class Edge = Edge_Base, class Proc = Proc_Base<Edge>, class Graph = Graph_List<Edge> > class BFS
 {
 	const Graph &G;
 	Proc &proc;
@@ -140,7 +140,7 @@ public:
  Topological sort
 \param Dag Directed \b acyclic graph type
 */
-template <class Edge = Edge_Base<>, class Dag = Graph_List<Edge> > class Topological_Sort 
+template <class Edge = Edge_Base, class Dag = Graph_List<Edge> > class Topological_Sort 
 { 
 	const Dag &D;
 	int cnt, tcnt;
@@ -182,7 +182,7 @@ public:
 
 /*!  Process every vertex from leafs deleting them at each step
 \param Proc Processing functor */
-template<class Proc, class Edge = Edge_Base<>, class Graph = Graph_List<Edge> > class Effeuiller
+template<class Proc, class Edge = Edge_Base, class Graph = Graph_List<Edge> > class Effeuiller
 {
 	Graph &G;
 public:

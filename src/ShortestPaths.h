@@ -17,7 +17,7 @@
 namespace sgl
 {
 /*! Computes a minimum spanning tree and stores it in a <b> graph MST (not rooted) <\b> */
-template<typename type_wt = int, class Edge = Edge_Base<type_wt>, class Graph = Graph_List<Edge>, class Tree = Tree_List<Edge> > 
+template<typename type_wt = int, class Edge = Edge_Weight<type_wt>, class Graph = Graph_List<Edge>, class Tree = Tree_List<Edge> > 
 class Kruskal
 {
 	const Graph &G;
@@ -79,7 +79,7 @@ public:
 };
 
 /*! Computes a minimum spanning tree and stores it in MST (rooted in source)  */
-template<typename type_wt = int, class Edge = Edge_Base<type_wt>, class Graph = Graph_List<Edge>, class Tree = Tree_List<Edge> >
+template<typename type_wt = int, class Edge = Edge_Weight<type_wt>, class Graph = Graph_List<Edge>, class Tree = Tree_List<Edge> >
  class Prim
 { 
 	const Graph &G;
@@ -161,7 +161,7 @@ public:
 \see Bellman for negative weights 
 \todo sameEdges
 \todo vector<bool> addToQ? */
-template<typename type_wt = int, class Edge = Edge_Base<type_wt>, class Graph = Graph_List<Edge>, class Tree = Tree_List<Edge> >
+template<typename type_wt = int, class Edge = Edge_Weight<type_wt>, class Graph = Graph_List<Edge>, class Tree = Tree_List<Edge> >
 class Dijkstra
 { 
 	const Graph &G;
@@ -212,7 +212,7 @@ public:
 
 /*! Computes shortest path tree, stores it in SPT and the distances in dist 
 \warning Edges must have positive weights, set negEdge to true to deal with negative edges (distinction for performance) */
-template<bool negEdge = true, typename type_wt = int, class Edge = Edge_Base<type_wt>, class Graph = Graph_List<Edge>, 
+template<bool negEdge = true, typename type_wt = int, class Edge = Edge_Weight<type_wt>, class Graph = Graph_List<Edge>, 
 class Tree = Tree_List<Edge> > class Bellman
 {
 	const Graph &G;
@@ -327,7 +327,7 @@ public:
 };
 
 /*! Compute a minimal hamiltonian cycle using dynamic programming */
-template<class type_wt = int, class Graph = Graph_Matrix<Edge_Base<type_wt> > > class TSP
+template<class type_wt = int, class Graph = Graph_Matrix<Edge_Weight<type_wt> > > class TSP
 {
 	std::set<int> *toAdd; // std::set à ajouter dans D_next
 	const Graph &G;
