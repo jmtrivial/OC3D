@@ -327,9 +327,9 @@ public:
 		//////////////////////////////////////////////////////////////////////////////
 
 		maxFlow.init_flow();
-		maxFlow(s, t);
+		maxFlow();
 
-		bool move = maxFlow.get_outflow(s) < next->cap();
+		bool move = maxFlow.get_outflow() < next->cap();
 
 		if(move) // We want cut with weight shorter than next
 		{

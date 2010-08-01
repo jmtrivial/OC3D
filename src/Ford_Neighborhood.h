@@ -7,7 +7,7 @@
 
 namespace oc3d
 {
-template<typename type_flow = int, class Edge = sgl::Edge_Flow<type_flow>, class Edge_Seg = sgl::Edge_Base, class Dual = sgl::Graph_List<Edge>, class Dual_Seg = sgl::Graph_List<Edge_Seg>, class Proc = sgl::NoNullCap<Edge>> 
+template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Seg = sgl::Edge_Base, class Dual = sgl::Graph_List<Edge>, class Dual_Seg = sgl::Graph_List<Edge_Seg>, class Proc = sgl::NoNullCap<Edge> > 
 class Ford_Neighborhood
 {
 	int s, t;
@@ -16,7 +16,6 @@ class Ford_Neighborhood
 	const Dual &dual;
 	const Dual_Seg &dual_seg;
 
-	Dual_Seg N; // Neighborhood
 	std::vector<int> edges_in_N;
 	std::vector<int> toLink;
 	std::vector<bool> in_cylinder; 
@@ -26,14 +25,14 @@ class Ford_Neighborhood
 	void augment() // Add flow along the path search.tPred
 	{ 
 		type_flow d = proc.tPred.pred(t)->capRto(t);
-		for (int v = get_pred(proc, t); v != s; v = get_pred(proc, v)) // Find minimal capacity on the path search.tPred
+		for (int v = get_pred(t); v != s; v = get_pred(v)) // Find minimal capacity on the path search.tPred
 		{
 			if (proc.tPred.pred(v)->capRto(v) < d) 
 				d = proc.tPred.pred(v)->capRto(v);
 		}
 		flow += d;
 		proc.tPred.pred(t)->addflowRto(t, d); 
-		for (int v = get_pred(proc,	t); v != s; v = get_pred(proc, v)) // Add this minimal capacity
+		for (int v = get_pred(t); v != s; v = get_pred(v)) // Add this minimal capacity
 			proc.tPred.pred(v)->addflowRto(v, d); 
 	}
 	void link()
@@ -43,26 +42,27 @@ class Ford_Neighborhood
 			typename Dual::iterator it(dual, v);
 			for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			{
-				int w = e->other(v);
-				if(w < v || edges_in_N[e->get_num()]) 
+				int w = e->other(v), num = e->get_num();
+				if(num == -1 || edges_in_N[num]) 
 					continue;
 				if(in_cylinder[w])
 				{
 					N.insert(e);
 					N.insert(e->get_RevEdge());
-					edges_in_N[e->get_num()] = true;
+					edges_in_N[num] = true;
 				}
 			}
 		}
 	}
 	void add_cylinder()
 	{
-		for (int v = get_pred(tmp_proc, t); v != s; v = get_pred(tmp_proc, v)) // Add path to N
+		for (int v = get_pred(t); v != s; v = get_pred(v)) // Add path to N
 		{
-			if(in_cylinder[v])
-				continue;
-			in_cylinder[v] = true;
-			toLink.push_back(v);
+			if(!in_cylinder[v])
+			{
+				in_cylinder[v] = true;
+				toLink.push_back(v);
+			}
 			typename Dual_Seg::iterator it(dual_seg, v);
 			for(Edge_Seg *e = it.beg(); !it.end(); e = it.nxt())
 			{
@@ -70,7 +70,7 @@ class Ford_Neighborhood
 				if(!in_cylinder[w])
 				{
 					in_cylinder[w] = true;
-					toLink.insert(v);
+					toLink.push_back(w);
 				}
 			}
 		}
@@ -83,25 +83,39 @@ class Ford_Neighborhood
 	}
 
 public:
-	Ford_Neighborhood(const Dual &dual, const Dual &dual_seg, int s, int t, type_flow upper_flow) : 
-	  s(s), t(t), dual(dual), dual_seg(dual_seg), N(false, 0), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(G.V(), false), flow(0), upper_flow(upper_flow)
+	Dual N; // Neighborhood
+
+	Ford_Neighborhood(const Dual &dual, const Dual_Seg &dual_seg, int s, int t, type_flow upper_flow) : 
+	  s(s), t(t), dual(dual), dual_seg(dual_seg), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), first(true)
     { }
 
+	bool first;
 	/*! Computes a maxflow in G using proc
 	\param s Source of the maxflow
 	\param t Sink (t must be different from s) */
 	bool operator()()
 	{
-		BFS<Edge, NoNullCap<Edge>, Dual> init_bfs(dual, proc);
-		init_bfs(s);
-		augment();
-		// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi créée
-		add_cylinder();
-		link();
-
-		BFS<Edge, NoNullCap<Edge>, Dual_Seg> bfs(N, proc);
-		while(bfs(s))
+		if(first)
 		{
+			N.resize(dual.V());
+			typename Dual::iterator it_s(dual, s);
+			for(Edge *e = it_s.beg(); !it_s.end(); e = it_s.nxt())
+				N.insert(e);
+			typename Dual::iterator it_t(dual, t);
+			for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
+				N.insert(e);
+			first = false;
+			BFS<Edge, NoNullCap<Edge>, Dual> init_bfs(dual, proc);
+			init_bfs(s);
+			augment();
+			// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi créée
+			add_cylinder();
+			link();
+		}
+		else
+		{
+			BFS<Edge, NoNullCap<Edge>, Dual> bfs(N, proc);
+			if(!bfs(s))
 			augment();
 			if(flow >= upper_flow)
 				return false;
@@ -118,7 +132,7 @@ public:
 	/*! Sets the flow to zero */
 	void init_flow() 
 	{
-		typename Graph::iterator_all it(G);
+		typename Dual::iterator_all it(dual);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			e->set_flow(static_cast<type_flow>(0));
 	}

@@ -20,7 +20,7 @@ namespace oc3d
 {
 template<class Edge, class Cut, class Dual, class Pants> class IO_Tet : public IO_Base<Edge, Cut, Dual, Pants>
 {
-private:
+protected:
 	typedef IO_Base<Edge, Cut, Dual, Pants> IO_B;
 
 	/*! Compares a TetVertex and a vect
@@ -120,29 +120,23 @@ public:
 	\param fileName Name of the .OFF file, if not provided the default path is used 
 	\remarks Keep the order of the vertices
 	\warning The dual graph must exist */
-	void dual_to_OFF(std::string offName =  "")
+	template<class Graph, class Edge_> void graph_to_OFF(Graph &graph, std::string ext, std::string offName =  "")
 	{
 		if(offName == "")
-			offName = IO_B::base_name + "_dual.off";
-		/*if(dualName == "")
-			dualName = base_name + ".dual";*/
+			offName = IO_B::base_name + "_dual" + ext + ".off";
 		std::ofstream offFile(offName.c_str(), ios::out | ios::binary);
 		offFile<<"OFF"<<endl;
-		offFile<<(IO_B::dual.V()-2)<<" "<<IO_B::dual.E()<<" "<<0<<endl; // -2: we don't want s and t
-		for(int i = 0; i < IO_B::dual.V() - 2; i++)
+		offFile<<(graph.V()-2)<<" "<<graph.E()<<" "<<0<<endl; // -2: we don't want s and t
+		for(int i = 0; i < graph.V() - 2; i++)
 		{
 			Vector tet_center = vertexToTet[i]->getCenter();
 			offFile<<tet_center.x<<" "<<tet_center.y<<" "<<tet_center.z<<endl;
 		}
-		typename Dual::iterator_all it(IO_B::dual);
-		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
-		{
+		typename Graph::iterator_all it(graph);
+		for(Edge_ *e = it.beg(); !it.end(); e = it.nxt())
 			offFile<<2<<" "<<e->v()<<" "<< e->w()<<endl;
-			/*dualFile<<e->cap()<<endl;*/
-		}
 		offFile.close();
-		/*dualFile.close();*/
-		show("Dual graph saved in file " + offName);
+		show("Graph saved in file " + offName);
 	}
 
 	/*! Exports the first extremities of edges in cut to a .OFF file (used to debug) 

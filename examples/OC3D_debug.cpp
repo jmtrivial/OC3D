@@ -1,10 +1,13 @@
+// TODO: prompt
+
 #include "OptimalNPants.h"
 #include "Structures.h"
 #include "Flow.h"
 #include "IO_Tet.h"
+#include "IO_Tet_Seg.h"
+#include "Ford_Neighborhood.h"
 #include <time.h>
 #include <vector>
-#include <time.h>
 #undef NDEBUG
 #include <assert.h>
 #include <string>
@@ -19,7 +22,8 @@ typedef Edge_Dual<type_flow> Edge;
 typedef Graph_List<Edge> Dual;
 typedef Edge_Cut<type_flow, Edge> Cut;
 typedef Graph_List<Cut> Pants;
-
+typedef Edge_Base Edge_Seg;
+typedef Graph_List<Edge_Seg> Dual_Seg; 
 
 void help()
 {
@@ -56,13 +60,23 @@ string args_to_file(vector<string> &tokens, int index)
 	return file;
 }
 
+bool use_neighbors = true;
+
+Tetrahedrization mesh; 
+typedef IO_Tet<Edge, Cut, Dual, Pants> IO_T;
+typedef IO_Tet_Seg<Edge, Edge_Seg, Cut, Dual, Dual_Seg, Pants> IO_T_S;
+IO_T io_tet(mesh, "");
+IO_T_S io_tet_seg(mesh, "");
+
+IO_Tet<Edge, Cut, Dual, Pants> &io() { return use_neighbors ? io_tet_seg : io_tet; }
+
+void init()
+{
+	TMLib::init();
+}
 int main(int argc, char *argv[])
 {
-	TMLib::init(); 
-	Tetrahedrization mesh; 
-
-	IO_Tet<Edge, Cut, Dual, Pants> io(mesh, "");
-
+	init();
 	string s;
 	
 	while(getline(cin, s))
@@ -70,7 +84,12 @@ int main(int argc, char *argv[])
 		vector<string> tokens;
 		tokenize(s, tokens);
 
-	    if(tokens[0] == "load")
+		if(tokens[0] == "neighbors")
+		{
+			use_neighbors = !use_neighbors;
+			show((use_neighbors ? "U" : "Don't u") + toString("se neighborhood for Ford Fulkerson algorithm"));
+		}
+	    else if(tokens[0] == "load")
 		{
 			string file = args_to_file(tokens, 1);
 			if (mesh.load(file.c_str()) != 0) 
@@ -79,26 +98,50 @@ int main(int argc, char *argv[])
 			{
 				show("Read " + file);
 				string base_file = del_ext(del_ext(file));
-				io.set_base_name(base_file);
+				io().set_base_name(base_file);
 				show("Base name: " + base_file);
 			}
 		}
 		else if(tokens[0] == "make_dual")
 		{
-			io.make_dual();
-			io.dual_to_OFF();
+			if(use_neighbors)
+			{
+				io_tet_seg.make_dual();
+				io_tet_seg.graph_to_OFF<Dual_Seg, Edge_Seg>(io_tet_seg.dual_seg, "_seg");
+				io_tet_seg.graph_to_OFF<Dual, Edge>(io_tet_seg.dual, "");
+			}
+			else
+			{
+				io_tet.make_dual();
+				io_tet.graph_to_OFF<Dual, Edge>(io_tet.dual, "");
+			}
+			
 		}		
 		else if(tokens[0] == "opt")
 		{
 			int num = 0;
-			if((tokens.size() == 1 || !fromString(tokens[1], num)) || num >= io.cuts.size())
+			if((tokens.size() == 1 || !fromString(tokens[1], num)) || num >= io().cuts.size())
 				help();
 			else
 			{
-				NoNullCap<Edge> noNull(io.dual.V(), io.get_t()); 
-				Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io.dual, noNull);
-				Cut_Vertices<Edge, Dual> cut_vertices(io.dual);
-				OptimalNPants<>::optimize(num, io, fulkerson, cut_vertices);
+				time_t t1 = clock();
+				if(use_neighbors)
+				{
+					Ford_Neighborhood<> neighborhood(io_tet_seg.dual, io_tet_seg.dual_seg, io_tet_seg.get_s(), io_tet_seg.get_t(), io_tet_seg.cuts[num]->cap());
+					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_seg.dual);
+					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Ford_Neighborhood<> > OptimalNPants;
+					OptimalNPants::optimize(num, io_tet_seg, neighborhood, cut_vertices);
+					io_tet_seg.graph_to_OFF<Dual, Edge>(neighborhood.N, "_N"); 
+				}
+				else
+				{
+					NoNullCap<Edge> noNull(io_tet.dual.V(), io_tet.get_t()); 
+					Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io_tet.dual, noNull, io_tet.get_s(), io_tet.get_t());
+					Cut_Vertices<Edge, Dual> cut_vertices(io_tet.dual);
+					OptimalNPants<>::optimize(num, io_tet, fulkerson, cut_vertices);
+				}
+				time_t t2 = clock();
+				show("Time: " + toString(t2-t1));
 			}
 		}
 		else if(tokens[0] == "load_cut")
@@ -109,7 +152,7 @@ int main(int argc, char *argv[])
 			else
 			{
 				string file = tokens.size() == 1 ? "" : args_to_file(tokens, 2);
-				io.filecut_to_cut(num, file);
+				io().filecut_to_cut(num, file);
 				show("Cut " + toString(num) + " loaded");
 			}
 		}
@@ -121,13 +164,15 @@ int main(int argc, char *argv[])
 			else
 			{
 				string file = tokens.size() == 1 ? "" : args_to_file(tokens, 2);
-				io.cut_to_filecut(num, file);
+				io().cut_to_filecut(num, file);
 			}
 		}
 		else if(tokens[0] == "save_off")
-			mesh.saveOFFBoundary((io.base_name + ".off").c_str());
+			mesh.saveOFFBoundary((io().base_name + ".off").c_str());
 		else if(tokens[0] == "init")
-			io.init_pants();
+		{
+			io().init_pants();
+		}
 		else if(tokens[0] == "exit")
 			break;
 		else 

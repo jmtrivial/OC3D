@@ -12,7 +12,7 @@
 /*! Edge in the dual graph */
 namespace oc3d
 {
-	template<typename type_flow = double, typename type_wt = type_flow> class Edge_Dual : public sgl::Edge_Flow<type_flow>
+template<typename type_flow = double, typename type_wt = type_flow> class Edge_Dual : public sgl::Edge_Flow<type_flow>
 {
 	type_wt wt_;
 	Edge_Dual *revEdge;

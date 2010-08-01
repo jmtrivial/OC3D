@@ -22,16 +22,15 @@ template<class Edge, class Edge_Seg, class Cut, class Dual, class Dual_Seg, clas
 		for(int i = 0; i < clique.size(); i++)
 			for(int j = i+1; j < clique.size(); j++) // We link clique[i] and clique[j]
 			{
-				Edge_Seg = new Edge(clique[i], clique[j]);
+				Edge_Seg *e = new Edge_Seg(clique[i], clique[j]);
 				dual_seg.insert(e);
-				dual_seg.insert(e->get_RevEdge());
 			}
 	}
 
 public:
 	Dual_Seg dual_seg;
 
-	IO_Tet_Seg(Tetrahedrization &mesh, std::string base_name) : IO_T(mesh, base_name), G_Seg(0, false) { }
+	IO_Tet_Seg(Tetrahedrization &mesh, std::string base_name) : IO_T(mesh, base_name), dual_seg(0, false) { }
 
 	void make_dual()
 	{
@@ -42,13 +41,24 @@ public:
 		{
 			TetEdge *e = *i;
 			Tetrahedra adj_tet;
-			ET(adj_tet);
+			e->ET(adj_tet);
 			
 			std::vector<int> clique;
 			for(Tetrahedra::const_iterator j = adj_tet.begin(); j != adj_tet.end(); ++j)
 					clique.push_back((int)(*j)->getInfo());
 			make_clique(clique);
 		}
+		/*for (TetVertices::const_iterator i = IO_T::mesh.Vertices().begin(); i != IO_T::mesh.Vertices().end(); ++i)
+		{
+			TetVertex *e = *i;
+			Tetrahedra adj_tet;
+			e->VT(adj_tet);
+			
+			std::vector<int> clique;
+			for(Tetrahedra::const_iterator j = adj_tet.begin(); j != adj_tet.end(); ++j)
+					clique.push_back((int)(*j)->getInfo());
+			make_clique(clique);
+		}*/
 	}
 };
 }

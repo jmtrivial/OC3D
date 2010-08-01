@@ -88,12 +88,13 @@ template<typename type_flow = int, class Edge = Edge_Flow<type_flow>, class Proc
 class Graph = Graph_List<Edge>,class Search_Path = BFS<Edge, Proc_ful, Graph> > 
 class Fulkerson
 {
+	const int s, t;
 	const Graph &G;
 	Proc_ful &proc_ful;
 	Search_Path search;
 
 	int get_pred(int v) const { return proc_ful.tPred.pred(v)->other(v); }
-	void augment(int s, int t) // Add flow along the path search.tPred
+	void augment() // Add flow along the path search.tPred
 	{ 
 		type_flow d = proc_ful.tPred.pred(t)->capRto(t);
 		for (int v = get_pred(t); v != s; v = get_pred(v)) // Find minimal capacity on the path search.tPred
@@ -107,19 +108,19 @@ class Fulkerson
 	}
 public:
 	~Fulkerson() { };
-	Fulkerson(const Graph &G, Proc_ful &proc_ful) : G(G), proc_ful(proc_ful), search(G, proc_ful) { }
+	Fulkerson(const Graph &G, Proc_ful &proc_ful, int s, int t) : G(G), proc_ful(proc_ful), search(G, proc_ful), s(s), t(t) { }
 	/*! Computes a maxflow in G using proc_ful
 	\param s Source of the maxflow
 	\param t Sink (t must be different from s) */
-	void operator()(int s = 0, int t = 1)
+	void operator()()
 	{
 		do{
 			while(search(s)) // Must return true if there exist a path from s to t
-				augment(s,t);
+				augment();
 		}while(!proc_ful.noPath());
 	}
 	/*! \returns Flow out of s */
-	type_flow get_outflow(int s = 0)
+	type_flow get_outflow()
 	{
 		type_flow max_flow = 0;
 		typename Graph::iterator it(G, s);
