@@ -128,11 +128,11 @@ public:
 		pos = -1;
 		return nxt();
 	}
-	/*! \returns Next edge, 0 if there is no more edge */
+	/*! \returns Next edge, NULL if there is no more edge */
 	inline Edge* nxt() 
 	{
 		++pos;
-		if(pos >= Cut->cut.size()) return 0;
+		if(pos >= Cut->cut.size()) return NULL;
 		return Cut->cut[pos];
 	}
 	/*! \returns true if there is no more edge */

@@ -119,7 +119,7 @@ public:
 		adjPred[succVertex] = e;
 		int predVertex = e->other(succVertex);
 		node * tmp = adjSucc[predVertex];
-		adjSucc[predVertex] = new node(e, tmp, 0);
+		adjSucc[predVertex] = new node(e, tmp, NULL);
 		if(tmp)
 			tmp->last = adjSucc[predVertex];
 		Ecnt++;
@@ -129,20 +129,20 @@ public:
 	{
 		for(int i = 0; i < adjSucc.size(); i++)
 		{
-			node *cur = adjSucc[i], *nxt = 0;
-			while(cur != 0) 
+			node *cur = adjSucc[i], *nxt = NULL;
+			while(cur != NULL) 
 			{
 				nxt = cur->next;
 				delete cur;
 				cur = nxt;
 			}
-			adjSucc[i] = 0;
+			adjSucc[i] = NULL;
 		}
 		for(int i = 0; i < adjPred.size(); i++)
-			adjPred[i] = 0;
+			adjPred[i] = NULL;
 	}
 	/*! \returns \li A pointer to a edge from v to w if it exists
-	\li 0 otherwise
+	\li NULL otherwise
 	*/
 	inline Edge *edge(int v, int w) const
 	{
@@ -150,10 +150,10 @@ public:
 			return adjPred[v];
 		if(adjPred[w]->other(w) == v)
 			return adjPred[w];
-		return 0;
+		return NULL;
 	}
 	/*! \returns \li Edge of a predecessor of v if it exists
-	\li 0 otherwise */
+	\li NULL otherwise */
 	inline Edge *pred(int v) const { return adjPred[v]; }
 
 	/*! \returns \li Predecessor of v if it exists
@@ -164,7 +164,7 @@ public:
 		if(e)
 			return e->other(v);
 		else
-			return 0;
+			return NULL;
 	}
 
 	class iterator;
@@ -205,13 +205,13 @@ template<class Edge = Edge_Base > class Tree_List<Edge>::iterator
 	node* t; // Current node
 public:
 	/*! Ierates through the \b successors of v */
-	iterator(const Tree_List<Edge> &T, int v) : T(T), v(v), t(0) {}
+	iterator(const Tree_List<Edge> &T, int v) : T(T), v(v), t(NULL) {}
 	/*!  Begins an iteration */
-	inline Edge* beg() { t = T.adjSucc[v]; return t ? t->e : 0; }
-	/*! \returns Next edge, 0 if there is no more edge */
-	inline Edge* nxt() { if (t) t = t->next; return t ? t->e : 0; }
+	inline Edge* beg() { t = T.adjSucc[v]; return t ? t->e : NULL; }
+	/*! \returns Next edge, NULL if there is no more edge */
+	inline Edge* nxt() { if (t) t = t->next; return t ? t->e : NULL; }
 	/*! \returns true if there is no more edge */
-	inline bool end() { return t == 0; }
+	inline bool end() { return t == NULL; }
 };
 
 /*! Ierates through all edges */
@@ -227,13 +227,13 @@ public:
 		i = -1; 
 		return nxt();
 	}
-	/*! \returns Next edge, 0 if there is no more edge */
+	/*! \returns Next edge, NULL if there is no more edge */
 	inline Edge* nxt() 
 	{ 
 		for (i++; i < T.V(); i++)
 			if(T.adjPred[i])
 				return T.adjPred[i];
-		return 0;
+		return NULL;
 	}
 	/*! \returns True if there is no more edge */
 	inline bool end()
@@ -257,16 +257,16 @@ template<class Edge = Edge_Base > class Graph_List
 		if(!t->last)
 		{
 			if(!t->next) 
-				adj[posInAdj] = 0;
+				adj[posInAdj] = NULL;
 			else {
-				t->next->last = 0;	
+				t->next->last = NULL;	
 				adj[posInAdj] = t->next;
 			}
 		}
 		else 
 		{
 			if(!t->next) 
-				t->last->next = 0;
+				t->last->next = NULL;
 			else
 			{
 				t->last->next = t->next;
@@ -280,7 +280,7 @@ public:
 	\param V Number of vertices
 	\param digraph Specify if the graph is directed
 	*/
-	Graph_List(int V, bool digraph = false) : adj(V, (node*)0), Vcnt(V), Ecnt(0), digraph(digraph) { }
+	Graph_List(int V, bool digraph = false) : adj(V, (node*)NULL), Vcnt(V), Ecnt(0), digraph(digraph) { }
 	~Graph_List() { }
 	/*!
 	\param v A vertex
@@ -299,8 +299,8 @@ public:
 	{
 		for(int i = 0; i < adj.size(); i++)
 		{
-			node *cur = adj[i], *nxt = 0;
-			while(cur != 0) 
+			node *cur = adj[i], *nxt = NULL;
+			while(cur != NULL) 
 			{
 				nxt = cur->next;
 				if(digraph || cur->e->from(i)) // Evite d'avoir des pointeurs invalides
@@ -308,14 +308,14 @@ public:
 				delete cur;
 				cur = nxt;
 			}
-			adj[i] = 0;
+			adj[i] = NULL;
 		}
 	}
 	/*! \param V New size */
 	void resize(int V)
 	{
 		Vcnt = V;
-		adj.resize(Vcnt, (node*)0);
+		adj.resize(Vcnt, (node*)NULL);
 	}
 	/*! \returns Number of vertices */
 	inline int V() const { return Vcnt; }
@@ -350,16 +350,16 @@ public:
 	void insert(Edge *e, bool sameEdgePtr = true)
 	{ 
 		node * tmp = adj[e->v()];
-		adj[e->v()] = new node(e, tmp, 0);
+		adj[e->v()] = new node(e, tmp, NULL);
 		if(tmp)
 			tmp->last = adj[e->v()];
 		if (!digraph) 
 		{
 			node * tmp_ = adj[e->w()];
 			if(sameEdgePtr) // warning : ne pas écrire adj[e->w()] = adj[e->v()]; car sinon les nodes sont les mêmes!
-				adj[e->w()] = new node(e, tmp_, 0);  
+				adj[e->w()] = new node(e, tmp_, NULL);  
 			else
-				adj[e->w()] = new node(new Edge(*e), tmp_, 0); 
+				adj[e->w()] = new node(new Edge(*e), tmp_, NULL); 
 			if(tmp_)
 				tmp_->last = adj[e->w()];
 		}
@@ -369,8 +369,8 @@ public:
 	\todo delete? */
 	inline void remove(int v)
 	{
-		node *cur = adj[v], *nxt = 0;
-		while(cur != 0) 
+		node *cur = adj[v], *nxt = NULL;
+		while(cur != NULL) 
 		{
 			nxt = cur->next;
 			Edge *e = cur->e;
@@ -381,7 +381,7 @@ public:
 			delete cur;
 			cur = nxt;
 		}
-		adj[v] = 0; // important
+		adj[v] = NULL; // important
 	}
 	/*! Remove edge pointer e from the vertex v <b> comparing pointers </b> without deleting the edge *e
 	\returns Number of elements removed
@@ -413,17 +413,17 @@ public:
 	{
 		for(int i = 0; i < adj.size(); i++)
 		{
-			node *cur = adj[i], *nxt = 0;
-			while(cur != 0) 
+			node *cur = adj[i], *nxt = NULL;
+			while(cur != NULL) 
 			{
 				nxt = cur->next;
 				delete cur;
 				cur = nxt;
 			}
-			adj[i] = 0;
+			adj[i] = NULL;
 		}
 		for(int i = 0; i < adj.size(); i++)
-			adj[i] = 0;
+			adj[i] = NULL;
 		Ecnt = 0;
 	}
 	class iterator;
@@ -442,7 +442,7 @@ template<class Edge = Edge_Base > class Graph_List<Edge>::iterator
 public:
 	/*!  Ierates through the edges from v. 
 	If directed, all edges are out of v */
-	iterator(const Graph_List<Edge> &G, int v) : G(G), v(v), t(0) {}
+	iterator(const Graph_List<Edge> &G, int v) : G(G), v(v), t(NULL) {}
 	/*!  Begins an iteration */
 	inline Edge* beg() { t = G.adj[v]; return t ? t->e : NULL; }
 	/*! \returns Next edge, NULL if there is no more edge */
@@ -462,7 +462,7 @@ template<class Edge = Edge_Base > class Graph_List<Edge>::iterator_all
 	{
 		while(true)
 		{
-			if(t == 0)
+			if(t == NULL)
 			{
 				if(pos <= G.V() - 2)
 					t = G.adj[++pos];
@@ -480,7 +480,7 @@ template<class Edge = Edge_Base > class Graph_List<Edge>::iterator_all
 		return true;
 	}
 public:
-	iterator_all(const Graph_List<Edge> &G) : G(G), pos(0), t(0) { }
+	iterator_all(const Graph_List<Edge> &G) : G(G), pos(0), t(NULL) { }
 	/*!  Begins an iteration */
 	inline Edge* beg()
 	{
@@ -490,16 +490,16 @@ public:
 		if(find_valid())
 			return t->e;
 		else
-			return 0;
+			return NULL;
 	}
-	/*! \returns Next edge, 0 if there is no more edge */
+	/*! \returns Next edge, NULL if there is no more edge */
 	inline Edge* nxt() 
 	{ 
 		t = t->next;
 		if(find_valid())
 			return t->e; 
 		else
-			return 0;
+			return NULL;
 	}
 	/*! \returns True if there is no more edge */
 	inline bool end()
@@ -519,7 +519,7 @@ public:
 	Graph_Matrix(int V, bool digraph = false) : adj(V), Vcnt(V), Ecnt(0), digraph(digraph)
 	{ 
 		for (int i = 0; i < V; i++) 
-			adj[i].assign(V, 0);
+			adj[i].assign(V, NULL);
 	}
 	/*!
 	Creates a matrix adjacency graph from an adjacency list graph
@@ -528,7 +528,7 @@ public:
 	Graph_Matrix(const Graph_List<Edge> &G) : adj(G.V()), Vcnt(G.V()), Ecnt(0), digraph(G.directed())
 	{
 		for (int i = 0; i < Vcnt; i++) 
-			adj[i].assign(Vcnt, 0);
+			adj[i].assign(Vcnt, NULL);
 		typename Graph_List<Edge>::iterator_all it(G);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			insert(e);
@@ -545,7 +545,7 @@ public:
 	void insert(Edge *e)
 	{ 
 		int v = e->v(), w = e->w();
-		if (adj[v][w] == 0) Ecnt++;
+		if (adj[v][w] == NULL) Ecnt++;
 		adj[v][w] = e;
 		if (!digraph) adj[w][v] = e;
 	} 
@@ -553,12 +553,12 @@ public:
 	void remove(Edge e)
 	{ 
 		int v = e.v(), w = e.w();
-		if (adj[v][w] != 0) Ecnt--;
-		adj[v][w] = 0;
-		if (!digraph) adj[w][v] = 0; 
+		if (adj[v][w] != NULL) Ecnt--;
+		adj[v][w] = NULL;
+		if (!digraph) adj[w][v] = NULL; 
 	} 
 	/*! \returns \li A pointer to a edge from v to w if it exists
-	\li 0 otherwise
+	\li NULL otherwise
 	*/
 	inline Edge* edge(int v, int w) const 
 	{ return adj[v][w]; }
@@ -581,12 +581,12 @@ public:
 	iterator(const Graph_Matrix &G, int v) : G(G), v(v), i(0) { }
 	/*! Begins an iteration */
 	Edge *beg() { i = -1; return nxt(); }
-	/*! \returns Next edge, 0 if there is no more edge */
+	/*! \returns Next edge, NULL if there is no more edge */
 	Edge *nxt()
 	{
 		for (i++; i < G.V(); i++)
 			if (G.edge(v, i)) return G.adj[v][i];
-		return 0;
+		return NULL;
 	}
 	/*! \returns true if there is no more edge */
 	bool end() const { return i >= G.V(); }
@@ -606,13 +606,13 @@ public:
 		j = 0; 
 		return nxt(); 
 	}
-	/*! \returns Next edge, 0 if there is no more edge */
+	/*! \returns Next edge, NULL if there is no more edge */
 	Edge *nxt()
 	{
 		for(; j < G.V(); j++, i = -1)
 			for (i++; i < G.V(); i++)
 				if (G.edge(i, j)) return G.adj[i][j];
-		return 0;
+		return NULL;
 	}
 	/*! \returns True if there is no more edge */
 	bool end() const { return j >= G.V(); }
