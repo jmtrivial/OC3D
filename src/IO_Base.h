@@ -2,6 +2,8 @@
 #define IO_BASE_H
 
 #include <iostream>
+#include <list>
+
 #include "Search.h"
 
 namespace oc3d
@@ -45,11 +47,11 @@ protected:
 		std::list<Edge*> delEdges;
 		remove(cut, delEdges);
 
-		typedef Proc_Base<Edge, Tree_Dist<Edge> > Proc;
+		typedef sgl::Proc_Base<Edge, sgl::Tree_Dist<Edge> > Proc;
 		Proc proc_v(dual.V() - 2);
 		proc_v.source = start->v();
 		proc_v.tPred.set_source(start->v());
-		BFS<Edge, Proc, Dual> bfs_v(dual, proc_v);
+		sgl::BFS<Edge, Proc, Dual> bfs_v(dual, proc_v);
 		bfs_v(start->v());
 
 		for(Edge *e = it.nxt(); !it.end(); e = it.nxt())
@@ -58,7 +60,7 @@ protected:
 			if( d1 < d2 ) // If e has a wrong orientation
 				it.replace(e->get_RevEdge());
 		}
-		for(typename list<Edge*>::const_iterator it_del = delEdges.begin(); it_del != delEdges.end(); ++it_del)
+		for(typename std::list<Edge*>::const_iterator it_del = delEdges.begin(); it_del != delEdges.end(); ++it_del)
 			dual.insert(*it_del);
 		// vertices_to_OFF(cut); // debug
 	}
@@ -134,11 +136,11 @@ public:
 		Cut *cut = cuts[num];
 		if(fileName == "")
 			fileName = (base_name + "_cut_" + toString(num) + ".cut");
-		std::ofstream outfile(fileName.c_str(), ios::out | ios::binary); 
-		outfile<<cut->E()<<endl;
+		std::ofstream outfile(fileName.c_str(), std::ios::out | std::ios::binary); 
+		outfile<<cut->E()<<std::endl;
 		typename Cut::iterator it(cut);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
-			outfile<<e->v()<<" "<<e->w()<<endl;
+		  outfile<<e->v()<<" "<<e->w()<<std::endl;
 		outfile.close();
 		show("Cut number " + toString(num) + " with " + toString(cut->E()) + " faces and area " + toString(cut->cap())+ " saved in file " + fileName);
 	}
@@ -149,7 +151,7 @@ public:
 		Cut *cut = new_cut(num);
 		if(fileName == "")
 			fileName = base_name + "_cut_" + toString(num) + ".cut";
-		std::ifstream file(fileName.c_str(), ios::in);
+		std::ifstream file(fileName.c_str(), std::ios::in);
 		int nEdges = 0;
 		file>>nEdges;
 		for(int i = 0; i < nEdges; i++)
@@ -230,10 +232,10 @@ public:
 			assert(!it.end());
 
 			int start = (cut->v() == -1) ? e->v() : e->w();
-			typedef Proc_Base<Edge> Proc;
+			typedef sgl::Proc_Base<Edge> Proc;
 			Proc proc(dual.V() - 2);
 			proc.source = start;
-			BFS<Edge, Proc, Dual> bfs(dual, proc);
+			sgl::BFS<Edge, Proc, Dual> bfs(dual, proc);
 			bfs(start);
 
 			for(int j = firstCut; j < cuts.size(); j++) // Sets every cut found by bfs
@@ -256,7 +258,7 @@ public:
 			}
 		} // for(int curPant = 0; ; curPant++) 
 
-		for(typename list<Edge*>::const_iterator it_del = delEdges.begin(); it_del != delEdges.end(); ++it_del)
+		for(typename std::list<Edge*>::const_iterator it_del = delEdges.begin(); it_del != delEdges.end(); ++it_del)
 			dual.insert(*it_del);
 
 		pants.clear();
