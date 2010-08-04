@@ -172,7 +172,7 @@ int main()
 	for(int i = 0; i < cuts.size(); i++) // We insert cuts and their reverse
 	{
 		cuts[i]->create_RevCut();
-		io.cuts[i]->set_num(i);
+		cuts[i]->set_num(i);
 		pants.insert(cuts[i]);
 		pants.insert(cuts[i]->get_RevCut());
 	}
