@@ -4,7 +4,7 @@
 #include "Structures.h"
 #include "Flow.h"
 #include "IO_Tet.h"
-#include "IO_Tet_Seg.h"
+#include "IO_Tet_Adj.h"
 #include "Ford_Neighborhood.h"
 #include <time.h>
 #include <vector>
@@ -22,8 +22,8 @@ typedef Edge_Dual<type_flow> Edge;
 typedef Graph_List<Edge> Dual;
 typedef Edge_Cut<type_flow, Edge> Cut;
 typedef Graph_List<Cut> Pants;
-typedef Edge_Base Edge_Seg;
-typedef Graph_List<Edge_Seg> Dual_Seg; 
+typedef Edge_Base Edge_Adj;
+typedef Graph_List<Edge_Adj> Dual_Adj; 
 
 void help()
 {
@@ -64,11 +64,11 @@ bool use_neighbors = true;
 
 Tetrahedrization mesh; 
 typedef IO_Tet<Edge, Cut, Dual, Pants> IO_T;
-typedef IO_Tet_Seg<Edge, Edge_Seg, Cut, Dual, Dual_Seg, Pants> IO_T_S;
+typedef IO_Tet_Adj<Edge, Edge_Adj, Cut, Dual, Dual_Adj, Pants> IO_T_S;
 IO_T io_tet(mesh, "");
-IO_T_S io_tet_seg(mesh, "");
+IO_T_S io_tet_adj(mesh, "");
 
-IO_Tet<Edge, Cut, Dual, Pants> &io() { return use_neighbors ? io_tet_seg : io_tet; }
+IO_Tet<Edge, Cut, Dual, Pants> &io() { return use_neighbors ? io_tet_adj : io_tet; }
 
 void init()
 {
@@ -107,9 +107,9 @@ int main(int argc, char *argv[])
 			time_t t1 = clock();
 			if(use_neighbors)
 			{
-				io_tet_seg.make_dual();
-				io_tet_seg.graph_to_OFF<Dual_Seg, Edge_Seg>(io_tet_seg.dual_seg, "_seg");
-				io_tet_seg.graph_to_OFF<Dual, Edge>(io_tet_seg.dual, "");
+				io_tet_adj.make_dual();
+				io_tet_adj.graph_to_OFF<Dual_Adj, Edge_Adj>(io_tet_adj.dual_adj, "_adj");
+				io_tet_adj.graph_to_OFF<Dual, Edge>(io_tet_adj.dual, "");
 			}
 			else
 			{
@@ -129,11 +129,11 @@ int main(int argc, char *argv[])
 				time_t t1 = clock();
 				if(use_neighbors)
 				{
-					Ford_Neighborhood<> neighborhood(io_tet_seg.dual, io_tet_seg.dual_seg, io_tet_seg.get_s(), io_tet_seg.get_t(), io_tet_seg.cuts[num]->cap(), io_tet_seg);
-					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_seg.dual);
+					Ford_Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(), io_tet_adj.get_t(), io_tet_adj.cuts[num]->cap(), io_tet_adj);
+					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_adj.dual);
 					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Ford_Neighborhood<> > OptimalNPants;
-					OptimalNPants::optimize(num, io_tet_seg, neighborhood, cut_vertices);
-					//io_tet_seg.graph_to_OFF<Dual, Edge>(neighborhood.N, "_N"); 
+					OptimalNPants::optimize(num, io_tet_adj, neighborhood, cut_vertices);
+					//io_tet_adj.graph_to_OFF<Dual, Edge>(neighborhood.N, "_N"); 
 				}
 				else
 				{

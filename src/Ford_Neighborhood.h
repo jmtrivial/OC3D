@@ -7,14 +7,14 @@
 
 namespace oc3d
 {
-template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Seg = sgl::Edge_Base, class Dual = sgl::Graph_List<Edge>, class Dual_Seg = sgl::Graph_List<Edge_Seg>, class Proc = sgl::NoNullCap<Edge>, class IO = IO_Tet_Seg<Edge, Edge_Seg, Cut, Dual, Dual_Seg, Pants> > 
+template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Adj = sgl::Edge_Base, class Dual = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge>, class IO = IO_Tet_Adj<Edge, Edge_Adj, Cut, Dual, Dual_Adj, Pants> > 
 class Ford_Neighborhood
 {
 	int s, t;
 	type_flow flow;
 	const type_flow upper_flow;
 	const Dual &dual;
-	const Dual_Seg &dual_seg;
+	const Dual_Adj &dual_adj;
 	IO &io;
 
 	std::vector<int> edges_in_N;
@@ -65,8 +65,8 @@ class Ford_Neighborhood
 				in_cylinder[v] = true;
 				toLink.push_back(v);
 			}
-			typename Dual_Seg::iterator it(dual_seg, v);
-			for(Edge_Seg *e = it.beg(); !it.end(); e = it.nxt())
+			typename Dual_Adj::iterator it(dual_adj, v);
+			for(Edge_Adj *e = it.beg(); !it.end(); e = it.nxt())
 			{
 				int w = e->other(v);
 				if(!in_cylinder[w])
@@ -87,8 +87,8 @@ class Ford_Neighborhood
 public:
 	Dual N; // Neighborhood
 
-	Ford_Neighborhood(const Dual &dual, const Dual_Seg &dual_seg, int s, int t, type_flow upper_flow, IO &io) : 
-	  s(s), t(t), dual(dual), dual_seg(dual_seg), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), io(io)
+	Ford_Neighborhood(const Dual &dual, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io) : 
+	  s(s), t(t), dual(dual), dual_adj(dual_adj), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), io(io)
     { }
 
 	/*! Computes a maxflow in G using proc
