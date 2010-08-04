@@ -444,11 +444,11 @@ public:
 	If directed, all edges are out of v */
 	iterator(const Graph_List<Edge> &G, int v) : G(G), v(v), t(NULL) {}
 	/*!  Begins an iteration */
-	inline Edge* beg() { t = G.adj[v]; return t ? t->e : NULL; }
+	inline Edge* beg() { t = G.adj[v]; return (t != NULL) ? t->e : NULL; }
 	/*! \returns Next edge, NULL if there is no more edge */
-	inline Edge* nxt() { if (t) t = t->next; return t ? t->e : NULL; }
+	inline Edge* nxt() { if (t != NULL) t = t->next; return (t != NULL) ? t->e : NULL; }
 	/*! \returns true if there is no more edge */
-	inline bool end() { return t == NULL; }
+	inline bool end() { return (t == NULL); }
 };
 
 /*!  Ierates through all edges */

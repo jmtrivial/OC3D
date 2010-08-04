@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 			{
 				io_tet_adj.make_dual();
 				io_tet_adj.graph_to_OFF<Dual_Adj, Edge_Adj>(io_tet_adj.dual_adj, "_adj");
-				//io_tet_adj.graph_to_OFF<Dual, Edge>(io_tet_adj.dual, "");
+				io_tet_adj.graph_to_OFF<Dual, Edge>(io_tet_adj.dual, "");
 			}
 			else
 			{

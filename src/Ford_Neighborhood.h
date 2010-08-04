@@ -10,13 +10,13 @@ namespace oc3d
 template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Adj = sgl::Edge_Base, class Dual = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge>, class IO = IO_Tet_Adj<Edge, Edge_Adj, Cut, Dual, Dual_Adj, Pants> > 
 class Ford_Neighborhood
 {
-	int s, t;
+	const int s, t;
 	type_flow flow;
 	const type_flow upper_flow;
 	const Dual &dual;
 	const Dual_Adj &dual_adj;
 	IO &io;
-
+	const bool continue_augment;
 	std::vector<int> edges_in_N;
 	std::vector<int> toLink;
 	std::vector<bool> in_cylinder; 
@@ -87,8 +87,8 @@ class Ford_Neighborhood
 public:
 	Dual N; // Neighborhood
 
-	Ford_Neighborhood(const Dual &dual, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io) : 
-	  s(s), t(t), dual(dual), dual_adj(dual_adj), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), io(io)
+	Ford_Neighborhood(const Dual &dual, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_augment = true) : 
+	  s(s), t(t), dual(dual), dual_adj(dual_adj), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), io(io), continue_augment(continue_augment)
     { }
 
 	/*! Computes a maxflow in G using proc
@@ -111,15 +111,36 @@ public:
 		link();
 		// io.graph_to_OFF<Dual, Edge>(N, "_N");
 
+
 		BFS<Edge, NoNullCap<Edge>, Dual> bfs(N, proc);
-		while(bfs(s))
+		if(!continue_augment)
+			while(bfs(s))
+			{
+				augment();
+				if(flow >= upper_flow)
+					return false;
+				init_cylinder();
+				add_cylinder();
+				link();
+			}
+		else
 		{
-			augment();
-			if(flow >= upper_flow)
-				return false;
-			init_cylinder();
-			add_cylinder();
-			link();
+			while(bfs(s))
+			{
+				augment();
+				if(flow >= upper_flow)
+					return false;
+				init_cylinder();
+				add_cylinder();
+				while(bfs(s))
+				{
+					augment();
+					if(flow >= upper_flow)
+						return false;
+					add_cylinder();
+				}
+				link();
+			}
 		}
 		return true;
 	}
