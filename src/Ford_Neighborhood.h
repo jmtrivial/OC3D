@@ -4,6 +4,8 @@
 #include "Search.h"
 #include "Flow.h"
 #include <vector>
+#include <time.h>
+#include "IO_Base.h"
 
 namespace oc3d
 {
@@ -16,7 +18,7 @@ class Ford_Neighborhood
 	const Dual &dual;
 	const Dual_Adj &dual_adj;
 	IO &io;
-	const bool continue_bfs;
+	const bool continue_bfs, details;
 	std::vector<int> edges_in_N;
 	std::vector<int> toLink;
 	std::vector<bool> in_cylinder; 
@@ -87,8 +89,8 @@ class Ford_Neighborhood
 public:
 	Dual N; // Neighborhood
 
-	Ford_Neighborhood(const Dual &dual, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true) : 
-	  s(s), t(t), dual(dual), dual_adj(dual_adj), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), io(io), continue_bfs(continue_bfs)
+	Ford_Neighborhood(const Dual &dual, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
+	  s(s), t(t), dual(dual), dual_adj(dual_adj), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), io(io), continue_bfs(continue_bfs), details(details)
     { }
 
 	/*! Computes a maxflow in G using proc
@@ -96,6 +98,8 @@ public:
 	\param t Sink (t must be different from s) */
 	bool operator()()
 	{
+		time_t t1, t2;
+
 		N.resize(dual.V());
 		typename Dual::iterator it_s(dual, s);
 		for(Edge *e = it_s.beg(); !it_s.end(); e = it_s.nxt())
@@ -104,40 +108,60 @@ public:
 		for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
 			N.insert(e);
 		BFS<Edge, NoNullCap<Edge>, Dual> init_bfs(dual, proc);
+		t1 = clock();
 		init_bfs(s);
+		t2 = clock();
+		if(details)
+			show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 		augment();
 		// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi créée
 		add_cylinder();
 		link();
-		// io.graph_to_OFF<Dual, Edge>(N, "_N");
-
+		if(details)
+			io.graph_to_OFF<Dual, Edge>(N, "_N");
 
 		BFS<Edge, NoNullCap<Edge>, Dual> bfs(N, proc);
 		if(!continue_bfs)
+		{
+			t1 = clock();
 			while(bfs(s))
 			{
+				t2 = clock();
+				if(details)
+					show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 				augment();
 				if(flow >= upper_flow)
 					return false;
 				init_cylinder();
 				add_cylinder();
 				link();
+				t1 = clock();
 			}
+		}
 		else
 		{
+			t1 = clock();
 			while(bfs(s))
 			{
+				t2 = clock();
+				if(details)
+					show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 				augment();
 				if(flow >= upper_flow)
 					return false;
 				init_cylinder();
 				add_cylinder();
+				t1 = clock();
 				while(bfs(s))
 				{
+					t2 = clock();
+					if(details)
+						show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 					augment();
 					if(flow >= upper_flow)
 						return false;
 					add_cylinder();
+					t1 = clock();
 				}
 				link();
 			}

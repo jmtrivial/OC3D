@@ -1,3 +1,4 @@
+// todo: write time info in file
 
 #include "OptimalNPants.h"
 #include "Structures.h"
