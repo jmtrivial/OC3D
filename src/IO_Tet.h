@@ -76,7 +76,8 @@ public:
 				t1 = f->t1();
 				t2 = f->t2();
 				// Use area as weight too?
-				Edge *e = new Edge((int)t1->getInfo(), (int)t2->getInfo(), f->area(), f->area(), index);
+				// TODO: long int for 64 bits, int for 32 bits... we have to fix this type...
+				Edge *e = new Edge((long int)t1->getInfo(), (long int)t2->getInfo(), f->area(), f->area(), index);
 
 				IO_B::dual.insert(e);
 				IO_B::dual.insert(e->get_RevEdge());
@@ -126,18 +127,18 @@ public:
 			offName = IO_B::base_name + "_dual.off";
 		/*if(dualName == "")
 			dualName = base_name + ".dual";*/
-		std::ofstream offFile(offName.c_str(), ios::out | ios::binary);
-		offFile<<"OFF"<<endl;
-		offFile<<(IO_B::dual.V()-2)<<" "<<IO_B::dual.E()<<" "<<0<<endl; // -2: we don't want s and t
+		std::ofstream offFile(offName.c_str(), std::ios::out | std::ios::binary);
+		offFile<<"OFF"<<std::endl;
+		offFile<<(IO_B::dual.V()-2)<<" "<<IO_B::dual.E()<<" "<<0<<std::endl; // -2: we don't want s and t
 		for(int i = 0; i < IO_B::dual.V() - 2; i++)
 		{
 			Vector tet_center = vertexToTet[i]->getCenter();
-			offFile<<tet_center.x<<" "<<tet_center.y<<" "<<tet_center.z<<endl;
+			offFile<<tet_center.x<<" "<<tet_center.y<<" "<<tet_center.z<<std::endl;
 		}
 		typename Dual::iterator_all it(IO_B::dual);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 		{
-			offFile<<2<<" "<<e->v()<<" "<< e->w()<<endl;
+			offFile<<2<<" "<<e->v()<<" "<< e->w()<<std::endl;
 			/*dualFile<<e->cap()<<endl;*/
 		}
 		offFile.close();
@@ -151,15 +152,15 @@ public:
 	{
 		if(fileName == "")
 			fileName = IO_B::base_name + "_vertices_cut.off";
-		std::ofstream outfile(fileName.c_str(), ios::out | ios::binary);  
-		outfile<<"OFF"<<endl;
-		outfile<<cut->E()<<" 0 0"<<endl;
+		std::ofstream outfile(fileName.c_str(), std::ios::out | std::ios::binary);  
+		outfile<<"OFF"<<std::endl;
+		outfile<<cut->E()<<" 0 0"<<std::endl;
 
 		typename Cut::iterator it(cut);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 		{
 			Vector v = vertexToTet[e->v()]->getCenter();
-			outfile<<v.x<<" "<<v.y<<" "<<v.z<<endl;
+			outfile<<v.x<<" "<<v.y<<" "<<v.z<<std::endl;
 		}
 		outfile.close();
 	}
@@ -175,7 +176,7 @@ public:
 		Cut *cut = IO_B::new_cut(num);
 		if(fileName == "")
 			fileName = IO_B::base_name + "_cut_" + toString(num) + ".off";
-		std::ifstream file(fileName.c_str(), ios::in);
+		std::ifstream file(fileName.c_str(), std::ios::in);
 		std::string line;
 		getline(file, line);
 		int nFaces = 0, nVertices = 0, nEdges = 0;
@@ -328,15 +329,15 @@ public:
 		if(fileName == "")
 			fileName = (IO_B::base_name + "_cut_" + toString(num) + ".off");
 
-		std::ofstream outfile(fileName.c_str(), ios::out | ios::binary);  
-		outfile<<"OFF"<<endl;
-		outfile<<vertices.size()<<" "<<cut->E()<<" "<<0<<endl;
+		std::ofstream outfile(fileName.c_str(), std::ios::out | std::ios::binary);  
+		outfile<<"OFF"<<std::endl;
+		outfile<<vertices.size()<<" "<<cut->E()<<" "<<0<<std::endl;
 		for(int i = 0; i < vertices.size(); i++)
-			outfile<<vertices[i].x<<" "<<vertices[i].y<<" "<<vertices[i].z<<endl;
+			outfile<<vertices[i].x<<" "<<vertices[i].y<<" "<<vertices[i].z<<std::endl;
 
 		typename Cut::iterator it(cut);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
-			outfile<<2<<" "<<numToIndex[e->v()]<<" "<<numToIndex[e->w()]<<endl;
+			outfile<<2<<" "<<numToIndex[e->v()]<<" "<<numToIndex[e->w()]<<std::endl;
 		outfile.close();
 		show("Cut number " + toString(num) + " saved in " + fileName);
 	}

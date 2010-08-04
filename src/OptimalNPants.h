@@ -15,11 +15,12 @@
 #include <queue>
 #include <list>
 #include <assert.h>
+#include <algorithm>
 
 namespace oc3d
 {
 template<typename type_flow = double, typename type_wt = type_flow, class Edge = Edge_Dual<type_flow>, class Cut = Edge_Cut<type_wt, Edge>,
-class Dual = sgl::Graph_List<Edge>, class Pants = sgl::Graph_List<Cut>, class MaxFlow = sgl::Fulkerson<type_flow, Edge, sgl::NoNullCap<Edge>, Dual>, class Cut_Find = Cut_Vertices<Edge, Dual>, class IO = IO_Base<Edge, Cut, Dual, Pants> > 
+	 class Dual = sgl::Graph_List<Edge>, class Pants = sgl::Graph_List<Cut>, class MaxFlow = sgl::Fulkerson<type_flow, Edge, sgl::NoNullCap<Edge>, Dual>, class Cut_Find = sgl::Cut_Vertices<Edge, Dual>, class IO = IO_Base<Edge, Cut, Dual, Pants> > 
 class OptimalNPants
 {
 	typedef Cut* ptrCut; // for references to pointer to cut ...
@@ -35,15 +36,15 @@ class OptimalNPants
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 		{
 			if(link_s)
-				io.dual.insert(new Edge(s, e->w(), max_val<type_wt>(), e->wt()));
+			  io.dual.insert(new Edge(s, e->w(), sgl::max_val<type_wt>(), e->wt()));
 			else
-				io.dual.insert(new Edge(e->v(), t, max_val<type_wt>(), e->wt()));
+			  io.dual.insert(new Edge(e->v(), t, sgl::max_val<type_wt>(), e->wt()));
 			if(insert_reverse)
 			{
 				if(link_s)
-					io.dual.insert(new Edge(s, e->v(), max_val<type_wt>(), e->wt()));
+				  io.dual.insert(new Edge(s, e->v(), sgl::max_val<type_wt>(), e->wt()));
 				else
-					io.dual.insert(new Edge(e->w(), t, max_val<type_wt>(), e->wt()));
+				  io.dual.insert(new Edge(e->w(), t, sgl::max_val<type_wt>(), e->wt()));
 			}
 		}
 	}
@@ -192,14 +193,14 @@ class OptimalNPants
 		compare comp;
 		std::sort(io.cuts.begin(), io.cuts.end(), comp);
 
-		list<Edge *> delEdges;
+		std::list<Edge *> delEdges;
 		for(typename std::vector<Cut *>::iterator it = io.cuts.begin(); it != io.cuts.end(); ++it)
 		{
 			std::list<Edge *> curDelEdges;
 			remove(*it, curDelEdges);
 			remove((*it)->get_RevCut(), curDelEdges);
-			Proc_Base<Edge> proc(io.dual.V());
-			BFS<Edge, Proc_Base<Edge>, Dual> bfs(io.dual, proc);
+			sgl::Proc_Base<Edge> proc(io.dual.V());
+			sgl::BFS<Edge, sgl::Proc_Base<Edge>, Dual> bfs(io.dual, proc);
 			assert(!curDelEdges.empty());
 			bfs((*(curDelEdges.begin()))->v());
 			bool allVisited = true;
@@ -213,7 +214,7 @@ class OptimalNPants
 				delEdges.insert(delEdges.end(), curDelEdges.begin(), curDelEdges.end());
 			}
 			else
-				for(typename list<Edge *>::const_iterator it = curDelEdges.begin(); it != curDelEdges.end(); ++it)
+			  for(typename std::list<Edge *>::const_iterator it = curDelEdges.begin(); it != curDelEdges.end(); ++it)
 					io.dual.insert(*it);
 		}
 	}
@@ -233,7 +234,7 @@ class OptimalNPants
 					// This way we don't store twice the same edge (otherwise we will stock make_pair(adjEdge, infty) and we give adjEdge infty capacity after
 					continue;
 				changedCap.push_back(std::make_pair(adjEdge, adjEdge->cap()));
-				adjEdge->set_cap(max_val<type_flow>());
+				adjEdge->set_cap(sgl::max_val<type_flow>());
 			}
 		}
 	}	
@@ -249,7 +250,7 @@ public:
 		Cut *next = io.cuts[num];
 		show("Optimization of cut " + toString(next->get_num()) + " with " + toString(next->E()) + " faces and area " + toString(next->cap()) + "...");
 		std::list<Edge*> delEdges; // Stores removed edges to add them after min cut algorithm, see at the very bottom
-		std::list< pair<Edge *, type_flow> > changedCap; // Stores edges we change capacity to restore them (if next->v() == next->w())
+		std::list< std::pair<Edge *, type_flow> > changedCap; // Stores edges we change capacity to restore them (if next->v() == next->w())
 		if(next->v() == next->w()) // If true, the two pants adjacent to next are actually one pant
 		{
 			std::vector<Cut *> cut; // Adjacent cuts
@@ -300,7 +301,7 @@ public:
 			for( int i = 0; i != - 1; i = shortestPathToAllCuts(i, cutsToVisit, true, shortestPath, io) );  
 
 			for(typename std::list<int>::const_iterator it = shortestPath.begin(); it != shortestPath.end(); ++it)
-				io.dual.insert(new Edge(s, *it, max_val<type_wt>(), 0)); 
+			  io.dual.insert(new Edge(s, *it, sgl::max_val<type_wt>(), 0)); 
 
 			shortestPath.clear();
 			cutsToVisit = wCut;
@@ -308,7 +309,7 @@ public:
 			for( int i = 0; i != - 1; i = shortestPathToAllCuts(i, cutsToVisit, false, shortestPath, io) ); 
 
 			for(typename std::list<int>::const_iterator it = shortestPath.begin(); it != shortestPath.end(); ++it)
-				io.dual.insert(new Edge(*it, t, max_val<type_wt>(), 0)); // Links the shortest path from cutStart to cutEnd, to t
+			  io.dual.insert(new Edge(*it, t, sgl::max_val<type_wt>(), 0)); // Links the shortest path from cutStart to cutEnd, to t
 
 			///////////////////////////////////////////
 			//     Links boundaries to s (and t)     //
