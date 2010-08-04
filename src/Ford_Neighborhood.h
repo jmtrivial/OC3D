@@ -96,28 +96,21 @@ public:
 	\param t Sink (t must be different from s) */
 	bool operator()()
 	{
-		/*if(first)
-		{*/
-			N.resize(dual.V());
-			typename Dual::iterator it_s(dual, s);
-			for(Edge *e = it_s.beg(); !it_s.end(); e = it_s.nxt())
-				N.insert(e);
-			typename Dual::iterator it_t(dual, t);
-			for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
-				N.insert(e);
-			BFS<Edge, NoNullCap<Edge>, Dual> init_bfs(dual, proc);
-			init_bfs(s);
-			augment();
-			// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi créée
-			add_cylinder();
-			link();
-			io.graph_to_OFF<Dual, Edge>(N, "_N");
-			/*for(int i = 0; i < ve.size(); i++)
-				std::cout<<ve[i]<<" "<<ve[(i+1) % ve.size()]<<std::endl;*/
-		//io.graph_to_OFF<Dual, Edge>(N, "_N");
-		/*}
-		else
-		{*/
+		N.resize(dual.V());
+		typename Dual::iterator it_s(dual, s);
+		for(Edge *e = it_s.beg(); !it_s.end(); e = it_s.nxt())
+			N.insert(e);
+		typename Dual::iterator it_t(dual, t);
+		for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
+			N.insert(e);
+		BFS<Edge, NoNullCap<Edge>, Dual> init_bfs(dual, proc);
+		init_bfs(s);
+		augment();
+		// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi créée
+		add_cylinder();
+		link();
+		// io.graph_to_OFF<Dual, Edge>(N, "_N");
+
 		BFS<Edge, NoNullCap<Edge>, Dual> bfs(N, proc);
 		while(bfs(s))
 		{
@@ -128,7 +121,6 @@ public:
 			add_cylinder();
 			link();
 		}
-		/*}*/
 		return true;
 	}
 
