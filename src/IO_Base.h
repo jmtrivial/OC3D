@@ -33,15 +33,16 @@ struct vect
 template<class Edge, class Cut, class Dual, class Pants> class IO_Base
 {
 protected:
+	
 	/*! Gives an orientation to the cut with bfs 
-	\todo BFS works, but better to use orientate face - crossprod or to use an stop bfs search (ask me) */
+	\todo BFS works, but better to use orientate face - crossprod or <b> to stop bfs search </b> */
 	void orientate(Cut *cut)
 	{
 		typename Cut::iterator it(cut);
 		Edge *start = it.beg();
 		assert(start != NULL); // cut is empty
 		// e determines the orientation
-		list<Edge*> delEdges;
+		std::list<Edge*> delEdges;
 		remove(cut, delEdges);
 
 		typedef Proc_Base<Edge, Tree_Dist<Edge> > Proc;
@@ -118,6 +119,14 @@ public:
 		return -1;
 	}
 
+	void init_cut(int num)
+	{
+		Cut *cut = cuts[num];
+		orientate(cut);
+		cut->create_RevCut();
+		cut->get_RevCut()->set_num(cut->get_num(), false);
+	}
+
 	/*! Saves cut number num as a .cut file fileName: <br/> 
 	first line is the number of edges, every other line contains the extremities of one edge */
 	void cut_to_filecut(int num, std::string fileName = "")
@@ -153,11 +162,42 @@ public:
 			assert(!it.end()); // Check if we found the edge
 			cut->insert(e);
 		}
-		orientate(cut);
-		cut->create_RevCut();
-		cut->get_RevCut()->set_num(cut->get_num(), false);
 		file.close();
 		show("Cut number " + toString(num) + " with " + toString(nEdges) + " faces and area " + toString(cut->cap())+ " loaded from file " + fileName);
+	}
+
+	void shrink_cut(int num, int max_depth)
+	{
+		Cut *cut = cuts[num];
+		
+		Dual thick_cut(dual.V(), false);
+		typename Cut::iterator it_all(cut);
+		for(Edge *e = it_all.beg(); !it_all.end(); e = it_all.nxt())
+			thick_cut.insert(e);
+		std::list<Edge *> delEdges;
+		remove(cut, delEdges);
+		typename Cut::iterator it(cut);
+		Edge *e = it.beg();
+		for(; !it.end() && (thick_cut.deg(e->v()) != 1) && (thick_cut.deg(e->w()) != 1); e = it.nxt());
+		assert(!it.end());
+		int start = thick_cut.isolated(e->v()) ? e->v() : e->w();
+		typedef Proc_Max_Depth<Edge> Proc;
+		Proc proc(dual.V() - 2, max_depth);
+		proc.source = start;
+		proc.tPred.set_source(start);
+		BFS<Edge, Proc, Dual> bfs(dual, proc);
+		bfs(start);
+		
+		std::vector<Edge *> new_edges;
+		typename Cut::iterator it_(cut);
+		for(Edge *e_ = it_.beg(); !it_.end(); e_ = it_.nxt())
+			if(!proc.tPred.isolated(e_->v()) || !proc.tPred.isolated(e_->w()))
+				new_edges.push_back(e_);
+		cut->clear();
+		for(int i = 0; i < new_edges.size(); i++)
+			cut->insert(new_edges[i]);
+		for(typename std::list<Edge *>::const_iterator it = delEdges.begin(); it != delEdges.end(); ++it)
+			dual.insert(*it);
 	}
 
 	/*! Gives a number to each pants defined by cuts (finding connected components) and update extremities of each cut

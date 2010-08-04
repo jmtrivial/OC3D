@@ -323,6 +323,13 @@ public:
 	inline int E() const { return Ecnt; }
 	/*! \returns True iff directed */
 	inline bool directed() const { return digraph; }
+	bool isolated(int v)
+	{
+		iterator it(*this, v);
+		it.beg();
+		if(it.end()) return true;
+		return false;
+	}
 	/*! \returns \li A pointer to a edge from v to w if it exists
 	\li NULL otherwise
 	\warning See Graph_Matrix for better performances

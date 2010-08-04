@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
 		}
 		else if(tokens[0] == "make_dual")
 		{
+			time_t t1 = clock();
 			if(use_neighbors)
 			{
 				io_tet_seg.make_dual();
@@ -115,7 +116,8 @@ int main(int argc, char *argv[])
 				io_tet.make_dual();
 				io_tet.graph_to_OFF<Dual, Edge>(io_tet.dual, "");
 			}
-			
+			time_t t2 = clock();
+			show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 		}		
 		else if(tokens[0] == "opt")
 		{
@@ -127,11 +129,11 @@ int main(int argc, char *argv[])
 				time_t t1 = clock();
 				if(use_neighbors)
 				{
-					Ford_Neighborhood<> neighborhood(io_tet_seg.dual, io_tet_seg.dual_seg, io_tet_seg.get_s(), io_tet_seg.get_t(), io_tet_seg.cuts[num]->cap());
+					Ford_Neighborhood<> neighborhood(io_tet_seg.dual, io_tet_seg.dual_seg, io_tet_seg.get_s(), io_tet_seg.get_t(), io_tet_seg.cuts[num]->cap(), io_tet_seg);
 					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_seg.dual);
 					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Ford_Neighborhood<> > OptimalNPants;
 					OptimalNPants::optimize(num, io_tet_seg, neighborhood, cut_vertices);
-					io_tet_seg.graph_to_OFF<Dual, Edge>(neighborhood.N, "_N"); 
+					//io_tet_seg.graph_to_OFF<Dual, Edge>(neighborhood.N, "_N"); 
 				}
 				else
 				{
@@ -141,7 +143,7 @@ int main(int argc, char *argv[])
 					OptimalNPants<>::optimize(num, io_tet, fulkerson, cut_vertices);
 				}
 				time_t t2 = clock();
-				show("Time: " + toString(t2-t1));
+				show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 			}
 		}
 		else if(tokens[0] == "load_cut")
@@ -153,6 +155,22 @@ int main(int argc, char *argv[])
 			{
 				string file = tokens.size() == 1 ? "" : args_to_file(tokens, 2);
 				io().filecut_to_cut(num, file);
+				io().init_cut(num);
+				show("Cut " + toString(num) + " loaded");
+			}
+		}
+		else if(tokens[0] == "load_thick_cut")
+		{
+			int num = 0;
+			if(tokens.size() == 1 || !fromString(tokens[1], num))
+				help();
+			else
+			{
+				string file = tokens.size() == 1 ? "" : args_to_file(tokens, 2);
+				io().filecut_to_cut(num, file);
+				io().shrink_cut(num, 50);
+				io().cut_to_filecut(num, io().base_name + "_cut_" + toString(num) + + "_thin" + ".cut");
+				io().init_cut(num);
 				show("Cut " + toString(num) + " loaded");
 			}
 		}

@@ -36,7 +36,10 @@ public:
 	{
 		IO_T::make_dual();
 		dual_seg.resize(IO_T::dual.V());
-		
+	
+		/*typename Dual::iterator_all it(dual);
+		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
+			dual_seg.insert(new Edge_Seg(e->v(), e->w()));*/
 		for (TetEdges::const_iterator i = IO_T::mesh.Edges().begin(); i != IO_T::mesh.Edges().end(); ++i)
 		{
 			TetEdge *e = *i;

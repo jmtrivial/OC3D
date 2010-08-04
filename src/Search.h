@@ -96,6 +96,19 @@ public:
 /*!  \example dfs.cpp
 \image html exdfsbfs.jpg */
 
+template<class Edge = Edge_Base, class Tree = Tree_Dist<Edge> > class  Proc_Max_Depth : public Proc_Base<Edge, Tree>
+{
+	const int max_depth;
+public:
+	Proc_Max_Depth(int V, int max_depth) : Proc_Base<Edge, Tree>(V), max_depth(max_depth) { }
+	/*!  \returns True iff toVertex is not visited and its depth is less than max_depth */
+	bool toVisit(Edge *e, int toVertex)
+	{ 
+		if(tPred.dist(e->other(toVertex)) > max_depth) return false;
+		return Proc_Base<Edge, Tree>::toVisit(e, toVertex);
+	}
+};
+
 /*!  
  breadth first search
 \param Proc Functor
