@@ -1,4 +1,3 @@
-// TODO: prompt
 
 #include "OptimalNPants.h"
 #include "Structures.h"
@@ -27,7 +26,15 @@ typedef Graph_List<Edge_Adj> Dual_Adj;
 
 void help()
 {
-	show("Usage:"); //todo
+	show("Command:"); 
+	show("load tet.ele: load a mesh and set base name to tet");
+	show("make_dual: make dual graph and export it in <base name>_dual.off");
+	show("load_cut i [file.cut]: load cut number i in file file.cut if provided, otherwise in <base name>_cut_i.cut");
+	show("init: find pants defined by loaded cuts, must be called after all cuts are loaded");
+	show("save_cut i [file.cut]: save cut number i in file file.cut if provided, otherwise in <base name>_cut_i.cut");
+	show("opt i: optimize cut number i, pants must be initialized before");
+	show("neighbors: enable/disable neighborhood variant of Ford Fulkerson algorithm\n  Default: enabled");
+	show("continue: enable/disable the variant of neighborhood algorithm searching all possible paths before augmentating, must be used with neighbors\n  Default: enabled");
 }
 
 
@@ -61,6 +68,7 @@ string args_to_file(vector<string> &tokens, int index)
 }
 
 bool use_neighbors = true;
+bool continue_bfs = true;
 
 Tetrahedrization mesh; 
 typedef IO_Tet<Edge, Cut, Dual, Pants> IO_T;
@@ -70,26 +78,28 @@ IO_T_S io_tet_adj(mesh, "");
 
 IO_Tet<Edge, Cut, Dual, Pants> &io() { return use_neighbors ? io_tet_adj : io_tet; }
 
-void init()
-{
-	TMLib::init();
-}
 int main(int argc, char *argv[])
 {
-	init();
+	TMLib::init();
 	string s;
 	
 	while(getline(cin, s))
 	{
 		vector<string> tokens;
 		tokenize(s, tokens);
-
-		if(tokens[0] == "neighbors")
+		if(tokens.size() == 0) continue;
+		string cmd = tokens[0];
+		if(cmd == "neighbors")
 		{
 			use_neighbors = !use_neighbors;
 			show((use_neighbors ? "U" : "Don't u") + toString("se neighborhood for Ford Fulkerson algorithm"));
 		}
-	    else if(tokens[0] == "load")
+		else if(cmd == "continue")
+		{
+			continue_bfs = !continue_bfs;
+			show((continue_bfs ? "U" : "Don't u") + toString("se the variant of neighborhood algorithm searching all possible paths before augmentating"));
+		}
+	    else if(cmd == "load")
 		{
 			string file = args_to_file(tokens, 1);
 			if (mesh.load(file.c_str()) != 0) 
@@ -102,7 +112,7 @@ int main(int argc, char *argv[])
 				show("Base name: " + base_file);
 			}
 		}
-		else if(tokens[0] == "make_dual")
+		else if(cmd == "make_dual")
 		{
 			time_t t1 = clock();
 			if(use_neighbors)
@@ -119,7 +129,7 @@ int main(int argc, char *argv[])
 			time_t t2 = clock();
 			show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 		}		
-		else if(tokens[0] == "opt")
+		else if(cmd == "opt")
 		{
 			int num = 0;
 			if((tokens.size() == 1 || !fromString(tokens[1], num)) || num >= io().cuts.size())
@@ -129,7 +139,7 @@ int main(int argc, char *argv[])
 				time_t t1 = clock();
 				if(use_neighbors)
 				{
-					Ford_Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(), io_tet_adj.get_t(), io_tet_adj.cuts[num]->cap(), io_tet_adj);
+					Ford_Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(), io_tet_adj.get_t(), io_tet_adj.cuts[num]->cap(), io_tet_adj, continue_bfs);
 					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_adj.dual);
 					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Ford_Neighborhood<> > OptimalNPants;
 					OptimalNPants::optimize(num, io_tet_adj, neighborhood, cut_vertices);
@@ -146,7 +156,7 @@ int main(int argc, char *argv[])
 				show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 			}
 		}
-		else if(tokens[0] == "load_cut")
+		else if(cmd == "load_cut")
 		{
 			int num = 0;
 			if(tokens.size() == 1 || !fromString(tokens[1], num))
@@ -159,7 +169,7 @@ int main(int argc, char *argv[])
 				show("Cut " + toString(num) + " loaded");
 			}
 		}
-		else if(tokens[0] == "load_thick_cut")
+		else if(cmd == "load_thick_cut")
 		{
 			int num = 0;
 			if(tokens.size() == 1 || !fromString(tokens[1], num))
@@ -174,7 +184,7 @@ int main(int argc, char *argv[])
 				show("Cut " + toString(num) + " loaded");
 			}
 		}
-		else if(tokens[0] == "save_cut")
+		else if(cmd == "save_cut")
 		{
 			int num = 0;
 			if(tokens.size() == 1 || !fromString(tokens[1], num))
@@ -185,13 +195,13 @@ int main(int argc, char *argv[])
 				io().cut_to_filecut(num, file);
 			}
 		}
-		else if(tokens[0] == "save_off")
+		else if(cmd == "save_off")
 			mesh.saveOFFBoundary((io().base_name + ".off").c_str());
-		else if(tokens[0] == "init")
+		else if(cmd == "init")
 		{
 			io().init_pants();
 		}
-		else if(tokens[0] == "exit")
+		else if(cmd == "exit")
 			break;
 		else 
 			help();

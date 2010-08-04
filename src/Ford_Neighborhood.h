@@ -16,7 +16,7 @@ class Ford_Neighborhood
 	const Dual &dual;
 	const Dual_Adj &dual_adj;
 	IO &io;
-	const bool continue_augment;
+	const bool continue_bfs;
 	std::vector<int> edges_in_N;
 	std::vector<int> toLink;
 	std::vector<bool> in_cylinder; 
@@ -87,8 +87,8 @@ class Ford_Neighborhood
 public:
 	Dual N; // Neighborhood
 
-	Ford_Neighborhood(const Dual &dual, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_augment = true) : 
-	  s(s), t(t), dual(dual), dual_adj(dual_adj), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), io(io), continue_augment(continue_augment)
+	Ford_Neighborhood(const Dual &dual, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true) : 
+	  s(s), t(t), dual(dual), dual_adj(dual_adj), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), io(io), continue_bfs(continue_bfs)
     { }
 
 	/*! Computes a maxflow in G using proc
@@ -113,7 +113,7 @@ public:
 
 
 		BFS<Edge, NoNullCap<Edge>, Dual> bfs(N, proc);
-		if(!continue_augment)
+		if(!continue_bfs)
 			while(bfs(s))
 			{
 				augment();
