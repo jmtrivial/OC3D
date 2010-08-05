@@ -44,10 +44,8 @@ public:
 	Tetrahedrization &mesh;
 
 	~IO_Tet()
-	{
-		IO_B::dual.delete_ptr();
-		IO_B::pants.delete_ptr();
-	}
+	{  }
+
 	IO_Tet(Tetrahedrization &mesh, std::string base_name) :
 	mesh(mesh), IO_B(base_name) 
 	{  }

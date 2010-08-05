@@ -26,8 +26,6 @@ public:
 
   /*! destructor */
   ~IO_Voxels() {
-    IO_B::dual.delete_ptr();
-    IO_B::pants.delete_ptr();
   }
 
   /*! Makes the dual graph from the given 3D image

@@ -105,6 +105,11 @@ public:
 	void set_base_name(std::string &s) { base_name = s; }
 	
 	IO_Base(std::string base_name) : dual(0, false), pants(0, true), base_name(base_name) { }
+	
+	~IO_Base() {
+		dual.delete_ptr();
+		pants.delete_ptr();
+	}
 
 	/*! Gets the source, -1 if it doesn't exist */
 	inline int get_s() const
