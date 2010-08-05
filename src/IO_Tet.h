@@ -236,8 +236,8 @@ public:
 			}
 			assert(j != numToFace.size()); // Check if we found a face
 
-			int v = (int)face->t1()->getInfo(), w = (int)face->t2()->getInfo();
-			Edge *e = numToEdge[(int)face->getInfo()];
+			int v = (long int)face->t1()->getInfo(), w = (long int)face->t2()->getInfo();
+			Edge *e = numToEdge[(long int)face->getInfo()];
 			cut->insert(e); // warning: multi pant
 		} // for(int i = 0; i < nFaces; i++)
 
