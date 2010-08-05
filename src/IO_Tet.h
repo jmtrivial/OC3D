@@ -125,8 +125,8 @@ public:
 	{
 		if(offName == "")
 			offName = IO_B::base_name + "_dual" + ext + ".off";
-		std::ofstream offFile(offName.c_str(), ios::out | ios::binary);
-		offFile<<"OFF"<<endl;
+		std::ofstream offFile(offName.c_str(), std::ios::out | std::ios::binary);
+		offFile<<"OFF"<<std::endl;
 		offFile<<(graph.V()-2)<<" "<<graph.E()<<" "<<0<<std::endl; // -2: we don't want s and t
 		for(int i = 0; i < graph.V() - 2; i++)
 		{

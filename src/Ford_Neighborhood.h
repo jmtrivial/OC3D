@@ -107,7 +107,7 @@ public:
 		typename Dual::iterator it_t(dual, t);
 		for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
 			N.insert(e);
-		BFS<Edge, NoNullCap<Edge>, Dual> init_bfs(dual, proc);
+		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Dual> init_bfs(dual, proc);
 		t1 = clock();
 		init_bfs(s);
 		t2 = clock();
@@ -118,9 +118,9 @@ public:
 		add_cylinder();
 		link();
 		if(details)
-			io.graph_to_OFF<Dual, Edge>(N, "_N");
+		  io.graph_to_OFF(N, "_N");
 
-		BFS<Edge, NoNullCap<Edge>, Dual> bfs(N, proc);
+		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Dual> bfs(N, proc);
 		if(!continue_bfs)
 		{
 			t1 = clock();

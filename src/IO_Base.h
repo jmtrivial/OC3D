@@ -183,11 +183,11 @@ public:
 		for(; !it.end() && (thick_cut.deg(e->v()) != 1) && (thick_cut.deg(e->w()) != 1); e = it.nxt());
 		assert(!it.end());
 		int start = thick_cut.isolated(e->v()) ? e->v() : e->w();
-		typedef Proc_Max_Depth<Edge> Proc;
+		typedef sgl::Proc_Max_Depth<Edge> Proc;
 		Proc proc(dual.V() - 2, max_depth);
 		proc.source = start;
 		proc.tPred.set_source(start);
-		BFS<Edge, Proc, Dual> bfs(dual, proc);
+		sgl::BFS<Edge, Proc, Dual> bfs(dual, proc);
 		bfs(start);
 		
 		std::vector<Edge *> new_edges;
