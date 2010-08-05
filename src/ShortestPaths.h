@@ -192,7 +192,7 @@ public:
 				type_wt d_v = S.top().first;
 				Edge *pere = S.top().second.second;
 				S.pop();
-				if(dist[v] != max_val<type_wt>()) // si on a déjà rencontré ce sommet
+				if(dist[v] != max_val<type_wt>()) // si on a dï¿½jï¿½ rencontrï¿½ ce sommet
 					continue;
 				dist[v] = d_v; 
 				SPT.insert(pere, v);
@@ -217,8 +217,8 @@ class Tree = Tree_List<Edge> > class Bellman
 {
 	const Graph &G;
 public:
-	std::vector<type_wt> dist;
 	Tree SPT; ///< Shortest path tree
+	std::vector<type_wt> dist;
 	/*! \param G: Graph with positive weights*/
 	Bellman(const Graph &G) : G(G), SPT(G.V()), dist(G.V(), max_val<type_wt>()) { }
 	/*! Computes shortest path from source to all vertices 
@@ -329,7 +329,7 @@ public:
 /*! Compute a minimal hamiltonian cycle using dynamic programming */
 template<class type_wt = int, class Graph = Graph_Matrix<Edge_Weight<type_wt> > > class TSP
 {
-	std::set<int> *toAdd; // std::set à ajouter dans D_next
+	std::set<int> *toAdd; // std::set ï¿½ ajouter dans D_next
 	const Graph &G;
 	std::queue<std::set<int> > ensembles;
 	std::map<std::set<int>, std::vector<type_wt> > *D_last, *D_next;    // D[{i1, ..., ip}][j] : distance d'un plus court chemin partant de j, passant une et 
@@ -338,15 +338,15 @@ public:
 	TSP(const Graph &G) : G(G), D_last(0), D_next(0) { };
 
 	inline type_wt calc_min(int j, std::set<int>::iterator &maj) // on suppose que (*D_next)[*toAdd][j] existe et on le calcule
-		// maj = --toAdd->end() si on veut pas mettre à jour
+		// maj = --toAdd->end() si on veut pas mettre ï¿½ jour
 	{
 		int maj_val = *maj; // warning: apres maj sera inutilisable
-		type_wt min_ = max_val<type_wt>(); // on recherche le min des d[j][k] + D_last[toAdd-{k}][j], pour k appartenant à toAdd
-		std::set<int>::iterator last;	// pour replacer l'élement supprimé rapidement
+		type_wt min_ = max_val<type_wt>(); // on recherche le min des d[j][k] + D_last[toAdd-{k}][j], pour k appartenant ï¿½ toAdd
+		std::set<int>::iterator last;	// pour replacer l'ï¿½lement supprimï¿½ rapidement
 		std::set<int>::iterator toDelete = toAdd->begin();
 		int tmp = *toDelete;
 		(*toAdd).erase(toDelete);
-		min_ = std::min<type_wt>(min_, G.edge(j, tmp)->wt() +  (*D_last)[(*toAdd)][tmp-1]); // tmp n'appartient pas à (*toAdd) 
+		min_ = std::min<type_wt>(min_, G.edge(j, tmp)->wt() +  (*D_last)[(*toAdd)][tmp-1]); // tmp n'appartient pas ï¿½ (*toAdd) 
 		last = (*toAdd).insert(toAdd->begin(), tmp); // bof ..
 		if(*last == maj_val)
 		{
@@ -360,7 +360,7 @@ public:
 			{
 				tmp = *toDelete;
 				(*toAdd).erase(toDelete);
-				min_ = std::min<type_wt>(min_, G.edge(j, tmp)->wt() +  (*D_last)[(*toAdd)][tmp-1]); // tmp n'appartient pas à (*toAdd) 
+				min_ = std::min<type_wt>(min_, G.edge(j, tmp)->wt() +  (*D_last)[(*toAdd)][tmp-1]); // tmp n'appartient pas ï¿½ (*toAdd) 
 				last = (*toAdd).insert(last, tmp);
 				toDelete = ++last;
 				--last; // bof..
@@ -375,7 +375,7 @@ public:
 		{
 			tmp = *toDelete;
 			(*toAdd).erase(toDelete);
-			min_ = std::min<type_wt>(min_, G.edge(j, tmp)->wt() +  (*D_last)[(*toAdd)][tmp-1]); // tmp n'appartient pas à (*toAdd) 
+			min_ = std::min<type_wt>(min_, G.edge(j, tmp)->wt() +  (*D_last)[(*toAdd)][tmp-1]); // tmp n'appartient pas ï¿½ (*toAdd) 
 			last = (*toAdd).insert(last, tmp);
 			toDelete = ++last;
 			--last; // bof..
@@ -389,7 +389,7 @@ public:
 		D_next = new std::map<std::set<int>, std::vector<type_wt> >();
 		std::set<int> empty;
 		(*D_next)[empty].resize(G.V() - 1, 0);
-		for(int i = 1; i < G.V(); i++) // on part de 0, pas besoin de l'insérer
+		for(int i = 1; i < G.V(); i++) // on part de 0, pas besoin de l'insï¿½rer
 		{
 			(*D_next)[empty][i-1] = G.edge(i, 0)->wt();
 			empty.insert(i);
@@ -398,12 +398,12 @@ public:
 		}
 
 		int curSize = 0; // les ensembles en cours de traitement sont de taille curSize
-		while(ensembles.size()) // doit toujours être vrai
+		while(ensembles.size()) // doit toujours ï¿½tre vrai
 		{
 			toAdd = &ensembles.front();
 
 			if((*toAdd).size() > curSize) 
-				//on passe à des ensembles de taille supérieur et on a besoin que des ensembles de taille juste en dessous
+				//on passe ï¿½ des ensembles de taille supï¿½rieur et on a besoin que des ensembles de taille juste en dessous
 			{
 				if(D_last)
 					delete D_last;
@@ -417,7 +417,7 @@ public:
 
 			(*D_next)[(*toAdd)].resize(G.V() - 1, 0); // sans le sommet 0
 
-			// calcul de D_next[(*toAdd)][j], pour tout j n'appartenant pas à toAdd (si j € toAdd, D_next[toAdd][j] = 0)
+			// calcul de D_next[(*toAdd)][j], pour tout j n'appartenant pas ï¿½ toAdd (si j ï¿½ toAdd, D_next[toAdd][j] = 0)
 			int firstNb = *(*toAdd).begin();
 			for(int j = 1; j<firstNb; j++)
 				(*D_next)[(*toAdd)][j - 1] = calc_min(j, --toAdd->end());
@@ -429,11 +429,11 @@ public:
 				for(int j = debut + 1; j < fin; j++)
 					(*D_next)[(*toAdd)][j - 1] = calc_min(j, it);
 			}
-			for(int j = lastNb + 1; j < G.V(); j++)  // dernier passage, jusqu'à la fin
+			for(int j = lastNb + 1; j < G.V(); j++)  // dernier passage, jusqu'ï¿½ la fin
 				(*D_next)[(*toAdd)][j - 1] = calc_min(j, --toAdd->end());
 			//
 
-			// ajouter les nouveaux ensembles à considérer
+			// ajouter les nouveaux ensembles ï¿½ considï¿½rer
 			std::set<int>::iterator last = --(*toAdd).end();
 			for(int i = lastNb + 1; i < G.V(); i++) // tous les rajouter?
 			{

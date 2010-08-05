@@ -108,7 +108,7 @@ class Fulkerson
 	}
 public:
 	~Fulkerson() { };
-	Fulkerson(const Graph &G, Proc_ful &proc_ful, int s, int t) : G(G), proc_ful(proc_ful), search(G, proc_ful), s(s), t(t) { }
+	Fulkerson(const Graph &G, Proc_ful &proc_ful, int s, int t) : s(s), t(t), G(G), proc_ful(proc_ful), search(G, proc_ful) { }
 	/*! Computes a maxflow in G using proc_ful
 	\param s Source of the maxflow
 	\param t Sink (t must be different from s) */
@@ -223,7 +223,7 @@ template<class Flow = Edge_Flow<>, class Graph = Graph_List<Flow> > class Cut_Ve
 		bool trait(int v)  { return false;}
 		bool toVisit(Flow *f, int toVertex)
 		{
-			if(f->w() != toVertex) // on ne regarde que les arêtes de s vers t
+			if(f->w() != toVertex) // on ne regarde que les arï¿½tes de s vers t
 				return false;
 			if(f->capRto(toVertex) == 0 || visited[toVertex])
 				return false;
@@ -241,12 +241,12 @@ private: SelectVerticesR select;
 public:
 	/*! G Graph with a max flow 
 	\see Fulkerson */
-	Cut_Vertices(const Graph &G) : G(G), cut(), vertices(G.V(), false), select(G.V(), vertices), bfs_select(G, select) { };
+	Cut_Vertices(const Graph &G) : G(G), vertices(G.V(), false), cut(), select(G.V(), vertices), bfs_select(G, select) { };
 	/*!  Computes the minimum cut of a network */
 	void operator()(int source) 
 	{ 
 		bfs_select(source); 
-		for(int i = 0; i < vertices.size(); i++)
+		for(unsigned int i = 0; i < vertices.size(); i++)
 			if(vertices[i])
 			{
 				typename Graph::iterator it(G, i);

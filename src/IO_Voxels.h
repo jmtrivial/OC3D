@@ -8,17 +8,22 @@
 *  Input / output
 */
 
+#ifndef IO_VOXELS_H
+#define IO_VOXELS_H
+
 #include <vector>
 #include <string>
+
+#include <itkImage.h>
 
 namespace oc3d
 {
 
-template<class Edge, class Cut, class Dual, class Pants, class Image> class IO_Voxels : public IO_Base<Edge, Cut, Dual, Pants> {
+template<class Edge, class Cut, class Dual, class Pants, class Image = itk::Image<unsigned char, 3> > class IO_Voxels : public IO_Base<Edge, Cut, Dual, Pants> {
 protected:
 	typedef IO_Base<Edge, Cut, Dual, Pants> IO_B;
 public:
-  Image image;
+  Image::Pointer image;
 
   /*! Constructor given an image */
   IO_Voxels(const Image & i, const std::string & base_name) : image(i), IO_B(base_name) {
@@ -37,3 +42,5 @@ public:
 };
 
 }
+
+#endif

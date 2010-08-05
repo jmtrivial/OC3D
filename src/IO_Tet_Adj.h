@@ -21,8 +21,8 @@ template<class Edge, class Edge_Adj, class Cut, class Dual, class Dual_Adj, clas
 
 	void make_clique(std::vector<int> &clique)
 	{
-		for(int i = 0; i < clique.size(); i++)
-			for(int j = i+1; j < clique.size(); j++) // We link clique[i] and clique[j]
+		for(unsigned int i = 0; i < clique.size(); i++)
+			for(unsigned int j = i+1; j < clique.size(); j++) // We link clique[i] and clique[j]
 			{
 				Edge_Adj *e = new Edge_Adj(clique[i], clique[j]);
 				dual_adj.insert(e);

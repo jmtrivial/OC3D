@@ -140,7 +140,7 @@ class OptimalNPants
 		cutsEnd[iCutStart] = NULL;
 
 		std::list<int> shortestPath;
-		for(int i = 0; i < cutsEnd.size(); i++) // We search shortest path between cutStart and cutEnd
+		for(unsigned int i = 0; i < cutsEnd.size(); i++) // We search shortest path between cutStart and cutEnd
 		{
 			Cut *cutEnd = cutsEnd[i];
 			if(cutEnd == NULL || cutEnd == cutStart->get_RevCut())
@@ -287,7 +287,7 @@ public:
 			for(typename std::vector<Cut *>::iterator it_cut = vCut.begin(); it_cut != vCut.end(); ++it_cut) // Destroys edges out of the pant
 				remove((*it_cut)/*->get_RevCut()*/, delEdges, io);
 
-			for(typename std::vector<Cut *>::iterator it_cut = wCut.begin(); it_cut != wCut.end(); ++it_cut) // useless with bfs (ça rime)
+			for(typename std::vector<Cut *>::iterator it_cut = wCut.begin(); it_cut != wCut.end(); ++it_cut) // useless with bfs (ï¿½a rime)
 				remove((*it_cut), delEdges, io);
 
 			//////////////////////////////////////////////////////////////////////////////
@@ -369,7 +369,7 @@ public:
 	/*! Optimize until there is no more cut to optimize, using a random order cut processing */
 	static void optimize(IO &io, MaxFlow &maxFlow, Cut_Find &cut_Find)
 	{
-		int nIterations = 0, s = io.get_s(), t = io.get_t();
+		int nIterations = 0;
 		std::queue<Cut *> Q; // Q contains all the cuts which must be updated, use set?
 		std::vector<bool> inQ; // inQ[C->get_num()] is true iff C (or C->get_RevEdge()) is in Q (avoid multiple Cut* in Q)
 

@@ -38,6 +38,7 @@ public:
 	{
 		if(u==v_) return w_;
 		if(u==w_) return v_;
+		return 0;
 	}
 	/*! \returns True if the edge starts from v */
 	inline bool from (int v) const 
@@ -133,7 +134,7 @@ public:
 	/*! Clear the tree without deleting any edge pointer */
 	void clear()
 	{
-		for(int i = 0; i < adjSucc.size(); i++)
+		for(unsigned int i = 0; i < adjSucc.size(); i++)
 		{
 			node *cur = adjSucc[i], *nxt = NULL;
 			while(cur != NULL) 
@@ -144,7 +145,7 @@ public:
 			}
 			adjSucc[i] = NULL;
 		}
-		for(int i = 0; i < adjPred.size(); i++)
+		for(unsigned int i = 0; i < adjPred.size(); i++)
 			adjPred[i] = NULL;
 	}
 	/*! \returns \li A pointer to a edge from v to w if it exists
@@ -286,7 +287,7 @@ public:
 	\param V Number of vertices
 	\param digraph Specify if the graph is directed
 	*/
-	Graph_List(int V, bool digraph = false) : adj(V, (node*)NULL), Vcnt(V), Ecnt(0), digraph(digraph) { }
+	Graph_List(int V, bool digraph = false) : Vcnt(V), Ecnt(0), digraph(digraph), adj(V, (node*)NULL) { }
 	~Graph_List() { }
 	/*!
 	\param v A vertex
@@ -303,7 +304,7 @@ public:
 	\see clear to remove edges without deleting them */
 	void delete_ptr()
 	{
-		for(int i = 0; i < adj.size(); i++)
+		for(unsigned int i = 0; i < adj.size(); i++)
 		{
 			node *cur = adj[i], *nxt = NULL;
 			while(cur != NULL) 
@@ -417,7 +418,7 @@ public:
 	\see delete_ptr to delete edge pointers*/
 	void clear()
 	{
-		for(int i = 0; i < adj.size(); i++)
+		for(unsigned int i = 0; i < adj.size(); i++)
 		{
 			node *cur = adj[i], *nxt = NULL;
 			while(cur != NULL) 
@@ -428,7 +429,7 @@ public:
 			}
 			adj[i] = NULL;
 		}
-		for(int i = 0; i < adj.size(); i++)
+		for(unsigned int i = 0; i < adj.size(); i++)
 			adj[i] = NULL;
 		Ecnt = 0;
 	}

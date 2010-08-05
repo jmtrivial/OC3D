@@ -47,7 +47,7 @@ class Ford_Neighborhood
 	}
 	void link()
 	{
-		for(int i = 0; i < toLink.size(); i++)
+		for(unsigned int i = 0; i < toLink.size(); i++)
 		{
 			int v = toLink[i];
 			typename Dual::iterator it(dual, v);
@@ -88,7 +88,7 @@ class Ford_Neighborhood
 	}
 	void init_cylinder()
 	{
-		for(int i = 0; i < toLink.size(); i++)
+		for(unsigned int i = 0; i < toLink.size(); i++)
 			in_cylinder[toLink[i]] = false;
 		toLink.clear();
 	}
@@ -97,7 +97,7 @@ public:
 	Dual N; // Neighborhood
 
 	Ford_Neighborhood(const Dual &dual, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
-	  s(s), t(t), dual(dual), dual_adj(dual_adj), N(dual.V(), false), edges_in_N(dual.E(), false), proc(dual.V(), t), in_cylinder(dual.V(), false), flow(0), upper_flow(upper_flow), io(io), continue_bfs(continue_bfs), details(details)
+	  s(s), t(t), flow(0), upper_flow(upper_flow), dual(dual), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), edges_in_N(dual.E(), false), in_cylinder(dual.V(), false), proc(dual.V(), t), N(dual.V(), false)
     { }
 
 	/*! Computes a maxflow in G using proc

@@ -47,7 +47,7 @@ public:
 	{  }
 
 	IO_Tet(Tetrahedrization &mesh, std::string base_name) :
-	mesh(mesh), IO_B(base_name) 
+	IO_B(base_name), mesh(mesh)
 	{  }
 
 	/*! Makes the dual graph from mesh 

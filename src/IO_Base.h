@@ -80,7 +80,7 @@ protected:
 		}
 	}
 
-	Cut *new_cut(int num)
+	Cut *new_cut(unsigned int num)
 	{
 		Cut *cut;
 		if(num < 0 || num >= cuts.size())
@@ -201,7 +201,7 @@ public:
 			if(!proc.tPred.isolated(e_->v()) || !proc.tPred.isolated(e_->w()))
 				new_edges.push_back(e_);
 		cut->clear();
-		for(int i = 0; i < new_edges.size(); i++)
+		for(unsigned int i = 0; i < new_edges.size(); i++)
 			cut->insert(new_edges[i]);
 		for(typename std::list<Edge *>::const_iterator it = delEdges.begin(); it != delEdges.end(); ++it)
 			dual.insert(*it);
@@ -213,17 +213,17 @@ public:
 	void init_pants()
 	{
 		// Set all extremities of cuts to "not processed"		
-		for(int i = 0; i < cuts.size(); i++)
+		for(unsigned int i = 0; i < cuts.size(); i++)
 		{
 			cuts[i]->set_v(-1);
 			cuts[i]->set_w(-1);
 		}
 		std::list<Edge*> delEdges;
-		for(int i = 0; i < cuts.size(); i++)
+		for(unsigned int i = 0; i < cuts.size(); i++)
 			remove(cuts[i], delEdges);
 
-		int firstCut = 0; // First cut which extremities are not defined
-		int curPant = 0;
+		unsigned int firstCut = 0; // First cut which extremities are not defined
+		unsigned int curPant = 0;
 		for(; ; curPant++) // We are defining the pant curPant
 		{
 			// Finds first cut to process
@@ -243,7 +243,7 @@ public:
 			sgl::BFS<Edge, Proc, Dual> bfs(dual, proc);
 			bfs(start);
 
-			for(int j = firstCut; j < cuts.size(); j++) // Sets every cut found by bfs
+			for(unsigned int j = firstCut; j < cuts.size(); j++) // Sets every cut found by bfs
 			{
 				Cut *setCut = cuts[j];
 				typename Cut::iterator it_(setCut);
@@ -268,7 +268,7 @@ public:
 
 		pants.clear();
 		pants.resize(curPant);
-		for(int i = 0; i < cuts.size(); i++)
+		for(unsigned int i = 0; i < cuts.size(); i++)
 		{
 			pants.insert(cuts[i]);
 			pants.insert(cuts[i]->get_RevCut());

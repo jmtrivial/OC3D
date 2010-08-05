@@ -26,7 +26,7 @@ template<typename type_wt, class Edge> class Edge_Cut
 public:
 		
 	/*! Creates a cut from v to w */
-	Edge_Cut(int v, int w) : v_(v), w_(w), num(-1), cap_(0), revEdge_Cut(NULL) { }
+	Edge_Cut(int v, int w) : v_(v), w_(w), revEdge_Cut(NULL), num(-1), cap_(0) { }
 
 	/*! \returns Start vertex */ 
 	inline int v() const { return v_; }
@@ -117,7 +117,7 @@ public:
 template<typename type_wt, class Edge> class Edge_Cut<type_wt, Edge>::iterator
 {
 	Edge_Cut *Cut;
-	int pos;
+	unsigned int pos;
 public:
 	public:
 	/*!  Ierates through the edges of cut */
