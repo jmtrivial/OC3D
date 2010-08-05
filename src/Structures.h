@@ -51,7 +51,7 @@ public:
 
 template<typename type_wt> std::ostream &operator<<(std::ostream &os, const Edge_Base &e)
 {
-	os<<e.v()<<" -- "<<e.wt()<<" --> " <<e.w();
+	os<<e.v()<<" --> " <<e.w();
 	return os;
 };
 
@@ -67,10 +67,16 @@ public:
 	/*! Sets a new weight */
 	inline void set_wt(type_wt wt) { wt_ = wt; }
 
-	bool operator<(const Edge_Base &e) const
+	bool operator<(const Edge_Weight &e) const
 	{
 		return wt < e.wt || (wt == e.wt && v() < e.v()) || (wt == e.wt && v() == e.v() && w() < e.w());
 	}
+};
+
+template<typename type_wt> std::ostream &operator<<(std::ostream &os, const Edge_Weight<type_wt> &e)
+{
+	os<<e.v()<<" -- "<<e.wt()<<" --> " <<e.w();
+	return os;
 };
 
 /*! Tree_List, slighty different from Graph ADT (insert)
@@ -356,7 +362,7 @@ public:
 		if (!digraph) 
 		{
 			node * tmp_ = adj[e->w()];
-			if(sameEdgePtr) // warning : ne pas écrire adj[e->w()] = adj[e->v()]; car sinon les nodes sont les mêmes!
+			if(sameEdgePtr) // warning : ne pas ecrire adj[e->w()] = adj[e->v()]; car sinon les nodes sont les memes!
 				adj[e->w()] = new node(e, tmp_, NULL);  
 			else
 				adj[e->w()] = new node(new Edge(*e), tmp_, NULL); 
@@ -472,7 +478,7 @@ template<class Edge = Edge_Base > class Graph_List<Edge>::iterator_all
 					return false;
 				}
 			}
-			else if(!G.digraph && !t->e->from(pos)) // on ne visite qu'une fois chaque arête, si non orienté
+			else if(!G.digraph && !t->e->from(pos)) // on ne visite qu'une fois chaque arï¿½te, si non orientï¿½
 				t = t->next;
 			else
 				break;

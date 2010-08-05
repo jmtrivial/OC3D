@@ -104,7 +104,7 @@ public:
 	/*!  \returns True iff toVertex is not visited and its depth is less than max_depth */
 	bool toVisit(Edge *e, int toVertex)
 	{ 
-		if(tPred.dist(e->other(toVertex)) > max_depth) return false;
+		if((*this).tPred.dist(e->other(toVertex)) > max_depth) return false;
 		return Proc_Base<Edge, Tree>::toVisit(e, toVertex);
 	}
 };

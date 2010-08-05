@@ -9,6 +9,7 @@
 #include <list>
 #include <sstream>
 #include "IO_Base.h"
+#include "IO_Tet.h"
 #include "Search.h"
 
 namespace oc3d

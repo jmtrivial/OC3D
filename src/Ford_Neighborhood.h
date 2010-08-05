@@ -6,10 +6,16 @@
 #include <vector>
 #include <time.h>
 #include "IO_Base.h"
+#include "IO_Tet_Adj.h"
+#include "Edge_Cut.h"
+#include "Edge_Dual.h"
 
 namespace oc3d
 {
-template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Adj = sgl::Edge_Base, class Dual = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge>, class IO = IO_Tet_Adj<Edge, Edge_Adj, Cut, Dual, Dual_Adj, Pants> > 
+template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Adj = sgl::Edge_Base, 
+        class Dual = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge>, 
+        class Cut = oc3d::Edge_Cut<type_flow, Edge>, class Pants = sgl::Graph_List<Cut>,
+        class IO = oc3d::IO_Tet_Adj<Edge, Edge_Adj, Cut, Dual, Dual_Adj, Pants> > 
 class Ford_Neighborhood
 {
 	const int s, t;
@@ -114,7 +120,7 @@ public:
 		if(details)
 			show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 		augment();
-		// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi créée
+		// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi crï¿½ï¿½e
 		add_cylinder();
 		link();
 		if(details)
