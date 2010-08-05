@@ -6,3 +6,4 @@ TARGET_LINK_LIBRARIES(OC3D_debug libtetmesh.a)
 
 # recursive call
 ADD_SUBDIRECTORY(Basic)
+ADD_SUBDIRECTORY(images)

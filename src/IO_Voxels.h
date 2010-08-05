@@ -9,42 +9,25 @@
 */
 
 #include <vector>
+#include <string>
 
+namespace oc3d
+{
 
-template<class Edge, class Cut, class Dual, class Pants, class Image>
-class IO_Voxels {
-private:
-
+template<class Edge, class Cut, class Dual, class Pants, class Image> class IO_Voxels : public IO_Base<Edge, Cut, Dual, Pants> {
+protected:
+	typedef IO_Base<Edge, Cut, Dual, Pants> IO_B;
 public:
   Image image;
-  Dual dual;
-  Pants pants;
-  vector<Cut *> cuts;
 
   /*! Constructor given an image */
-  IO_Voxels(const Image & i) : image(i),
-			    dual(0, false), pants(0, true) {
+  IO_Voxels(const Image & i, const std::string & base_name) : image(i), IO_B(base_name) {
   }
 
   /*! destructor */
   ~IO_Voxels() {
-    dual.delete_ptr();
-    pants.delete_ptr();
-    for(std::vector<Cut *>::iterator c = cuts.begin(); c != cuts.end(); ++c)
-      delete *c;
-  }
-
-
-  /*! Gets the source, -1 if it doesn't exist */
-  inline int get_s() const {
-    // TODO
-    return -1;
-  }
-
-  /*! Gets the sink, -1 if it doesn't exist*/
-  inline int get_t() const {
-    // TODO
-    return -1;
+    IO_B::dual.delete_ptr();
+    IO_B::pants.delete_ptr();
   }
 
   /*! Makes the dual graph from the given 3D image
@@ -54,3 +37,5 @@ public:
   }
 
 };
+
+}
