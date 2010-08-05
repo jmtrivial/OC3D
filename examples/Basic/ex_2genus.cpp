@@ -103,13 +103,13 @@ int main()
 	e.push_back(new Edge(31, 22, cap, 1));
 	e.push_back(new Edge(31, 23, cap, 1));
 
-	for(int i = 0; i < e.size(); i++) // We insert edges and their reverse
+	for(unsigned int i = 0; i < e.size(); i++) // We insert edges and their reverse
 	{
 		io.dual.insert(e[i]);
 		io.dual.insert(e[i]->get_RevEdge());
 	}
 
-	for(int i = 0; i < io.cuts.size(); i++) // We insert io.cuts and their reverse
+	for(unsigned int i = 0; i < io.cuts.size(); i++) // We insert io.cuts and their reverse
 	{
 		io.cuts[i]->create_RevCut();
 		io.cuts[i]->set_num(i);
@@ -117,7 +117,7 @@ int main()
 		io.pants.insert(io.cuts[i]->get_RevCut());
 	}
 	cout<<"Initial cuts:"<<endl;
-	for(int i = 0; i < io.cuts.size(); i++) // Display found io.cuts
+	for(unsigned int i = 0; i < io.cuts.size(); i++) // Display found io.cuts
 	{
 		Cut::iterator it(io.cuts[i]);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
@@ -131,7 +131,7 @@ int main()
 
 	OptimalNPants<>::optimize(io, fulkerson, cut_vertices);
 	cout<<"Optimal cuts:"<<endl;
-	for(int i = 0; i < io.cuts.size(); i++) // Display found io.cuts
+	for(unsigned int i = 0; i < io.cuts.size(); i++) // Display found io.cuts
 	{
 		Cut::iterator it(io.cuts[i]);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())

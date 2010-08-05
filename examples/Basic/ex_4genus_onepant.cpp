@@ -163,13 +163,13 @@ int main()
 	e.push_back(new Edge(32, 34, cap, 1));
 	e.push_back(new Edge(32, 20, cap, 1));
 	
-	for(int i = 0; i < e.size(); i++) // We insert edges and their reverse
+	for(unsigned int i = 0; i < e.size(); i++) // We insert edges and their reverse
 	{
 		io.dual.insert(e[i]);
 		io.dual.insert(e[i]->get_RevEdge());
 	}
 
-	for(int i = 0; i < io.cuts.size(); i++) // We insert io.cuts and their reverse
+	for(unsigned int i = 0; i < io.cuts.size(); i++) // We insert io.cuts and their reverse
 	{
 		io.cuts[i]->create_RevCut();
 		io.cuts[i]->set_num(i);
@@ -182,7 +182,7 @@ int main()
 	Cut_Vertices<Edge, Dual> cut_vertices(io.dual);
 	
 	cout<<"Initial cuts:"<<endl;
-	for(int i = 0; i < io.cuts.size(); i++) // Display found io.cuts
+	for(unsigned int i = 0; i < io.cuts.size(); i++) // Display found io.cuts
 	{
 		Cut::iterator it(io.cuts[i]);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
@@ -197,7 +197,7 @@ int main()
 	time_t t2 = clock();
 	cout<<(double)(t2-t1)/CLOCKS_PER_SEC<<endl;
 	cout<<"Optimal cuts:"<<endl;
-	for(int i = 0; i < io.cuts.size(); i++) // Display found cuts
+	for(unsigned int i = 0; i < io.cuts.size(); i++) // Display found cuts
 	{
 		Cut::iterator it(io.cuts[i]);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
