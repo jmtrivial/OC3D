@@ -126,7 +126,7 @@ int main()
 	}
 
 	NoNullCap<Edge> noNull(io.dual.V(), io.get_t()); 
-    Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io.dual, noNull);
+    Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io.dual, noNull, io.get_s(), io.get_t());
 	Cut_Vertices<Edge, Dual> cut_vertices(io.dual);
 
 	OptimalNPants<>::optimize(io, fulkerson, cut_vertices);
