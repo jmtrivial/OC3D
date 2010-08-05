@@ -121,7 +121,7 @@ public:
 	\param fileName Name of the .OFF file, if not provided the default path is used 
 	\remarks Keep the order of the vertices
 	\warning The dual graph must exist */
-	template<class Graph, class Edge_> void graph_to_OFF(Graph &graph, std::string ext, std::string offName =  "")
+	template<class Graph> void graph_to_OFF(Graph &graph, std::string ext, std::string offName =  "")
 	{
 		if(offName == "")
 			offName = IO_B::base_name + "_dual" + ext + ".off";
