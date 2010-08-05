@@ -17,7 +17,7 @@ template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class E
 class Ford_Neighborhood
 {
   public:
-	typedef oc3d::IO_Tet_Adj<Edge, Edge_Adj, oc3d::Edge_Cut<type_flow, Edge>, Dual, Dual_Adj, sgl::Graph_List< oc3d::Edge_Cut<type_flow, Edge> > > IO;
+	typedef IO_Tet_Adj<Edge, Edge_Adj, oc3d::Edge_Cut<type_flow, Edge>, Dual, Dual_Adj, sgl::Graph_List< oc3d::Edge_Cut<type_flow, Edge> > > IO;
   private:
 	const int s, t;
 	type_flow flow;
@@ -124,6 +124,7 @@ public:
 		// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi cr��e
 		add_cylinder();
 		link();
+
 		if(details)
 		  io.graph_to_OFF(N, "_N");
 
