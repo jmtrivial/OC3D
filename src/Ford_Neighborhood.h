@@ -13,11 +13,12 @@
 namespace oc3d
 {
 template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Adj = sgl::Edge_Base, 
-        class Dual = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge>, 
-        class Cut = oc3d::Edge_Cut<type_flow, Edge>, class Pants = sgl::Graph_List<Cut>,
-        class IO = oc3d::IO_Tet_Adj<Edge, Edge_Adj, Cut, Dual, Dual_Adj, Pants> > 
+        class Dual = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge> > 
 class Ford_Neighborhood
 {
+  public:
+	typedef oc3d::IO_Tet_Adj<Edge, Edge_Adj, oc3d::Edge_Cut<type_flow, Edge>, Dual, Dual_Adj, sgl::Graph_List< oc3d::Edge_Cut<type_flow, Edge> > > IO;
+  private:
 	const int s, t;
 	type_flow flow;
 	const type_flow upper_flow;
