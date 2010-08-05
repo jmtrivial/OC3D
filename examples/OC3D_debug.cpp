@@ -56,10 +56,10 @@ string del_ext(string file)
 	return file.substr(0, file.find_last_of("."));
 }
 
-string args_to_file(vector<string> &tokens, int index)
+string args_to_file(vector<string> &tokens, unsigned int index)
 {
 	string file = "";
-	for(int i = index; i < tokens.size(); i++)
+	for(unsigned int i = index; i < tokens.size(); i++)
 	{
 		file += tokens[i];
 		if(i != tokens.size() - 1)
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 		}		
 		else if(cmd == "opt")
 		{
-			int num = 0;
+			unsigned int num = 0;
 			if((tokens.size() == 1 || !fromString(tokens[1], num)) || num >= io().cuts.size())
 				help();
 			else
