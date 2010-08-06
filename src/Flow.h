@@ -17,19 +17,13 @@ namespace sgl
 /*!  Creates an edge with flow and capacity: 
 \li oriented in the network 
 \li <b> non oriented in the residual graph </b> */
-template<typename type_flow = int> class Edge_Flow
+	template<typename type_flow = int> class Edge_Flow : public Edge_Base
 { 
-	const int v_, w_; 
 	type_flow cap_;
 	type_flow flow_;
 public:
-
 	/*! Creates an edge from v to w with capacity cap */
-	Edge_Flow(int v, int w, type_flow cap) : v_(v), w_(w), cap_(cap), flow_(0) { }
-	/*! \returns Start vertex */ 
-	inline int v() const { return v_; } 
-	/*! \returns End vertex */ 
-	inline int w() const { return w_; } 
+	Edge_Flow(int v, int w, type_flow cap) : Edge_Base(v, w), cap_(cap), flow_(0) { }
 	/*! \returns Capacity from v to w */
 	type_flow cap() const { return cap_; }
 	/*! Sets capacity from v to w */
@@ -38,12 +32,6 @@ public:
 	type_flow flow() const { return flow_; }
 	/*! Sets flow from v to w */
 	void set_flow(type_flow newFlow) { flow_ = newFlow; }
-	/*! \returns True if the edge comes from v */
-	bool from (int v) const 
-	{ return v_ == v; } 
-	/*! \returns the vertex different from v */
-	int other(int v) const 
-	{ return from(v) ? w_ : v_; } 
 	/*! \returns Residual capacity toward v */
 	type_flow capRto(int v) const
 	{ return from(v) ? flow_ : cap_ - flow_; }
