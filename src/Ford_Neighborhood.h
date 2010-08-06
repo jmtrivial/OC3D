@@ -126,7 +126,7 @@ public:
 		link();
 
 		if(details)
-		  io.graph_to_OFF(N, "_N");
+		  io.graph_to_OFF<Dual, Edge>(N, "_N");
 
 		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Dual> bfs(N, proc);
 		if(!continue_bfs)

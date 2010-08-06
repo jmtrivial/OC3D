@@ -119,7 +119,7 @@ public:
 	\param fileName Name of the .OFF file, if not provided the default path is used 
 	\remarks Keep the order of the vertices
 	\warning The dual graph must exist */
-	template<class Graph> void graph_to_OFF(Graph &graph, std::string ext, std::string offName =  "")
+	template<class Graph, class Edge_> void graph_to_OFF(Graph &graph, std::string ext, std::string offName =  "")
 	{
 		if(offName == "")
 			offName = IO_B::base_name + "_dual" + ext + ".off";
@@ -131,8 +131,8 @@ public:
 			Vector tet_center = vertexToTet[i]->getCenter();
 			offFile<<tet_center.x<<" "<<tet_center.y<<" "<<tet_center.z<<std::endl;
 		}
-		typename Dual::iterator_all it(IO_B::dual);
-		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
+		typename Graph::iterator_all it(graph);
+		for(Edge_ *e = it.beg(); !it.end(); e = it.nxt())
 			offFile<<2<<" "<<e->v()<<" "<< e->w()<<std::endl;
 
 		offFile.close();
