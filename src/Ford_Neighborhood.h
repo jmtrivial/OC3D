@@ -13,13 +13,13 @@
 namespace oc3d
 {
 template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Adj = sgl::Edge_Base, 
-        class Dual = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge> > 
-class Ford_Neighborhood : public sgl::Max_Flow<type_flow, Edge, Dual>
+        class Graph = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge> > 
+class Ford_Neighborhood : public sgl::Max_Flow<type_flow, Edge, Graph>
 {
 public:
 	typedef Edge_Cut<type_flow, Edge> Cut;
-	typedef IO_Tet_Adj<Edge, Edge_Adj, Cut, Dual, Dual_Adj, sgl::Graph_List<Cut> > IO;
-	typedef IO_Tet<Edge, Cut, Dual, sgl::Graph_List<Cut> > IO_T;
+	typedef IO_Tet_Adj<Edge, Edge_Adj, Cut, Graph, Dual_Adj, sgl::Graph_List<Cut> > IO;
+	typedef IO_Tet<Edge, Cut, Graph, sgl::Graph_List<Cut> > IO_T;
 private:
 	type_flow flow;
 	const type_flow upper_flow;
@@ -50,7 +50,7 @@ private:
 		for(unsigned int i = 0; i < toLink.size(); i++)
 		{
 			int v = toLink[i];
-			typename Dual::iterator it(G, v);
+			typename Graph::iterator it(G, v);
 			for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			{
 				int w = e->other(v), num = e->get_num();
@@ -94,9 +94,9 @@ private:
 	}
 
 public:
-	Dual N; // Neighborhood
+	Graph N; // Neighborhood
 
-	Ford_Neighborhood(const Dual &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
+	Ford_Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
 	  Max_Flow(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), edges_in_N(G.E(), false), 
 		  in_cylinder(G.V(), false), proc(G.V(), t), N(G.V(), false)
     { }
@@ -109,13 +109,13 @@ public:
 		time_t t1, t2;
 
 		N.resize(G.V());
-		typename Dual::iterator it_s(G, s);
+		typename Graph::iterator it_s(G, s);
 		for(Edge *e = it_s.beg(); !it_s.end(); e = it_s.nxt())
 			N.insert(e);
-		typename Dual::iterator it_t(G, t);
+		typename Graph::iterator it_t(G, t);
 		for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
 			N.insert(e);
-		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Dual> init_bfs(G, proc);
+		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> init_bfs(G, proc);
 		t1 = clock();
 		init_bfs(s);
 		t2 = clock();
@@ -127,9 +127,9 @@ public:
 		link();
 
 		if(details)
-			io.template graph_to_OFF<Dual, Edge>(N, "_N");
+			io.template graph_to_OFF<Graph, Edge>(N, "_N");
 
-		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Dual> bfs(N, proc);
+		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> bfs(N, proc);
 		if(!continue_bfs)
 		{
 			t1 = clock();
