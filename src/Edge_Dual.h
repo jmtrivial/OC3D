@@ -12,9 +12,9 @@
 /*! Edge in the dual graph */
 namespace oc3d
 {
-template<typename type_flow = double, typename type_wt = type_flow> class Edge_Dual : public sgl::Edge_Flow<type_flow>
+template<typename type_flow = double, typename type_wt = type_flow> 
+class Edge_Dual : public sgl::Edge_Flow<type_flow>, public sgl::Edge_Weight<type_wt>
 {
-	type_wt wt_;
 	Edge_Dual *revEdge;
 	int num;
 public:
@@ -22,7 +22,8 @@ public:
 	\param cap Capacity of the edge (area of the dual face, probability of a link...), used by max flow algorithms
 	\param wt Weight of the edge, used by shortest path algorithms
 	\param create_rev If true, the reverse edge is created and set suitably */
-	Edge_Dual(int v, int w, type_flow cap, type_wt wt, int num = -1, bool create_rev = true) : sgl::Edge_Flow<type_flow>(v,w,cap), wt_(wt), revEdge(0), num(num)
+	Edge_Dual(int v, int w, type_flow cap, type_wt wt, int num = -1, bool create_rev = true) 
+		: sgl::Edge_Base(v, w), sgl::Edge_Flow<type_flow>(v,w,cap), sgl::Edge_Weight<type_wt>(v,w,wt), revEdge(0), num(num)
 	{
 		if(create_rev)
 			create_RevEdge();
@@ -38,11 +39,6 @@ public:
 		if(reverse)
 			revEdge->set_num(num, false);
 	}
-	/*! \returns weight */
-	inline type_wt wt() const { return wt_; } 
-
-	/*! Sets weight to wt */
-	inline void set_wt(type_wt wt) { wt_ = wt; }
 
 	/*! Sets the reverse edge to e
 	\see create_RevEdge */

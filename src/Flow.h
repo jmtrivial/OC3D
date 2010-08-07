@@ -17,7 +17,7 @@ namespace sgl
 /*!  Creates an edge with flow and capacity: 
 \li oriented in the network 
 \li <b> non oriented in the residual graph </b> */
-	template<typename type_flow = int> class Edge_Flow : public Edge_Base
+	template<typename type_flow = int> class Edge_Flow : virtual public Edge_Base
 { 
 	type_flow cap_;
 	type_flow flow_;

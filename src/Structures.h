@@ -59,7 +59,7 @@ template<typename type_wt> std::ostream &operator<<(std::ostream &os, const Edge
 
 /*!  Basic edge with weight 
 \todo Class Vertex */
-template<typename type_wt = int> class Edge_Weight : public Edge_Base
+template<typename type_wt = int> class Edge_Weight : virtual public Edge_Base
 {
 	type_wt wt_; 
 public:

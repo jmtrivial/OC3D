@@ -285,9 +285,9 @@ public:
 			// Works also if vCut[0]->v() == vCut[0]->w()
 
 			for(typename std::vector<Cut *>::iterator it_cut = vCut.begin(); it_cut != vCut.end(); ++it_cut) // Destroys edges out of the pant
-				remove((*it_cut)/*->get_RevCut()*/, delEdges, io);
+				remove((*it_cut), delEdges, io);
 
-			for(typename std::vector<Cut *>::iterator it_cut = wCut.begin(); it_cut != wCut.end(); ++it_cut) // useless with bfs (�a rime)
+			for(typename std::vector<Cut *>::iterator it_cut = wCut.begin(); it_cut != wCut.end(); ++it_cut) 
 				remove((*it_cut), delEdges, io);
 
 			//////////////////////////////////////////////////////////////////////////////
