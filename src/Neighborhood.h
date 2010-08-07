@@ -14,7 +14,7 @@ namespace oc3d
 {
 template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Adj = sgl::Edge_Base, 
         class Graph = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge> > 
-class Ford_Neighborhood : public sgl::Max_Flow<type_flow, Edge, Graph>
+class Neighborhood : public sgl::Max_Flow<type_flow, Edge, Graph>
 {
 public:
 	typedef Edge_Cut<type_flow, Edge> Cut;
@@ -96,7 +96,7 @@ private:
 public:
 	Graph N; // Neighborhood
 
-	Ford_Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
+	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
 	  Max_Flow(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), edges_in_N(G.E(), false), 
 		  in_cylinder(G.V(), false), proc(G.V(), t), N(G.V(), false)
     { }

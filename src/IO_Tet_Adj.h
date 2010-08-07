@@ -14,7 +14,7 @@
 
 namespace oc3d
 {
-/*! Class used by Ford_Neighborhood to describe adjacences */
+/*! Class used by Neighborhood to describe adjacences */
 template<class Edge, class Edge_Adj, class Cut, class Dual, class Dual_Adj, class Pants> class IO_Tet_Adj : public IO_Tet<Edge, Cut, Dual, Pants>
 {
 	typedef IO_Tet<Edge, Cut, Dual, Pants> IO_T;

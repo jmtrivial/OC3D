@@ -5,7 +5,7 @@
 #include "Flow.h"
 #include "IO_Tet.h"
 #include "IO_Tet_Adj.h"
-#include "Ford_Neighborhood.h"
+#include "Neighborhood.h"
 #include <time.h>
 #include <vector>
 #undef NDEBUG
@@ -140,9 +140,9 @@ int main(int argc, char *argv[])
 				time_t t1 = clock();
 				if(use_neighbors)
 				{
-					Ford_Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(), io_tet_adj.get_t(), io_tet_adj.cuts[num]->cap(), io_tet_adj, continue_bfs);
+					Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(), io_tet_adj.get_t(), io_tet_adj.cuts[num]->cap(), io_tet_adj, continue_bfs);
 					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_adj.dual);
-					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Ford_Neighborhood<> > OptimalNPants;
+					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Neighborhood<> > OptimalNPants;
 					OptimalNPants::optimize(num, io_tet_adj, neighborhood, cut_vertices);
 					//io_tet_adj.graph_to_OFF<Dual, Edge>(neighborhood.N, "_N"); 
 				}
