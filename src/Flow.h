@@ -68,45 +68,14 @@ public:
 	bool noPath() { return true; }
 };
 
-/*!  Find the max flow using Ford %Fulkerson algorithm
-\param Search_Path Path-augmentating search algorithm type
-\param Proc_ful Processing functor Proc with an additionnal noPath() method, 
-specifying if the search must continue if no more path is found  */
-template<typename type_flow = int, class Edge = Edge_Flow<type_flow>, class Proc_ful = NoNullCap<Edge>, 
-class Graph = Graph_List<Edge>,class Search_Path = BFS<Edge, Proc_ful, Graph> > 
-class Fulkerson
+template<typename type_flow = int, class Edge = Edge_Flow<type_flow>, class Graph = Graph_List<Edge> > class Max_Flow
 {
+protected:
 	const int s, t;
 	const Graph &G;
-	Proc_ful &proc_ful;
-	Search_Path search;
 
-	int get_pred(int v) const { return proc_ful.tPred.pred(v)->other(v); }
-	void augment() // Add flow along the path search.tPred
-	{ 
-		type_flow d = proc_ful.tPred.pred(t)->capRto(t);
-		for (int v = get_pred(t); v != s; v = get_pred(v)) // Find minimal capacity on the path search.tPred
-		{
-			if (proc_ful.tPred.pred(v)->capRto(v) < d) 
-				d =proc_ful.tPred.pred(v)->capRto(v);
-		}
-		proc_ful.tPred.pred(t)->addflowRto(t, d); 
-		for (int v = get_pred(t); v != s; v = get_pred(v)) // Add this minimal capacity
-			proc_ful.tPred.pred(v)->addflowRto(v, d); 
-	}
 public:
-	~Fulkerson() { };
-	Fulkerson(const Graph &G, Proc_ful &proc_ful, int s, int t) : s(s), t(t), G(G), proc_ful(proc_ful), search(G, proc_ful) { }
-	/*! Computes a maxflow in G using proc_ful
-	\param s Source of the maxflow
-	\param t Sink (t must be different from s) */
-	void operator()()
-	{
-		do{
-			while(search(s)) // Must return true if there exist a path from s to t
-				augment();
-		}while(!proc_ful.noPath());
-	}
+	Max_Flow(const Graph &G, int s, int t) : G(G), s(s), t(t) { }
 	/*! \returns Flow out of s */
 	type_flow get_outflow()
 	{
@@ -124,18 +93,56 @@ public:
 			e->set_flow(static_cast<type_flow>(0));
 	}
 };
+
+/*!  Find the max flow using Ford %Fulkerson algorithm
+\param Search_Path Path-augmentating search algorithm type
+\param Proc_ful Processing functor Proc with an additionnal noPath() method, 
+specifying if the search must continue if no more path is found  */
+template<typename type_flow = int, class Edge = Edge_Flow<type_flow>, class Proc_ful = NoNullCap<Edge>, 
+class Graph = Graph_List<Edge>,class Search_Path = BFS<Edge, Proc_ful, Graph> > 
+class Fulkerson : public Max_Flow<type_flow, Edge, Graph>
+{
+	Proc_ful &proc_ful;
+	Search_Path search;
+
+	int get_pred(int v) const { return proc_ful.tPred.pred(v)->other(v); }
+	void augment() // Add flow along the path search.tPred
+	{ 
+		type_flow d = proc_ful.tPred.pred(t)->capRto(t);
+		for (int v = get_pred(t); v != s; v = get_pred(v)) // Find minimal capacity on the path search.tPred
+		{
+			if (proc_ful.tPred.pred(v)->capRto(v) < d) 
+				d = proc_ful.tPred.pred(v)->capRto(v);
+		}
+		proc_ful.tPred.pred(t)->addflowRto(t, d); 
+		for (int v = get_pred(t); v != s; v = get_pred(v)) // Add this minimal capacity
+			proc_ful.tPred.pred(v)->addflowRto(v, d); 
+	}
+public:
+	~Fulkerson() { };
+	Fulkerson(const Graph &G, Proc_ful &proc_ful, int s, int t) : Max_Flow<type_flow, Edge, Graph>(G,s,t), proc_ful(proc_ful), search(G, proc_ful) { }
+	/*! Computes a maxflow in G using proc_ful
+	\param s Source of the maxflow
+	\param t Sink (t must be different from s) */
+	void operator()()
+	{
+		do{
+			while(search(s)) // Must return true if there exist a path from s to t
+				augment();
+		}while(!proc_ful.noPath());
+	}
+};
 /*! \example fulkerson.cpp
 \image html exflow.jpg */
 
 template<typename type_flow = int, class Edge = Edge_Flow<type_flow>, class Graph = Graph_List<Edge> >
-class Preflow
+class Preflow : public Max_Flow<type_flow, Edge, Graph>
 {
-	const Graph &G;
 	std::vector<int> h, wt;
 public:
-	Preflow(const Graph &G) : G(G), h(G.V(), 0), wt(G.V(), 0) { }
+	Preflow(const Graph &G, int s, int t) : Max_Flow<type_flow, Edge, Graph>(G,s,t), h(G.V(), 0), wt(G.V(), 0) { }
 
-	void operator()(int s, int t)
+	void operator()()
 	{
 		std::queue<int> Q;
 		std::vector<bool> inQ(G.V(), false);
@@ -178,21 +185,6 @@ public:
 				Q.push(next);
 			}
 		}
-	}
-	type_flow get_outflow(int s = 0)
-	{
-		type_flow max_flow = 0;
-		typename Graph::iterator it(G, s);
-		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
-			max_flow += e->flow();
-		return max_flow;
-	}
-	/*! Sets the flow to zero */
-	void init_flow() 
-	{
-		typename Graph::iterator_all it(G);
-		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
-			e->set_flow(static_cast<type_flow>(0));
 	}
 };
 

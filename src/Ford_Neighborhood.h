@@ -14,15 +14,15 @@ namespace oc3d
 {
 template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Adj = sgl::Edge_Base, 
         class Dual = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge> > 
-class Ford_Neighborhood
+class Ford_Neighborhood : public sgl::Max_Flow<type_flow, Edge, Dual>
 {
-  public:
-	typedef IO_Tet_Adj<Edge, Edge_Adj, oc3d::Edge_Cut<type_flow, Edge>, Dual, Dual_Adj, sgl::Graph_List< oc3d::Edge_Cut<type_flow, Edge> > > IO;
-  private:
-	const int s, t;
+public:
+	typedef Edge_Cut<type_flow, Edge> Cut;
+	typedef IO_Tet_Adj<Edge, Edge_Adj, Cut, Dual, Dual_Adj, sgl::Graph_List<Cut> > IO;
+	typedef IO_Tet<Edge, Cut, Dual, sgl::Graph_List<Cut> > IO_T;
+private:
 	type_flow flow;
 	const type_flow upper_flow;
-	const Dual &dual;
 	const Dual_Adj &dual_adj;
 	IO &io;
 	const bool continue_bfs, details;
@@ -50,7 +50,7 @@ class Ford_Neighborhood
 		for(unsigned int i = 0; i < toLink.size(); i++)
 		{
 			int v = toLink[i];
-			typename Dual::iterator it(dual, v);
+			typename Dual::iterator it(G, v);
 			for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			{
 				int w = e->other(v), num = e->get_num();
@@ -96,8 +96,9 @@ class Ford_Neighborhood
 public:
 	Dual N; // Neighborhood
 
-	Ford_Neighborhood(const Dual &dual, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
-	  s(s), t(t), flow(0), upper_flow(upper_flow), dual(dual), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), edges_in_N(dual.E(), false), in_cylinder(dual.V(), false), proc(dual.V(), t), N(dual.V(), false)
+	Ford_Neighborhood(const Dual &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
+	  Max_Flow(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), edges_in_N(G.E(), false), 
+		  in_cylinder(G.V(), false), proc(G.V(), t), N(G.V(), false)
     { }
 
 	/*! Computes a maxflow in G using proc
@@ -107,26 +108,26 @@ public:
 	{
 		time_t t1, t2;
 
-		N.resize(dual.V());
-		typename Dual::iterator it_s(dual, s);
+		N.resize(G.V());
+		typename Dual::iterator it_s(G, s);
 		for(Edge *e = it_s.beg(); !it_s.end(); e = it_s.nxt())
 			N.insert(e);
-		typename Dual::iterator it_t(dual, t);
+		typename Dual::iterator it_t(G, t);
 		for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
 			N.insert(e);
-		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Dual> init_bfs(dual, proc);
+		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Dual> init_bfs(G, proc);
 		t1 = clock();
 		init_bfs(s);
 		t2 = clock();
 		if(details)
 			show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
 		augment();
-		// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi cr��e
+		// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi cree
 		add_cylinder();
 		link();
 
 		if(details)
-		  io.graph_to_OFF<Dual, Edge>(N, "_N");
+			io.template graph_to_OFF<Dual, Edge>(N, "_N");
 
 		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Dual> bfs(N, proc);
 		if(!continue_bfs)
@@ -160,8 +161,10 @@ public:
 				init_cylinder();
 				add_cylinder();
 				t1 = clock();
-				while(bfs(s))
+				int n = 0;
+				while(bfs(s) || n == 4)
 				{
+					n++;
 					t2 = clock();
 					if(details)
 						show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
@@ -179,14 +182,6 @@ public:
 
 	/*! \returns Flow out of s */
 	type_flow get_outflow() { return flow; }
-
-	/*! Sets the flow to zero */
-	void init_flow() 
-	{
-		typename Dual::iterator_all it(dual);
-		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
-			e->set_flow(static_cast<type_flow>(0));
-	}
 };
 }
 
