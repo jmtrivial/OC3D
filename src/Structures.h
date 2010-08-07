@@ -25,7 +25,8 @@ template<typename type_wt> inline type_wt max_val() // for old compilators (acm-
 
 class Edge_Base
 { 
-	const int v_,w_; // Must be const for Graph
+protected:
+	int v_,w_; // Must be const for Graph
 public:
 	/*! Creates an edge from v to w with weight wt */
 	Edge_Base(int v, int w): v_(v), w_(w) { };
@@ -171,7 +172,7 @@ public:
 		if(e)
 			return e->other(v);
 		else
-			return NULL;
+			return -1;
 	}
 
 	class iterator;

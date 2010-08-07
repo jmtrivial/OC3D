@@ -7,13 +7,13 @@
 #define EDGE_CUT_H
 
 #include <list>
+#include "Structures.h"
 
 namespace oc3d
 {
 /*! Cut class, as an edge in the pant graph */
-template<typename type_wt, class Edge> class Edge_Cut
+template<typename type_wt, class Edge> class Edge_Cut : public sgl::Edge_Base
 { 
-	int v_, w_; // Pants, extremities of the cut
 	Edge_Cut *revEdge_Cut; // Pointer to backward cut
 	int num; // Every cut has a number
 	std::vector<Edge*> cut; // Edges in the cut
@@ -26,16 +26,12 @@ template<typename type_wt, class Edge> class Edge_Cut
 public:
 		
 	/*! Creates a cut from v to w */
-	Edge_Cut(int v, int w) : v_(v), w_(w), revEdge_Cut(NULL), num(-1), cap_(0) { }
+	Edge_Cut(int v, int w) : Edge_Base(v, w), revEdge_Cut(NULL), num(-1), cap_(0) { }
 
-	/*! \returns Start vertex */ 
-	inline int v() const { return v_; }
-	/*! \returns End vertex */ 
-	inline int w() const { return w_; }
 	/*! Sets start vertex */ 
-	void set_v(int v) { v_ = v; }
+	void set_v(int v) { Edge_Base::v_ = v; }
 	/*! Sets end vertex */ 
-	void set_w(int w) { w_ = w; }
+	void set_w(int w) { Edge_Base::w_ = w; }
 
 	/*! \returns Number of edges in the cut */
 	inline int E() const { return cut.size(); }
@@ -54,15 +50,6 @@ public:
 		cap_ += e->cap();
 	} 
 
-	/*! \returns the extremity different from u */
-	inline int other(int u) const
-	{
-		if(u==v_) return v_;
-		if(u==w_) return w_;
-	}
-	/*! \returns True if the edge starts from v */
-	inline bool from (int v) { return v_ == v; } 
-
 	/*! \returns total capacity */
 	inline type_wt cap() const { return cap_; } 
 	/*! Sets total capacity 
@@ -78,10 +65,7 @@ public:
 			revEdge_Cut->set_num(n, false);
 	}
 	/*! \returns Cut number */
-	int get_num() const 
-	{ 
-		return num; 
-	}
+	int get_num() const { return num; }
 	
 	/*! Sets the reverse cut to revCut (with all edges in the opposite direction) 
 	\see create_RevCut */
