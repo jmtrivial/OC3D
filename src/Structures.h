@@ -356,7 +356,10 @@ public:
 	if the reverse edge must have the same pointer (if sameEdgePtr is false, a new pointer to an edge is created for the reverse edge) 
 	*/
 	void insert(Edge *e, bool sameEdgePtr = true)
-	{ 
+	{
+	        if ((e->v() >= Vcnt) || (e->w() >= Vcnt)) {
+		  resize(e->v() > e->w() ? e->v() : e->w());
+		}
 		node * tmp = adj[e->v()];
 		adj[e->v()] = new node(e, tmp, NULL);
 		if(tmp)
