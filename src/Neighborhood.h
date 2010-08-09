@@ -34,15 +34,15 @@ private:
 	int get_pred(int v) const { return proc.tPred.pred(v)->other(v); }
 	void augment() // Add flow along the path search.tPred
 	{ 
-		type_flow d = proc.tPred.pred(t)->capRto(t);
-		for (int v = get_pred(t); v != s; v = get_pred(v)) // Find minimal capacity on the path search.tPred
+		type_flow d = proc.tPred.pred((*this).t)->capRto((*this).t);
+		for (int v = get_pred((*this).t); v != (*this).s; v = get_pred(v)) // Find minimal capacity on the path search.tPred
 		{
 			if (proc.tPred.pred(v)->capRto(v) < d) 
 				d = proc.tPred.pred(v)->capRto(v);
 		}
 		flow += d;
-		proc.tPred.pred(t)->addflowRto(t, d); 
-		for (int v = get_pred(t); v != s; v = get_pred(v)) // Add this minimal capacity
+		proc.tPred.pred((*this).t)->addflowRto((*this).t, d); 
+		for (int v = get_pred((*this).t); v != (*this).s; v = get_pred(v)) // Add this minimal capacity
 			proc.tPred.pred(v)->addflowRto(v, d); 
 	}
 	void link()
@@ -50,7 +50,7 @@ private:
 		for(unsigned int i = 0; i < toLink.size(); i++)
 		{
 			int v = toLink[i];
-			typename Graph::iterator it(G, v);
+			typename Graph::iterator it((*this).G, v);
 			for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			{
 				int w = e->other(v), num = e->get_num();
@@ -67,7 +67,7 @@ private:
 	}
 	void add_cylinder()
 	{
-		for (int v = get_pred(t); v != s; v = get_pred(v)) // Add path to N
+		for (int v = get_pred((*this).t); v != (*this).s; v = get_pred(v)) // Add path to N
 		{
 			if(!in_cylinder[v])
 			{
@@ -96,8 +96,8 @@ private:
 public:
 	Graph N; // Neighborhood
 
-	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = true) : 
-	  Max_Flow(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), edges_in_N(G.E(), false), 
+	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
+	  sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), edges_in_N(G.E(), false), 
 		  in_cylinder(G.V(), false), proc(G.V(), t), N(G.V(), false)
     { }
 
@@ -110,7 +110,7 @@ public:
 
 		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> init_bfs(G, proc);
 		t1 = clock();
-		init_bfs(s);
+		init_bfs((*this).s);
 		t2 = clock();
 		if(details)
 			show("First BFS time: " + toString((t2-t1)));
@@ -137,7 +137,7 @@ public:
 		if(!continue_bfs)
 		{
 			t1 = clock();
-			while(bfs(s))
+			while(bfs((*this).s))
 			{
 				t2 = clock();
 				if(details)
@@ -153,7 +153,7 @@ public:
 		}
 		else
 		{
-			while(bfs(s))
+			while(bfs(this->s))
 			{
 				time_t total_time = 0;
 				int nPaths = 0;
@@ -163,7 +163,7 @@ public:
 				init_cylinder();
 				add_cylinder();
 				t1 = clock();
-				while(bfs(s))
+				while(bfs(this->s))
 				{
 					t2 = clock();
 					nPaths++;
