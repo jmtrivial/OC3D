@@ -318,8 +318,7 @@ public:
 			while(cur != NULL) 
 			{
 				nxt = cur->next;
-				// TODO: if cur->e has been deleted, cur->e->from(i) cannot be accessed properly
-				if(digraph || cur->e->from(i)) // Evite d'avoir des pointeurs invalides
+				if(digraph || i > cur->e->other(i)) // Avoid invalid pointer (e->v() must be different from e->w())
 					delete cur->e;
 				delete cur;
 				cur = nxt;
@@ -365,9 +364,9 @@ public:
 	*/
 	void insert(Edge *e, bool sameEdgePtr = true)
 	{
-	        if ((e->v() >= Vcnt) || (e->w() >= Vcnt)) {
+	    if ((e->v() >= Vcnt) || (e->w() >= Vcnt))
 		  resize(e->v() > e->w() ? e->v() : e->w());
-		}
+		
 		node * tmp = adj[e->v()];
 		adj[e->v()] = new node(e, tmp, NULL);
 		if(tmp)
