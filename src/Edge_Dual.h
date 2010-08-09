@@ -56,7 +56,7 @@ public:
 	/*! \returns True if e has a higher weight */
 	bool operator<(const Edge_Dual &e) const
 	{
-		return wt < e.wt;
+		return (*this).wt < e.wt;
 	}
 };
 }

@@ -75,7 +75,7 @@ protected:
 	const Graph &G;
 
 public:
-	Max_Flow(const Graph &G, int s, int t) : G(G), s(s), t(t) { }
+	Max_Flow(const Graph &G, int s, int t) : s(s), t(t), G(G) { }
 	/*! \returns Flow out of s */
 	type_flow get_outflow()
 	{
@@ -108,14 +108,14 @@ class Fulkerson : public Max_Flow<type_flow, Edge, Graph>
 	int get_pred(int v) const { return proc_ful.tPred.pred(v)->other(v); }
 	void augment() // Add flow along the path search.tPred
 	{ 
-		type_flow d = proc_ful.tPred.pred(t)->capRto(t);
-		for (int v = get_pred(t); v != s; v = get_pred(v)) // Find minimal capacity on the path search.tPred
+		type_flow d = proc_ful.tPred.pred((*this).t)->capRto((*this).t);
+		for (int v = get_pred((*this).t); v != (*this).s; v = get_pred(v)) // Find minimal capacity on the path search.tPred
 		{
 			if (proc_ful.tPred.pred(v)->capRto(v) < d) 
 				d = proc_ful.tPred.pred(v)->capRto(v);
 		}
-		proc_ful.tPred.pred(t)->addflowRto(t, d); 
-		for (int v = get_pred(t); v != s; v = get_pred(v)) // Add this minimal capacity
+		proc_ful.tPred.pred((*this).t)->addflowRto((*this).t, d); 
+		for (int v = get_pred((*this).t); v != (*this).s; v = get_pred(v)) // Add this minimal capacity
 			proc_ful.tPred.pred(v)->addflowRto(v, d); 
 	}
 public:
@@ -127,7 +127,7 @@ public:
 	void operator()()
 	{
 		do{
-			while(search(s)) // Must return true if there exist a path from s to t
+			while(search((*this).s)) // Must return true if there exist a path from s to t
 				augment();
 		}while(!proc_ful.noPath());
 	}
@@ -145,11 +145,11 @@ public:
 	void operator()()
 	{
 		std::queue<int> Q;
-		std::vector<bool> inQ(G.V(), false);
-		Q.push(s);
-		inQ[s] = true;
-		wt[t] = - ( wt[s] = max_val<type_flow>() );
-		h[s] = 1;
+		std::vector<bool> inQ((*this).G.V(), false);
+		Q.push((*this).s);
+		inQ[(*this).s] = true;
+		wt[(*this).t] = - ( wt[(*this).s] = max_val<type_flow>() );
+		h[(*this).s] = 1;
 		/*
 		while(true)
 		{
@@ -165,21 +165,21 @@ public:
 			Q.pop();
 			inQ[next] = false;
 
-			typename Graph::iterator it(G, next);
+			typename Graph::iterator it((*this).G, next);
 			for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			{
 				int w = e->other(next), cap = e->capRto(w), red = std::min(cap, wt[next]);
-				if(red > 0 && ( next == s || h[next] == h[w] + 1 ))
+				if(red > 0 && ( next == (*this).s || h[next] == h[w] + 1 ))
 				{
 					e->addflowRto(w, red);
 					wt[next] -= red;
 					wt[w] += red;
-					if( !inQ[w] && (w != s) && (w != t) )
+					if( !inQ[w] && (w != (*this).s) && (w != (*this).t) )
 						Q.push(w);
 				}
 			}
 
-			if( next != s && next != t && wt[next] > 0) 
+			if( next != (*this).s && next != (*this).t && wt[next] > 0) 
 			{
 				h[next]++;
 				Q.push(next);
