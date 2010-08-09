@@ -122,7 +122,7 @@ class OptimalNPants
 			if(shortestLengthFrom < shortestPathLength) // If we found a better path, shortestVertex is valid (!= -1)
 			{
 				shortestPath.clear();
-				for(int v = bellman.SPT.pred_vertex(shortestVertex); v != from; v = bellman.SPT.pred_vertex(v)) 
+				for(int v = bellman.SPT.pred_vertex(shortestVertex); v != from && v != -1; v = bellman.SPT.pred_vertex(v)) 
 					// We add all vertices in the shortest path
 					shortestPath.push_back(v);
 
