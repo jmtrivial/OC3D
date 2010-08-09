@@ -311,6 +311,7 @@ public:
 			while(cur != NULL) 
 			{
 				nxt = cur->next;
+				// TODO: if cur->e has been deleted, cur->e->from(i) cannot be accessed properly
 				if(digraph || cur->e->from(i)) // Evite d'avoir des pointeurs invalides
 					delete cur->e;
 				delete cur;
