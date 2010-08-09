@@ -97,8 +97,8 @@ public:
 	Graph N; // Neighborhood
 
 	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
-	  sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), edges_in_N(G.E(), false), 
-		  in_cylinder(G.V(), false), proc(G.V(), t), N(G.V(), false)
+	  sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), 
+		  edges_in_N(G.size(), false), in_cylinder(G.V(), false), proc(G.V(), t), N(G.V(), false)
     { }
 
 	/*! Computes a maxflow in G using proc

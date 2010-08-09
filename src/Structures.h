@@ -20,7 +20,7 @@ namespace sgl
 template<typename type_wt> inline type_wt max_val() // for old compilators (acm-icpc)...
 {
 	//return INT_MAX;
-	return std::numeric_limits<type_wt>::max() / (type_wt) 2;
+	return std::numeric_limits<type_wt>::max();
 }
 
 class Edge_Base
@@ -252,7 +252,8 @@ public:
 \todo Use list instead of node */
 template<class Edge = Edge_Base > class Graph_List
 { 
-	int Vcnt, Ecnt; bool digraph;
+	int Vcnt; 
+	bool digraph;
 	struct node
 	{ Edge* e; node* next; node* last; 
 	node(Edge* e, node* next, node* last): e(e), next(next), last(last) {};
@@ -288,8 +289,9 @@ public:
 	\param V Number of vertices
 	\param digraph Specify if the graph is directed
 	*/
-	Graph_List(int V, bool digraph = false) : Vcnt(V), Ecnt(0), digraph(digraph), adj(V, (node*)NULL) { }
+	Graph_List(int V, bool digraph = false) : Vcnt(V), digraph(digraph), adj(V, (node*)NULL) { }
 	~Graph_List() { }
+	/*! \returns Number of edges */
 	int size() const
 	{
 		int ret = 0;
@@ -334,8 +336,6 @@ public:
 	}
 	/*! \returns Number of vertices */
 	inline int V() const { return Vcnt; }
-	/*! \returns Number of edges */
-	inline int E() const { return Ecnt; }
 	/*! \returns True iff directed */
 	inline bool directed() const { return digraph; }
 	bool isolated(int v)
@@ -381,10 +381,8 @@ public:
 			if(tmp_)
 				tmp_->last = adj[e->w()];
 		}
-		Ecnt++;
 	} 
-	/*! Remove vertex v and delete all its associated edges 
-	\todo delete? */
+	/*! Remove vertex v and delete all its associated edges */
 	inline void remove(int v)
 	{
 		node *cur = adj[v], *nxt = NULL;
@@ -394,8 +392,7 @@ public:
 			Edge *e = cur->e;
 			if(!digraph)
 				remove(e, e->other(v));
-			delete e; // delete?
-			Ecnt--;
+			delete e; 
 			delete cur;
 			cur = nxt;
 		}
@@ -420,9 +417,7 @@ public:
 	\returns Number of elements removed */ 
 	inline int remove(Edge *e)
 	{
-		int removed = remove(e, e->v()) + remove(e, e->w());
-		if(removed) Ecnt--;
-		return removed;
+		return remove(e, e->v()) + remove(e, e->w());
 	}
 
 	/*! Clear the graph without deleting any edge pointer 
@@ -442,7 +437,6 @@ public:
 		}
 		for(unsigned int i = 0; i < adj.size(); i++)
 			adj[i] = NULL;
-		Ecnt = 0;
 	}
 	class iterator;
 	friend class iterator;

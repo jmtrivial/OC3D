@@ -248,7 +248,7 @@ public:
 	{
 		int s = io.get_s(), t = io.get_t();
 		Cut *next = io.cuts[num];
-		show("Optimization of cut " + toString(next->get_num()) + " with " + toString(next->E()) + " faces and area " + toString(next->cap()) + "...");
+		show("Optimization of cut " + toString(next->get_num()) + " with " + toString(next->size()) + " faces and area " + toString(next->cap()) + "...");
 		std::list<Edge*> delEdges; // Stores removed edges to add them after min cut algorithm, see at the very bottom
 		std::list< std::pair<Edge *, type_flow> > changedCap; // Stores edges we change capacity to restore them (if next->v() == next->w())
 		if(next->v() == next->w()) // If true, the two pants adjacent to next are actually one pant
@@ -346,7 +346,7 @@ public:
 				next->insert(*it);
 				revNext->insert((*it)->get_RevEdge());
 			}
-			show("Cut " + toString(next->get_num()) + " optimized: new cut with " + toString(next->E()) + " faces and area " + toString(next->cap()));
+			show("Cut " + toString(next->get_num()) + " optimized: new cut with " + toString(next->size()) + " faces and area " + toString(next->cap()));
 		}
 		else
 			show("Can't optimize cut " + toString(next->get_num()));
