@@ -10,6 +10,23 @@ IF(ITK_FOUND)
   INCLUDE(${ITK_USE_FILE})
 ENDIF(ITK_FOUND)
 
+# check for popt
+FIND_PATH(POPT_INCLUDE_DIR popt.h
+  /usr/local/include
+  /usr/include
+)
+
+FIND_LIBRARY(POPT_LIBRARIES popt
+  /usr/lib
+  /usr/local/lib
+)
+
+IF (POPT_LIBRARIES)
+  IF (POPT_INCLUDE_DIR)
+    SET(POPT_FOUND "YES")
+  ENDIF (POPT_INCLUDE_DIR)
+ENDIF (POPT_LIBRARIES)
+
 # add the include directories
 INCLUDE_DIRECTORIES(. src/ contrib/TetMeshLib/include/)
 
