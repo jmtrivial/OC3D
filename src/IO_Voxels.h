@@ -105,8 +105,8 @@ namespace oc3d
 						    it.GetIndex()[1] + directions[i][1],
 						    it.GetIndex()[2] + directions[i][2])];
 	      Edge *e = new Edge(itId, nbId, 1, 1, index++);
-	      IO_B::dual.insert(e);
-	      IO_B::dual.insert(e->get_RevEdge());
+	      IO_B::dual.insert(e, false);
+	      IO_B::dual.insert(e->get_RevEdge(), false);
 	    }
 	}
       }
