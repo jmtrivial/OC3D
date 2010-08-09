@@ -36,8 +36,8 @@ template<class Edge, class Cut, class Dual, class Pants> class IO_Base
 {
 protected:
 	
-	/*! Gives an orientation to the cut with bfs 
-	\todo BFS works, but better to use orientate face - crossprod or <b> to stop bfs search </b> */
+	/*! Gives an orientation to the cut 
+	\todo orientate face - crossprod instead */
 	void orientate(Cut *cut)
 	{
 		typename Cut::iterator it(cut);

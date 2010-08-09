@@ -290,6 +290,13 @@ public:
 	*/
 	Graph_List(int V, bool digraph = false) : Vcnt(V), Ecnt(0), digraph(digraph), adj(V, (node*)NULL) { }
 	~Graph_List() { }
+	int size() const
+	{
+		int ret = 0;
+		iterator_all it(*this);
+		for(it.beg(); !it.end(); ret++, it.nxt());
+		return ret;
+	}
 	/*!
 	\param v A vertex
 	\returns the degree of v
