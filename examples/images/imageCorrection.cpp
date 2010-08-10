@@ -13,6 +13,7 @@
 #include "Flow.h"
 #include "Edge_Dual.h"
 #include "Edge_Cut.h"
+#include "OptimalNPants.h"
 
 // popt option for parameters
 #include <popt.h>
@@ -110,8 +111,23 @@ int main(int argc, const char** argv) {
     // generate the initial cut
     std::cout << "Create initial cut" << std::endl;
     io_voxels.make_initialcut_BFS(true);
+    std::cout << "Number of initial cuts: " << io_voxels.cuts.size() << std::endl;
 
-    // TODO: optimize cuts and save
+
+    // TODO: adapt the following code to the image context
+    NoNullCap<Edge> noNull(io_voxels.dual.V(), io_voxels.get_t());
+    Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io_voxels.dual, noNull, io_voxels.get_s(), io_voxels.get_t());
+    Cut_Vertices<Edge, Dual> cut_vertices(io_voxels.dual);
+    
+    OptimalNPants<>::optimize(io_voxels, fulkerson, cut_vertices);
+    cout<<"Optimal cuts:"<<endl;
+    for(unsigned int i = 0; i < io_voxels.cuts.size(); i++) // Display found io.cuts
+    {
+      Cut::iterator it(io_voxels.cuts[i]);
+      for(Edge *e = it.beg(); !it.end(); e = it.nxt())
+        cout<<e->v()<<" -- "<<e->cap()<<" --> "<<e->w()<<"; ";
+      cout<<endl;
+    }
   }
   return 0;
 }
