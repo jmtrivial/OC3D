@@ -103,13 +103,13 @@ int main(int argc, const char** argv) {
   }
   else {
     std::cout << "Create dual structure" << std::endl;
-
     // create the dual
     IO_V io_voxels(image, "");
     io_voxels.make_dual();
 
     // generate the initial cut
-    io_voxels.make_initialcut();
+    std::cout << "Create initial cut" << std::endl;
+    io_voxels.make_initialcut_BFS(true);
 
     // TODO: optimize cuts and save
   }
