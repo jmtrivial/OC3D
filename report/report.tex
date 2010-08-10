@@ -129,6 +129,7 @@ We are also interested in the related problem on surface, which we will investig
 \begin{pb} [\PbOne]
 Given a discrete surface \S, find a minimum system of 1-cuts. 
 \end{pb}
+These minimums exist: there are finitely many sets of g 1-cuts (resp. 2-cuts).
 
 \subsection{NP-hardness}
 An apparently similar problem is known to be NP-hard: \\
@@ -156,7 +157,7 @@ The size of \V{} is polynomial in the size of \S{} according to the isoperimetri
 \fin
 The same theorem holds for tetrahedra if we restrict the problem to PLC (\textit{piecewise linear complex}) which can be tetrahedrized (not all surfaces can be tetrahedrized).
 \subsection{Relations between the two problems}
-Although they have similarities, the two problems above are not identicals and especially, minimizing the area of a surface is not equivalent to minimizing its perimeter. [Cylinder with a "star"].\\
+Although they have similarities, the two problems above are not identicals and especially, minimizing the area of a surface is not equivalent to minimizing its perimeter. \\
 Moreover, a surface with bounded area may have a perimeter equals to infinity.\\
 
 \begin{figure}[h]
@@ -207,6 +208,14 @@ The algorithm consists in iteratively calculating the shortest 1-cut, while poss
 
 \subsection{Shortest homotopic cycles on a surface}
 This second algorithm uses \textit{n-pants} (a genus-0 surface with n boundaries) [example]. \\
+\begin{figure}[htb]
+  \begin{center}
+    \includegraphics[height=2cm]{3pant.eps}
+    \caption{A 3-pant}
+  \end{center}
+\end{figure}
+
+
 \begin{theoreme}
 In a 3-pant, we can compute the shortest 1-cut \textbf{homotopic} to a a boundary of the pant in O(Vlog(V)).
 \end{theoreme}
@@ -237,8 +246,8 @@ The medial axis (or skeleton) of \S{} is the set of all points (different from \
 \begin{defi}
 The local feature size is the distance to the medial axis.
 \end{defi}
-The method consist in Creating a non-Euclidean distance on the mesh describe by this local feature size: the length of an edge is defined by the local feature size of the adjacent vertices, and by the Euclidean length of the edge, as a product. It corresponds to an estimation of the area that will be introduced if we are correcting an $\alpha$-junction using this edge %[http://wiki.jmfavreau.info/post-doc_2009/projects/volumic_correction/report_june_2010]
-\begin{figure}[htb]
+The method consist in Creating a non-Euclidean distance on the mesh describe by this local feature size: the length of an edge is defined by the local feature size of the adjacent vertices, and by the Euclidean length of the edge, as a product. It corresponds to an estimation of the area that will be introduced if we are correcting an $\alpha$-junction using this edge. %[http://wiki.jmfavreau.info/post-doc_2009/projects/volumic_correction/report_june_2010]
+\begin{figure}[h]
   \begin{center}
     \includegraphics[height=2cm]{LFS.eps}
     \caption{Local feature size}
@@ -261,6 +270,19 @@ To compute a first cutting, I already described the cut locus method: given a se
 In the SPA, we simply choose an arbitrary point p, compute the p-cut locus \Sys{} and take as an initial decomposition the n-pant which boundaries are the g connected components of \Sys. \\
 However, one may try to act more \textit{locally} and to use \textit{topological information} to guide the choice of the cuts (i.e to have an initial set of cuts close to the optimal) by decomposing the volume into many pants.  \\
 For that purpose, the MPA first compute the skeleton (or medial axis) \K{} of the surface, using for example an \textit{erosion} process, see \cite{Cornea07} for a comprehensive survey of skeleton computation.\\
+\begin{figure}[h]
+\begin{center}
+\begin{minipage}{0.4\linewidth}
+\centering \includegraphics[height=3cm]{skeleton.eps}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\linewidth}
+\centering \includegraphics[height=3cm]{cutlocus_skeleton.eps}
+\end{minipage}
+\caption{Left: Skeleton. 
+Right: Cuts associated to this skeleton. }
+\end{center}
+\end{figure}
 Let B be the set of all intersection points of \K: the MPA basically compute the B-cut locus and use its connected components as a pants decomposition. \\
 All the resulting pants need not have the same number of boundaries, but assuming that it is the case, we can know precisely the number of such pants:
 \begin{theoreme}
@@ -292,18 +314,8 @@ We first build the network N from \Dual{} the following way:
 The second part of this last point is needed in order to avoid intersections between 2-cuts. \\
 Then, we compute a max flow on N (using Ford Fulkerson or Push-Relabel algorithm, for example) and we use the min cut - max flow theorem (the reader not familiar with flows on network may first read \cite{Cormen90}) to deduce a min \textit{\C s-t cut} (i.e, a min cut obtained by computing a max flow on \C) \MinC.
 However, \MinC{} is not necessarly a 2-cut, for example \D{\MinC} is not necessarily connected, but in most applications we hope that \MinC{} is indeed a 2-cut, and from now on, \textbf{we assume that every min cut computed this way is a 2-cut}. \\ 
-In the SPA, one may wonder whether we keep the pant structure:
-\begin{theoreme}
-(\Sys - \C) $\cup$ \MinC{} is a system of 2-cuts.
-\end{theoreme}
-A result of "stability" with respect from the initial 2-cut system follows:
-\begin{theoreme}
-Assume that there is only one 2-cut with weight equals to the weight of \C$_i$, for all i. \\
-Then the resulting cutting of the whole SPA doesn't depend on the initial cutting.
-\end{theoreme}
-\begin{rem}
-It may be interesting, if two min 2-cuts have the same weight, to choose the "best", dans un sens à préciser, this can be done using a min cost max flow algorithm.
-\end{rem}
+It is easy to see that, throughout the SPA, the pant structure is kept ((\Sys - \C) $\cup$ \MinC{} is a system of 2-cuts). \\
+Moreover, the result of the SPA is likely to be, in pratice, independant from the initial set of cuts. \\
 
 However, it is possible that the best cut \MinC' intersects \C, and a max flow will not take it into account. \\
 To avoid this problem, I suggested to take a \MinC{} s-t cut as a new cut, which correctness is validated by the theorem: \\
@@ -314,15 +326,21 @@ To avoid this problem, I suggested to take a \MinC{} s-t cut as a new cut, which
 \fin
 
 \subsubsection{Optimization of a 2-cut \C{} (not auto)}
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[height=1.4cm]{mincut.eps}
+    \caption{Optimization of a cut}
+  \end{center}
+\end{figure}
 Now we assume that \C{} is adjacent to two different pants \P$_1$ and \P$_2$, let \C$_{i, j}$ be the boundaries of \P$_i$ different from \C. \\
 We need to be careful since we want to avoid non connected min cut [fig]. \\
-Like auto cut case, we build N from \Dual:
+We build N from \Dual the following way:
 \begin{itemize}
 \item Find a shortest tree $\mathcal{T}_{1}$ (resp. $\mathcal{T}_{2}$) connecting $\bigcup$\C$_{1, j}$ (resp. $\bigcup$\C$_{2, j}$). 
 \item Link s to \C$_{1, j}$ and $\mathcal{T}_{1}$ and link \C$_{2, j}$ and $\mathcal{T}_{2}$ to t.
 \end{itemize}
-This way, every \C{} s-t cut is homotopic to \C: \textbf{we don't change homotopy classes}.
-\subsection{Processing choice}
+This way, every s-t cut is homotopic to \C: \textbf{we don't change homotopy classes}.
+\subsection{Processing choice} 
 Since every optimization of a 2-cut decreases the weight of the 2-cut system \Sys, and as there are only finitely many possible total weights (for a discrete volume), our algorithms are \textit{terminating}. \\
 However, the final weight of \Sys{} and the complexity these algorithms depends crucially on the order we choose cuts to optimize. [fig] \\
 Several possible choice were considered:
