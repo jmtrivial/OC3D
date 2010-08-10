@@ -62,7 +62,7 @@ namespace oc3d
       Coord3DT(const Coord3DT<T> & c) : x(c.x), y(c.y), z(c.z) { }
       /*! comparison operator */
       bool operator<(const Coord3DT<T> & c) const {
-	return (x < c.x) || (y < c.y) || (z < c.z);
+        return (x < c.x) || (y < c.y) || (z < c.z);
       }
       /*! accessor */
       inline const T & getX() const { return x; }
@@ -72,30 +72,33 @@ namespace oc3d
       inline const T & getZ() const { return z; }
       /*! add a coord value to the current one */
       Coord3DT<T> & operator+=(const ImageIndexType & index) {
-	x += index[0];
-	y += index[1];
-	z += index[2];
+        x += index[0];
+        y += index[1];
+        z += index[2];
 
-	return *this;
+        return *this;
       }
       /*! division operator */
       Coord3DT<T> & operator /=(T value) {
-	x /= value;
-	y /= value;
-	z /= value;
+        x /= value;
+        y /= value;
+        z /= value;
 
-	return *this;
+        return *this;
       }
       void exportIndex(ImageIndexType & index) const {
-	index[0] = x;
-	index[1] = y;
-	index[2] = z;
+        index[0] = x;
+        index[1] = y;
+        index[2] = z;
       }
     };
 
     typedef Coord3DT<unsigned int> Coord3D;
 
   private:
+    /*! the manipulated image */
+    ImagePointer image;
+
     /*! 6 neighbors in 3D */
     static const OType directions6[6];
 
@@ -113,27 +116,27 @@ namespace oc3d
       unsigned int nb = 0;
 
       if (img->GetPixel(point) == in) {
-	RType radius;
-	radius.Fill(1);
-	NeighborhoodIteratorType it(radius, img, img->GetRequestedRegion());
-	BCondition bCond;
-	bCond.SetConstant(out);
-	it.SetBoundaryCondition(bCond);
+        RType radius;
+        radius.Fill(1);
+        NeighborhoodIteratorType it(radius, img, img->GetRequestedRegion());
+        BCondition bCond;
+        bCond.SetConstant(out);
+        it.SetBoundaryCondition(bCond);
 
-	std::queue<ImageIndexType> open;
-	open.push(point);
-	img->SetPixel(point, out);
+        std::queue<ImageIndexType> open;
+        open.push(point);
+        img->SetPixel(point, out);
 
-	while(!open.empty()) {
-	  ImageIndexType current = open.front();
-	  open.pop();
-	  it.SetLocation(current);
-	  for (unsigned int i = 0; i < 6; ++i)
-	    if (it.GetPixel(directions6[i]) == in) {
-	      open.push(current + directions6[i]);
-	      it.SetPixel(directions6[i], out);
-	    }
-	}
+        while(!open.empty()) {
+          ImageIndexType current = open.front();
+          open.pop();
+          it.SetLocation(current);
+          for (unsigned int i = 0; i < 6; ++i)
+            if (it.GetPixel(directions6[i]) == in) {
+              open.push(current + directions6[i]);
+              it.SetPixel(directions6[i], out);
+            }
+        }
       }
 
       return nb;
@@ -145,67 +148,72 @@ namespace oc3d
       Coord3DT<unsigned long int> barycenter;
       typedef itk::ImageRegionConstIteratorWithIndex<Image> IteratorWithIndexType;
       {
-	unsigned long int nbPoints = 0;
-	IteratorWithIndexType it(img, img->GetRequestedRegion());
-	for (it.GoToBegin(); !it.IsAtEnd(); ++it)
-	  if (it.Get() != 0) {
-	    ++nbPoints;
-	    barycenter += it.GetIndex();
-	  }
-	  barycenter /= nbPoints;
+        unsigned long int nbPoints = 0;
+        IteratorWithIndexType it(img, img->GetRequestedRegion());
+        for (it.GoToBegin(); !it.IsAtEnd(); ++it)
+          if (it.Get() != 0) {
+            ++nbPoints;
+            barycenter += it.GetIndex();
+          }
+          barycenter /= nbPoints;
       }
 
       ImageIndexType middle;
       barycenter.exportIndex(middle);
       {
-	float dist = std::numeric_limits<float>::max();
-	if (img->GetPixel(middle) == 0) {
-	  // find the closest point in the structure from the barycenter
-	  IteratorWithIndexType it(img, img->GetRequestedRegion());
-	  for (it.GoToBegin(); !it.IsAtEnd(); ++it)
-	    if (it.Get() != 0) {
-	      float d = distance(it.GetIndex(), middle);
-	      if (d < dist) {
-		middle = it.GetIndex();
-		dist = d;
-	      }
-	    }
-	}
+        float dist = std::numeric_limits<float>::max();
+        if (img->GetPixel(middle) == 0) {
+          // find the closest point in the structure from the barycenter
+          IteratorWithIndexType it(img, img->GetRequestedRegion());
+          for (it.GoToBegin(); !it.IsAtEnd(); ++it)
+            if (it.Get() != 0) {
+              float d = distance(it.GetIndex(), middle);
+              if (d < dist) {
+                middle = it.GetIndex();
+                dist = d;
+              }
+            }
+        }
       }
 
       return middle;
     }
 
     /*! return true if the given voxel is a front voxel */
-    bool isValidFrontNeighborhood(ImagePointer & img, const ImageIndexType & center, NeighborhoodIteratorType & it) {
+    bool isValidFrontNeighborhood(ImagePointer & img, NeighborhoodIteratorType & it) {
       bool result = true;
 
       // translate 3-labeled neighbors into 4-labeled voxels
       bool single = true;
       for (unsigned int i = 0; i < it.Size(); ++i)
-	if (it.GetPixel(i) == 3) {
-	  it.SetPixel(i, 4);
-	  single = false;
-	}
+        if (it.GetPixel(i) == 3) {
+          it.SetPixel(i, 4);
+          single = false;
+        }
       if (single)
-	return result;
+        return result;
 
 
       // get the first connected component labeled 4, correct it with 3, then check for other 3 points
       bool first = true;
       for (unsigned int i = 0; i < it.Size(); ++i)
-	if (it.GetPixel(i) == 4) {
-	  if (first) {
-	    fillCC(img, center + it.GetOffset(i), 4, 3);
-	    first = false;
-	  }
-	  else {
-	    it.SetPixel(i, 3);
-	    result = false;
-	  }
-	}
+        if (it.GetPixel(i) == 4) {
+          if (first) {
+            fillCC(img, it.GetIndex(i), 4, 3);
+            first = false;
+          }
+          else {
+            it.SetPixel(i, 3);
+            result = false;
+          }
+        }
       return result;
     }
+
+    /*! propagate a shape in the object from the middle point, preserving the topology of the growing ball
+    After this propagation, voxels of img with value=1 are the pre-cuts, voxels with value=3 are inside the growing ball,
+    and voxels with value=0 are outside of the object.
+    */
     void propagateFromPoint(ImagePointer & img, const ImageIndexType & middle) {
 
       RType radius;
@@ -224,28 +232,189 @@ namespace oc3d
       img->SetPixel(middle, 2);
 
       while(!open.empty()) {
-	ImageIndexType current = open.front();
-	open.pop();
-	it.SetLocation(current);
-	if (isValidFrontNeighborhood(img, current, it)) {
-	  // move the current voxel in the close list
-	  img->SetPixel(current, 3);
-	  for (unsigned int i = 0; i < 6; ++i)
-	    if (it.GetPixel(directions6[i]) == 1) {
-	      open.push(current + directions6[i]);
-	      it.SetPixel(directions6[i], 2);
-	    }
-	}
-	else {
-	  // current voxel is labeled as 'not in open or close list'
-	  img->SetPixel(current, 1);
-	}
+        ImageIndexType current = open.front();
+        open.pop();
+        it.SetLocation(current);
+        if (isValidFrontNeighborhood(img, it)) {
+          // move the current voxel in the close list
+          img->SetPixel(current, 3);
+          for (unsigned int i = 0; i < 6; ++i)
+            if (it.GetPixel(directions6[i]) == 1) {
+              open.push(current + directions6[i]);
+              it.SetPixel(directions6[i], 2);
+            }
+        }
+        else {
+          // current voxel is labeled as 'not in open or close list'
+          img->SetPixel(current, 1);
+        }
 
       }
     }
 
+    /*! given a point in a pre-cut (i.e. value=1), set all its connected component to 5,
+    and set all the 26-neighbors of this connected component to 6
+      input values:
+      - pre-cut: 3
+      - neigborhoods: 1
+      - outside: 0
+      output values:
+      - pre-cut: 5
+      - neigborhoods: 6
+      - outside: 0
+    */
+    void buildPreCutNeighbors(ImagePointer & img, const ImageIndexType & index) {
+      RType radius;
+      radius.Fill(1);
+      NeighborhoodIteratorType it(radius, img, img->GetRequestedRegion());
+      BCondition bCond;
+      bCond.SetConstant(0);
+      it.SetBoundaryCondition(bCond);
+
+      std::queue<ImageIndexType> open;
+      open.push(index);
+      assert(img->GetPixel(index) == 1);
+      img->SetPixel(index, 5);
+
+      while(!open.empty()) {
+        ImageIndexType current = open.front();
+        open.pop();
+        it.SetLocation(current);
+        for (unsigned int i = 0; i < it.Size(); ++i)
+          if (it.GetPixel(i) == 3) {
+            it.SetPixel(i, 6);
+          }
+          else if (it.GetPixel(i) == 1) {
+            it.SetPixel(i, 5);
+            open.push(it.GetIndex(i));
+          }
+      }
+    }
+
+    /*! return the set of cuts adjacents to the given pre-cut.
+      input values:
+      - pre-cut: 5 or 7
+      - neigborhoods: 6
+      - outside: 0
+      output values:
+      - pre-cut: 5 or 7
+      - neigborhoods: 1
+      - outside: 0
+      */
+    class std::list<Edge *> getCutFromPreCut(ImagePointer & img, const ImageIndexType & index) {
+      std::list<Edge *> result;
+
+      RType radius;
+      radius.Fill(1);
+      NeighborhoodIteratorType it(radius, img, img->GetRequestedRegion());
+      BCondition bCond;
+      bCond.SetConstant(0);
+      it.SetBoundaryCondition(bCond);
+
+      std::queue<ImageIndexType> open;
+      open.push(index);
+      img->SetPixel(index, 1);
+
+      while(!open.empty()) {
+        const ImageIndexType current = open.front();
+        open.pop();
+        it.SetLocation(current);
+        const unsigned int idCurrentVertex = voxelList[Coord3D(current)];
+        for (unsigned int i = 0; i < 6; ++i)
+          if (it.GetPixel(directions6[i]) == 6) {
+            open.push(current + directions6[i]);
+            it.SetPixel(directions6[i], 1);
+          }
+          else if ((it.GetPixel(directions6[i]) == 5) || (it.GetPixel(directions6[i]) == 7)) {
+            const unsigned int idInsideVertex = voxelList[Coord3D(it.GetIndex(directions6[i]))];
+            result.push_back(IO_B::dual.edge(idInsideVertex, idCurrentVertex));
+          }
+      }
+      return result;
+    }
+
+    /*! return the set of cuts adjacents to the given pre-cut.
+      input values:
+      - pre-cut: 5
+      - neigborhoods: 6
+      - outside: 0
+      output values:
+      - pre-cut: 7
+      - neigborhoods: 1
+      - outside: 0
+      */
+    class std::list<std::list<Edge *> > getCutsFromPreCut(ImagePointer & img, const ImageIndexType & index) {
+      std::list<std::list<Edge *> > result;
+
+      RType radius;
+      radius.Fill(1);
+      NeighborhoodIteratorType it(radius, img, img->GetRequestedRegion());
+      BCondition bCond;
+      bCond.SetConstant(0);
+      it.SetBoundaryCondition(bCond);
+
+      std::queue<ImageIndexType> open;
+      open.push(index);
+      assert(img->GetPixel(index) == 5);
+      img->SetPixel(index, 7);
+
+      while(!open.empty()) {
+        ImageIndexType current = open.front();
+        open.pop();
+        it.SetLocation(current);
+        for (unsigned int i = 0; i < it.Size(); ++i)
+          if (it.GetPixel(i) == 6) {
+            result.push_back(getCutFromPreCut(img, it.GetIndex()));
+          }
+          else if (it.GetPixel(i) == 5) {
+            it.SetPixel(i, 7);
+            open.push(it.GetIndex(i));
+          }
+      }
+
+      return result;
+    }
+
+
+    /*! given a point inside a pre-cut, build the corresponding cuts */
+    void createCutsFromPreCut(ImagePointer & img, const ImageIndexType & index) {
+      // build neighbors
+      buildPreCutNeighbors(img, index);
+
+      // build a pre-cut by CC in the neighborhood
+      std::list<std::list<Edge *> > l_cuts = getCutsFromPreCut(img, index);
+
+      // find the biggest one
+      unsigned int maxSize = 0;
+      class std::list<std::list<Edge *> >::const_iterator big = l_cuts.end();
+      for(class std::list<std::list<Edge *> >::const_iterator l = l_cuts.begin(); l != l_cuts.end(); ++l) {
+        unsigned int s = (*l).size();
+        if (s > maxSize) {
+          maxSize = s;
+          big = l;
+        }
+      }
+      // create the new cuts (except the biggest one) and insert the corresponding edges
+      if (big != l_cuts.end()) {
+        for(class std::list<std::list<Edge *> >::const_iterator l = l_cuts.begin(); l != l_cuts.end(); ++l)
+          if (l != big) {
+            Cut *cut = IO_B::new_cut();
+            (*cut).insert(*l);
+          }
+      }
+    }
+
+    /*! create initial cuts from pre-cuts. \see propagateFromPoint */
+    void createCutsFromPreCuts(ImagePointer & img) {
+      typedef itk::ImageRegionConstIteratorWithIndex<Image> IteratorWithIndexType;
+
+      IteratorWithIndexType it(img, img->GetRequestedRegion());
+      for (it.GoToBegin(); !it.IsAtEnd(); ++it)
+        if (it.Get() == 1)
+          createCutsFromPreCut(img, it.GetIndex());
+    }
+
   public:
-    ImagePointer image;
 
     /*! Constructor given an image */
     IO_Voxels(const ImagePointer & i, const std::string & base_name) : IO_B(base_name), image(i) {
@@ -264,9 +433,9 @@ namespace oc3d
       IteratorWithIndexType imgIt(image, image->GetRequestedRegion());
       unsigned int nbVoxels = 0;
       for (imgIt.GoToBegin(); !imgIt.IsAtEnd(); ++imgIt) {
-	if (imgIt.Get() != 0) {
-	  voxelList[imgIt.GetIndex()] = nbVoxels++;
-	}
+        if (imgIt.Get() != 0) {
+          voxelList[imgIt.GetIndex()] = nbVoxels++;
+        }
       }
       IO_B::dual.resize(nbVoxels + 2);
       RType radius;
@@ -279,25 +448,26 @@ namespace oc3d
 
       unsigned int index = 0;
       for (it.GoToBegin(); !it.IsAtEnd(); ++it) {
-	if (it.GetCenterPixel() != 0) {
-	  unsigned int itId = voxelList[Coord3D(it.GetIndex())];
-	  for(unsigned int i = 0; i < 3; ++i)
-	    if (it.GetPixel(directions[i]) != 0) {
-	      unsigned int nbId = voxelList[Coord3D(it.GetIndex()[0] + directions[i][0],
-						    it.GetIndex()[1] + directions[i][1],
-						    it.GetIndex()[2] + directions[i][2])];
-	      Edge *e = new Edge(itId, nbId, 1, 1, index++);
-	      IO_B::dual.insert(e, false);
-	      IO_B::dual.insert(e->get_RevEdge(), false);
-	    }
-	}
+        if (it.GetCenterPixel() != 0) {
+          unsigned int itId = voxelList[Coord3D(it.GetIndex())];
+          for(unsigned int i = 0; i < 3; ++i)
+            if (it.GetPixel(directions[i]) != 0) {
+              unsigned int nbId = voxelList[Coord3D(it.GetIndex()[0] + directions[i][0],
+                                                    it.GetIndex()[1] + directions[i][1],
+                                                    it.GetIndex()[2] + directions[i][2])];
+
+              Edge *e = new Edge(itId, nbId, 1, 1, index++);
+              IO_B::dual.insert(e, false);
+              IO_B::dual.insert(e->get_RevEdge(), false);
+            }
+        }
       }
     }
 
     /*! Makes the initial cut using a growing process from the middle of the object */
     void make_initialcut_BFS(bool verbose = false) {
       if (verbose)
-	std::cout << " Clone original image" << std::endl;
+        std::cout << " Clone original image" << std::endl;
       // copy the image
       typedef class itk::ImageDuplicator<Image> DuplicatorType;
       typedef class itk::ImageDuplicator<Image>::Pointer DuplicatorPointerType;
@@ -309,18 +479,19 @@ namespace oc3d
 
       // get the "middle point"
       if (verbose)
-	std::cout << " Get middle point" << std::endl;
+        std::cout << " Get middle point" << std::endl;
       ImageIndexType middle = getMiddlePoint(result);
 
       // compute a propagation from the middle point, preserving the topology of the volume
       if (verbose)
-	std::cout << " Front propagation" << std::endl;
+        std::cout << " Front propagation (pre-cut generation)" << std::endl;
       propagateFromPoint(result, middle);
 
       // compute the cut using this pre-cut
-      // TODO
+      if (verbose)
+        std::cout << " Build original cut from the pre-cut" << std::endl;
+      createCutsFromPreCuts(result);
 
-      std::cout << "Not yet fully implemented" << std::endl;
     }
 
 
