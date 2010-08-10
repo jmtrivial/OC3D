@@ -486,8 +486,8 @@ namespace oc3d
               unsigned int nbId = voxelList[Coord3D(it.GetIndex() + directions[i], image)];
 
               Edge *e = new Edge(itId, nbId, 1, 1, index++);
-              IO_B::dual.insert(e, false);
-              IO_B::dual.insert(e->get_RevEdge(), false);
+              IO_B::dual.insert(e);
+              IO_B::dual.insert(e->get_RevEdge());
             }
         }
       }
