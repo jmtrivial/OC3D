@@ -123,7 +123,7 @@ int main(int argc, const char** argv) {
 
     if (imageFile != NULL) {
       std::cout << "Save image (" << imageFile << ")" << std::endl;
-      io_voxels.saveResult(imageFile);
+      io_voxels.exportCutsImage(imageFile);
     }
     if (logFile != NULL) {
       // TODO

@@ -427,7 +427,7 @@ namespace oc3d
             (*cut).insert(*l);
             (*cut).create_RevCut();
             (*cut).get_RevCut()->set_num((*cut).get_num(), false);
-            
+
           }
       }
     }
@@ -523,7 +523,9 @@ namespace oc3d
       // then create the corresponding pant
       IO_B::init_pants();
     }
-    void saveResult(const std::string & filename) {
+
+    /*! save the cut in an image */
+    void exportCutsImage(const std::string & filename) {
       // copy the image
       typedef class itk::ImageDuplicator<Image> DuplicatorType;
       typedef class itk::ImageDuplicator<Image>::Pointer DuplicatorPointerType;
