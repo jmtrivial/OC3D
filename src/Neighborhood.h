@@ -108,7 +108,7 @@ public:
 	{
 		time_t t1, t2;
 
-		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> init_bfs(G, proc);
+		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> init_bfs((*this).G, proc);
 		t1 = clock();
 		init_bfs((*this).s);
 		t2 = clock();
@@ -121,15 +121,15 @@ public:
 
 		if(details)
 		{
-			N.remove(s);
-			N.remove(t);
+			N.remove((*this).s);
+                        N.remove((*this).t);
 			io.template graph_to_OFF<Graph, Edge>(N, "_N");
 		}
 
-		typename Graph::iterator it_s(G, s);
+                typename Graph::iterator it_s((*this).G, (*this).s);
 		for(Edge *e = it_s.beg(); !it_s.end(); e = it_s.nxt())
 			N.insert(e);
-		typename Graph::iterator it_t(G, t);
+                typename Graph::iterator it_t((*this).G, (*this).t);
 		for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
 			N.insert(e);
 
