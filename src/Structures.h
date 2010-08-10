@@ -383,7 +383,7 @@ public:
 		if (!digraph) 
 		{
 			node * tmp_ = adj[e->w()];
-			if(sameEdgePtr) // warning : ne pas ecrire adj[e->w()] = adj[e->v()]; car sinon les nodes sont les memes!
+			if(sameEdgePtr) // (warning : ne pas ecrire adj[e->w()] = adj[e->v()]; car sinon les nodes sont les memes!)
 				adj[e->w()] = new node(e, tmp_, NULL);  
 			else
 				adj[e->w()] = new node(new Edge(*e), tmp_, NULL); 

@@ -126,9 +126,10 @@ public:
 		return -1;
 	}
 
-	void init_cut(int num)
+	/*! Orientate a cut and creates its reverse
+	\warning All edges must be inserted before */
+	void init_cut(Cut *cut)
 	{
-		Cut *cut = cuts[num];
 		orientate(cut);
 		cut->create_RevCut();
 		cut->get_RevCut()->set_num(cut->get_num(), false);
@@ -169,6 +170,7 @@ public:
 			assert(!it.end()); // Check if we found the edge
 			cut->insert(e);
 		}
+		init_cut(cut);
 		file.close();
 		show("Cut number " + toString(num) + " with " + toString(nEdges) + " faces and area " + toString(cut->cap())+ " loaded from file " + fileName);
 	}

@@ -278,10 +278,7 @@ public:
 
 			cut->insert(e); // warning: multi pant
 		} // for(int i = 0; i < nFaces; i++)
-
-		orientate(cut);
-		cut->create_RevCut();
-		cut->get_RevCut()->set_num(cut->get_num(), false);
+		init_cut(cut);
 		file.close();
 		show("Cut number " + toString(num) + " with " + toString(nEdges + nFaces) + " faces and area " + toString(cut->cap())+ " loaded from file " + fileName);
 	}
