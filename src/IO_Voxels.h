@@ -39,6 +39,7 @@ namespace oc3d
     typedef IO_Base<Edge, Cut, Dual, Pants> IO_B;
     typedef class Image::Pointer ImagePointer;
     typedef class Image::IndexType ImageIndexType;
+    typedef class Image::SizeType ImageSizeType;
     typedef class itk::ConstantBoundaryCondition<Image> BCondition;
     typedef class itk::ConstNeighborhoodIterator<Image, BCondition> ConstNeighborhoodIteratorType;
     typedef class itk::NeighborhoodIterator<Image, BCondition> NeighborhoodIteratorType;
@@ -53,16 +54,30 @@ namespace oc3d
       private:
       /*! coordinates in the image */
       T x, y, z;
+      unsigned long int idImage;
+
+      void initIdImage(const ImageSizeType & size) {
+        idImage = x + size[0] * (y + size[1] * z);
+      }
       public:
       /*! constructor */
-      Coord3DT(T x = 0, T y = 0, T z = 0) : x(x), y(y), z(z) { }
+      Coord3DT(T x = 0, T y = 0, T z = 0, unsigned long int idImage = 0) : x(x), y(y), z(z), idImage(idImage) { }
       /*! constructor using an IndexType from itk */
-      Coord3DT(const ImageIndexType & index) : x(index[0]), y(index[1]), z(index[2]) {}
+      Coord3DT(const ImageIndexType & index,
+               const ImageSizeType & size) : x(index[0]), y(index[1]), z(index[2]) {
+        initIdImage(size);
+      }
+
+      Coord3DT(const ImageIndexType & index,
+               const ImagePointer & image) : x(index[0]), y(index[1]), z(index[2]) {
+        initIdImage(image->GetRequestedRegion().GetSize());
+      }
+
       /*! copy constructor */
-      Coord3DT(const Coord3DT<T> & c) : x(c.x), y(c.y), z(c.z) { }
+      Coord3DT(const Coord3DT<T> & c) : x(c.x), y(c.y), z(c.z), idImage(c.idImage) { }
       /*! comparison operator */
       bool operator<(const Coord3DT<T> & c) const {
-        return (x < c.x) || (y < c.y) || (z < c.z);
+        return idImage < c.idImage;
       }
       /*! accessor */
       inline const T & getX() const { return x; }
@@ -255,8 +270,8 @@ namespace oc3d
     /*! given a point in a pre-cut (i.e. value=1), set all its connected component to 5,
     and set all the 26-neighbors of this connected component to 6
       input values:
-      - pre-cut: 3
-      - neigborhoods: 1
+      - pre-cut: 1
+      - neigborhoods: 3
       - outside: 0
       output values:
       - pre-cut: 5
@@ -298,7 +313,7 @@ namespace oc3d
       - outside: 0
       output values:
       - pre-cut: 5 or 7
-      - neigborhoods: 1
+      - neigborhoods: 3
       - outside: 0
       */
     class std::list<Edge *> getCutFromPreCut(ImagePointer & img, const ImageIndexType & index) {
@@ -313,20 +328,23 @@ namespace oc3d
 
       std::queue<ImageIndexType> open;
       open.push(index);
-      img->SetPixel(index, 1);
+      assert(img->GetPixel(index) == 6);
+      img->SetPixel(index, 3);
 
       while(!open.empty()) {
         const ImageIndexType current = open.front();
         open.pop();
         it.SetLocation(current);
-        const unsigned int idCurrentVertex = voxelList[Coord3D(current)];
+        assert(voxelList.find(Coord3D(current, image)) != voxelList.end());
+        const unsigned int idCurrentVertex = voxelList[Coord3D(current, image)];
         for (unsigned int i = 0; i < 6; ++i)
           if (it.GetPixel(directions6[i]) == 6) {
             open.push(current + directions6[i]);
-            it.SetPixel(directions6[i], 1);
+            it.SetPixel(directions6[i], 3);
           }
           else if ((it.GetPixel(directions6[i]) == 5) || (it.GetPixel(directions6[i]) == 7)) {
-            const unsigned int idInsideVertex = voxelList[Coord3D(it.GetIndex(directions6[i]))];
+            assert(voxelList.find(Coord3D(it.GetIndex(directions6[i]), image)) != voxelList.end());
+            const unsigned int idInsideVertex = voxelList[Coord3D(it.GetIndex(directions6[i]), image)];
             result.push_back(IO_B::dual.edge(idInsideVertex, idCurrentVertex));
           }
       }
@@ -340,7 +358,7 @@ namespace oc3d
       - outside: 0
       output values:
       - pre-cut: 7
-      - neigborhoods: 1
+      - neigborhoods: 3
       - outside: 0
       */
     class std::list<std::list<Edge *> > getCutsFromPreCut(ImagePointer & img, const ImageIndexType & index) {
@@ -364,7 +382,7 @@ namespace oc3d
         it.SetLocation(current);
         for (unsigned int i = 0; i < it.Size(); ++i)
           if (it.GetPixel(i) == 6) {
-            result.push_back(getCutFromPreCut(img, it.GetIndex()));
+            result.push_back(getCutFromPreCut(img, it.GetIndex(i)));
           }
           else if (it.GetPixel(i) == 5) {
             it.SetPixel(i, 7);
@@ -383,6 +401,7 @@ namespace oc3d
 
       // build a pre-cut by CC in the neighborhood
       std::list<std::list<Edge *> > l_cuts = getCutsFromPreCut(img, index);
+      assert(l_cuts.size() > 1);
 
       // find the biggest one
       unsigned int maxSize = 0;
@@ -410,8 +429,9 @@ namespace oc3d
 
       IteratorWithIndexType it(img, img->GetRequestedRegion());
       for (it.GoToBegin(); !it.IsAtEnd(); ++it)
-        if (it.Get() == 1)
+        if (it.Get() == 1) {
           createCutsFromPreCut(img, it.GetIndex());
+        }
     }
 
   public:
@@ -434,7 +454,7 @@ namespace oc3d
       unsigned int nbVoxels = 0;
       for (imgIt.GoToBegin(); !imgIt.IsAtEnd(); ++imgIt) {
         if (imgIt.Get() != 0) {
-          voxelList[imgIt.GetIndex()] = nbVoxels++;
+          voxelList[Coord3D(imgIt.GetIndex(), image)] = nbVoxels++;
         }
       }
       IO_B::dual.resize(nbVoxels + 2);
@@ -449,12 +469,11 @@ namespace oc3d
       unsigned int index = 0;
       for (it.GoToBegin(); !it.IsAtEnd(); ++it) {
         if (it.GetCenterPixel() != 0) {
-          unsigned int itId = voxelList[Coord3D(it.GetIndex())];
+          unsigned int itId = voxelList[Coord3D(it.GetIndex(), image)];
           for(unsigned int i = 0; i < 3; ++i)
             if (it.GetPixel(directions[i]) != 0) {
-              unsigned int nbId = voxelList[Coord3D(it.GetIndex()[0] + directions[i][0],
-                                                    it.GetIndex()[1] + directions[i][1],
-                                                    it.GetIndex()[2] + directions[i][2])];
+              assert(voxelList.find(Coord3D(it.GetIndex() + directions[i], image)) != voxelList.end());
+              unsigned int nbId = voxelList[Coord3D(it.GetIndex() + directions[i], image)];
 
               Edge *e = new Edge(itId, nbId, 1, 1, index++);
               IO_B::dual.insert(e, false);
