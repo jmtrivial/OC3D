@@ -25,6 +25,7 @@
 #include "itkImageRegionIterator.h"
 #include "itkConstantBoundaryCondition.h"
 #include "itkImageDuplicator.h"
+#include "itkImageFileWriter.h"
 
 // oc3d
 #include <IO_Base.h>
@@ -47,6 +48,10 @@ namespace oc3d
     typedef class itk::ConstNeighborhoodIterator<Image>::OffsetType OType;
     typedef class itk::ConstNeighborhoodIterator<Image>::NeighborhoodType ConstNBType;
     typedef class itk::NeighborhoodIterator<Image>::NeighborhoodType NBType;
+    typedef class itk::ImageFileWriter<Image> ImageWriter;
+    typedef class itk::ImageFileWriter<Image>::Pointer ImageWriterPointer;
+
+    typedef class Cut::iterator CutIterator;
 
     /*! A coordinate system to locate voxels on the image */
     template <class T>
@@ -119,6 +124,7 @@ namespace oc3d
 
     /*! list of the voxels inside the structure */
     std::map<Coord3D, unsigned int> voxelList;
+    std::vector<ImageIndexType> intToVoxel;
 
     /*! Euclidean distance */
     inline static float distance(const ImageIndexType & index1, const ImageIndexType & index2) {
@@ -458,6 +464,7 @@ namespace oc3d
       for (imgIt.GoToBegin(); !imgIt.IsAtEnd(); ++imgIt) {
         if (imgIt.Get() != 0) {
           voxelList[Coord3D(imgIt.GetIndex(), image)] = nbVoxels++;
+          intToVoxel.push_back(imgIt.GetIndex());
         }
       }
       IO_B::dual.resize(nbVoxels + 2);
@@ -516,8 +523,30 @@ namespace oc3d
       // then create the corresponding pant
       IO_B::init_pants();
     }
+    void saveResult(const std::string & filename) {
+      // copy the image
+      typedef class itk::ImageDuplicator<Image> DuplicatorType;
+      typedef class itk::ImageDuplicator<Image>::Pointer DuplicatorPointerType;
+      DuplicatorPointerType duplicator = DuplicatorType::New();
+      duplicator->SetInputImage(image);
+      duplicator->Update();
+      ImagePointer result = duplicator->GetOutput();
 
+      // then for each cut, and for each edge of the cut, draw it in the image (2, 3)
+      for(unsigned int i = 0; i < IO_B::cuts.size(); i++) {
+        CutIterator it(IO_B::cuts[i]);
+        for(const Edge *e = it.beg(); !it.end(); e = it.nxt()) {
+          (*result).SetPixel(intToVoxel[(*e).v()], 2);
+          (*result).SetPixel(intToVoxel[(*e).w()], 3);
+        }
+      }
+      // then write the image
+      ImageWriterPointer writer = ImageWriter::New();
+      writer->SetFileName(filename);
+      writer->SetInput(result);
+      writer->Update();
 
+    }
   };
 
   template<class Edge, class Cut, class Dual, class Pants, class Image>

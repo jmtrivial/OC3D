@@ -40,6 +40,7 @@ typedef IO_Voxels<Edge, Cut, Dual, Pants, SCharImageType> IO_V;
 static char * inputFile       = NULL;
 static char * logFile         = NULL;
 static char * surfaceFile     = NULL;
+static char * imageFile       = NULL;
 static int    help            = 0;
 static int    neighborVariant = 0;
 
@@ -48,6 +49,7 @@ struct poptOption options[] = {
   { "neighbor", 'n', POPT_ARG_NONE, &neighborVariant, 0, "Use the neighbor-variant of the Ford-Fulkerson method.", NULL},
   { "log", 'l', POPT_ARG_STRING, &logFile, 0, "Generate a log file that contains information about the computation steps.", NULL},
   { "surface", 's', POPT_ARG_STRING, &surfaceFile, 0, "Generate a mesh file that describe the surface of the corrected object.", NULL},
+  { "image", 0, POPT_ARG_STRING, &imageFile, 0, "Generate an image that describe the optimal cutting.", NULL},
   { "help", 'h', POPT_ARG_NONE, &help, 0, "Show this help message", NULL},
   POPT_TABLEEND
 };
@@ -113,20 +115,21 @@ int main(int argc, const char** argv) {
     io_voxels.make_initialcut_BFS(true);
     std::cout << "Number of initial cuts: " << io_voxels.cuts.size() << std::endl;
 
-
-    // TODO: adapt the following code to the image context
+    // then optimize the structure
     NoNullCap<Edge> noNull(io_voxels.dual.V(), io_voxels.get_t());
     Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io_voxels.dual, noNull, io_voxels.get_s(), io_voxels.get_t());
     Cut_Vertices<Edge, Dual> cut_vertices(io_voxels.dual);
-    
     OptimalNPants<>::optimize(io_voxels, fulkerson, cut_vertices);
-    cout<<"Optimal cuts:"<<endl;
-    for(unsigned int i = 0; i < io_voxels.cuts.size(); i++) // Display found io.cuts
-    {
-      Cut::iterator it(io_voxels.cuts[i]);
-      for(Edge *e = it.beg(); !it.end(); e = it.nxt())
-        cout<<e->v()<<" -- "<<e->cap()<<" --> "<<e->w()<<"; ";
-      cout<<endl;
+
+    if (imageFile != NULL) {
+      std::cout << "Save image (" << imageFile << ")" << std::endl;
+      io_voxels.saveResult(imageFile);
+    }
+    if (logFile != NULL) {
+      // TODO
+    }
+    if (surfaceFile != NULL) {
+      // TODO
     }
   }
   return 0;
