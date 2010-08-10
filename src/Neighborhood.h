@@ -97,8 +97,8 @@ public:
 	Graph N; // Neighborhood
 
 	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
-	  sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), edges_in_N(G.E(), false), 
-		  in_cylinder(G.V(), false), proc(G.V(), t), N(G.V(), false)
+	  sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), 
+		  edges_in_N(G.size(), false), in_cylinder(G.V(), false), proc(G.V(), t), N(G.V(), false)
     { }
 
 	/*! Computes a maxflow in G using proc
@@ -108,26 +108,30 @@ public:
 	{
 		time_t t1, t2;
 
-		N.resize((*this).G.V());
-		typename Graph::iterator it_s((*this).G, (*this).s);
-		for(Edge *e = it_s.beg(); !it_s.end(); e = it_s.nxt())
-			N.insert(e);
-		typename Graph::iterator it_t((*this).G, (*this).t);
-		for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
-			N.insert(e);
-		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> init_bfs((*this).G, proc);
+		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> init_bfs(G, proc);
 		t1 = clock();
 		init_bfs((*this).s);
 		t2 = clock();
 		if(details)
-			show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
+			show("First BFS time: " + toString((t2-t1)));
 		augment();
 		// Ensuite on teste les adjacences de tet (pas besoin de supprimer les autres comp. connexes ainsi cree
 		add_cylinder();
 		link();
 
 		if(details)
+		{
+			N.remove(s);
+			N.remove(t);
 			io.template graph_to_OFF<Graph, Edge>(N, "_N");
+		}
+
+		typename Graph::iterator it_s(G, s);
+		for(Edge *e = it_s.beg(); !it_s.end(); e = it_s.nxt())
+			N.insert(e);
+		typename Graph::iterator it_t(G, t);
+		for(Edge *e = it_t.beg(); !it_t.end(); e = it_t.nxt())
+			N.insert(e);
 
 		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> bfs(N, proc);
 		if(!continue_bfs)
@@ -137,7 +141,7 @@ public:
 			{
 				t2 = clock();
 				if(details)
-					show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
+					show("Time: " + toString((t2-t1)));
 				augment();
 				if(flow >= upper_flow)
 					return false;
@@ -149,30 +153,33 @@ public:
 		}
 		else
 		{
-			t1 = clock();
-			while(bfs((*this).s))
+			while(bfs(this->s))
 			{
-				t2 = clock();
-				if(details)
-					show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
+				time_t total_time = 0;
+				int nPaths = 0;
 				augment();
 				if(flow >= upper_flow)
 					return false;
 				init_cylinder();
 				add_cylinder();
 				t1 = clock();
-				int n = 0;
-				while(bfs((*this).s) || n == 4)
+				while(bfs(this->s))
 				{
-					n++;
 					t2 = clock();
-					if(details)
-						show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
+					nPaths++;
+					total_time += (t2-t1);
 					augment();
 					if(flow >= upper_flow)
 						return false;
 					add_cylinder();
 					t1 = clock();
+				}
+				t2 = clock();
+				if(details)
+				{
+					show("Average time: " + toString(total_time/nPaths));
+					show("Total time: " + toString(total_time));
+					show(toString(nPaths) + " paths found");
 				}
 				link();
 			}

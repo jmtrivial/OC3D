@@ -90,7 +90,7 @@ public:
 		}
 		show("Dual created");
 		show("Number of vertices: " + toString(IO_B::dual.V()));
-		show("Number of edges: " + toString(IO_B::dual.E()));
+		show("Number of edges: " + toString(IO_B::dual.size()));
 	}
 
 	/*! Loads dual graph from a .OFF file
@@ -125,7 +125,7 @@ public:
 			offName = IO_B::base_name + "_dual" + ext + ".off";
 		std::ofstream offFile(offName.c_str(), std::ios::out | std::ios::binary);
 		offFile<<"OFF"<<std::endl;
-		offFile<<(graph.V()-2)<<" "<<graph.E()<<" "<<0<<std::endl; // -2: we don't want s and t
+		offFile<<(graph.V()-2)<<" "<<graph.size()<<" "<<0<<std::endl; // -2: we don't want s and t
 		for(int i = 0; i < graph.V() - 2; i++)
 		{
 			Vector tet_center = vertexToTet[i]->getCenter();
@@ -147,7 +147,7 @@ public:
 			fileName = IO_B::base_name + "_vertices_cut.off";
 		std::ofstream outfile(fileName.c_str(), std::ios::out | std::ios::binary);  
 		outfile<<"OFF"<<std::endl;
-		outfile<<cut->E()<<" 0 0"<<std::endl;
+		outfile<<cut->size()<<" 0 0"<<std::endl;
 
 		typename Cut::iterator it(cut);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
@@ -324,7 +324,7 @@ public:
 
 		std::ofstream outfile(fileName.c_str(), std::ios::out | std::ios::binary);  
 		outfile<<"OFF"<<std::endl;
-		outfile<<vertices.size()<<" "<<cut->E()<<" "<<0<<std::endl;
+		outfile<<vertices.size()<<" "<<cut->size()<<" "<<0<<std::endl;
 		for(int i = 0; i < vertices.size(); i++)
 			outfile<<vertices[i].x<<" "<<vertices[i].y<<" "<<vertices[i].z<<std::endl;
 

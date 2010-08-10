@@ -34,7 +34,7 @@ public:
 	void set_w(int w) { Edge_Base::w_ = w; }
 
 	/*! \returns Number of edges in the cut */
-	inline int E() const { return cut.size(); }
+	inline int size() const { return cut.size(); }
 
 	/*! Deletes all edges in the cut */
 	void clear() 

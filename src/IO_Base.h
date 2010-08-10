@@ -36,8 +36,8 @@ template<class Edge, class Cut, class Dual, class Pants> class IO_Base
 {
 protected:
 	
-	/*! Gives an orientation to the cut with bfs 
-	\todo BFS works, but better to use orientate face - crossprod or <b> to stop bfs search </b> */
+	/*! Gives an orientation to the cut 
+	\todo orientate face - crossprod instead */
 	void orientate(Cut *cut)
 	{
 		typename Cut::iterator it(cut);
@@ -142,12 +142,12 @@ public:
 		if(fileName == "")
 			fileName = (base_name + "_cut_" + toString(num) + ".cut");
 		std::ofstream outfile(fileName.c_str(), std::ios::out | std::ios::binary); 
-		outfile<<cut->E()<<std::endl;
+		outfile<<cut->size()<<std::endl;
 		typename Cut::iterator it(cut);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 		  outfile<<e->v()<<" "<<e->w()<<std::endl;
 		outfile.close();
-		show("Cut number " + toString(num) + " with " + toString(cut->E()) + " faces and area " + toString(cut->cap())+ " saved in file " + fileName);
+		show("Cut number " + toString(num) + " with " + toString(cut->size()) + " faces and area " + toString(cut->cap())+ " saved in file " + fileName);
 	}
 	/*! Loads cut number num as a .cut file: <br/> 
 	first line is the number of edges, every other line contains the extremities of one edge */

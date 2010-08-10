@@ -36,6 +36,7 @@ void help()
 	show("opt i: optimize cut number i, pants must be initialized before");
 	show("neighbors: enable/disable neighborhood variant of Ford Fulkerson algorithm\n  Default: enabled");
 	show("continue: enable/disable the variant of neighborhood algorithm searching all possible paths before augmentating, must be used with neighbors\n  Default: enabled");
+	show("details: enable/disable detailed information while optimizing with neighborhood algorithm");
 }
 
 
@@ -68,6 +69,7 @@ string args_to_file(vector<string> &tokens, unsigned int index)
 	return file;
 }
 
+bool details = true;
 bool use_neighbors = true;
 bool continue_bfs = true;
 
@@ -99,6 +101,11 @@ int main(int argc, char *argv[])
 		{
 			continue_bfs = !continue_bfs;
 			show((continue_bfs ? "U" : "Don't u") + toString("se the variant of neighborhood algorithm searching all possible paths before augmentating"));
+		}
+		else if(cmd == "details")
+		{
+			details = !details;
+			show((details ? "U" : "Don't u") + toString("se detailed information while optimizing with neighborhood algorithm"));
 		}
 	    else if(cmd == "load")
 		{
@@ -140,7 +147,8 @@ int main(int argc, char *argv[])
 				time_t t1 = clock();
 				if(use_neighbors)
 				{
-					Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(), io_tet_adj.get_t(), io_tet_adj.cuts[num]->cap(), io_tet_adj, continue_bfs);
+					Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(),
+						io_tet_adj.get_t(), io_tet_adj.cuts[num]->cap(), io_tet_adj, continue_bfs, details);
 					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_adj.dual);
 					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Neighborhood<> > OptimalNPants;
 					OptimalNPants::optimize(num, io_tet_adj, neighborhood, cut_vertices);
