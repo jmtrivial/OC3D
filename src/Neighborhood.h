@@ -17,12 +17,13 @@ template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class E
 class Neighborhood : public sgl::Max_Flow<type_flow, Edge, Graph>
 {
 public:
+	typedef sgl::Max_Flow<type_flow, Edge, Graph> M_F;
 	typedef Edge_Cut<type_flow, Edge> Cut;
 	typedef IO_Tet_Adj<Edge, Edge_Adj, Cut, Graph, Dual_Adj, sgl::Graph_List<Cut> > IO;
 	typedef IO_Tet<Edge, Cut, Graph, sgl::Graph_List<Cut> > IO_T;
 private:
 	type_flow flow;
-	const type_flow upper_flow;
+	const int size_G;
 	const Dual_Adj &dual_adj;
 	IO &io;
 	const bool continue_bfs, details;
@@ -30,7 +31,19 @@ private:
 	std::vector<int> toLink;
 	std::vector<bool> in_cylinder; 
 	Proc proc;
-	
+
+	void init()
+	{
+		int V = M_F::G.V();
+		N.clear();
+		N.resize(V);
+		flow = 0.0;
+		edges_in_N.clear();
+		edges_in_N.resize(M_F::G.size(), false);
+		toLink.clear();
+		in_cylinder.clear();
+		in_cylinder.resize(V, false);
+	}
 	int get_pred(int v) const { return proc.tPred.pred(v)->other(v); }
 	void augment() // Add flow along the path search.tPred
 	{ 
@@ -93,19 +106,27 @@ private:
 		toLink.clear();
 	}
 
+	const type_flow PRECISION;
+
+	// Returns true if flow is considered to be superior to f
+	bool sup_flow(type_flow f)
+	{
+		return flow >= f - PRECISION;
+	}
+
 public:
 	Graph N; // Neighborhood
 
-	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, type_flow upper_flow, IO &io, bool continue_bfs = true, bool details = false) : 
-	  sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), flow(0), upper_flow(upper_flow), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), 
-		  edges_in_N(G.size(), false), in_cylinder(G.V(), false), proc(G.V(), t), N(G.V(), false)
+	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, IO &io, bool continue_bfs = true, bool details = false) : 
+	  sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), 
+		  size_G(G.size()), proc(G.V(), t), N(G.V(), false), PRECISION(1./10000)
     { }
 
-	/*! Computes a maxflow in G using proc
-	\param s Source of the maxflow
-	\param t Sink (t must be different from s) */
-	bool operator()()
+	/*! Computes a maxflow */
+	bool operator()(type_flow upper_flow)
 	{
+		init();
+
 		time_t t1, t2;
 
 		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> init_bfs((*this).G, proc);
@@ -122,7 +143,7 @@ public:
 		if(details)
 		{
 			N.remove((*this).s);
-                        N.remove((*this).t);
+            N.remove((*this).t);
 			io.template graph_to_OFF<Graph, Edge>(N, "_N");
 		}
 
@@ -143,7 +164,7 @@ public:
 				if(details)
 					show("Time: " + toString((t2-t1)));
 				augment();
-				if(flow >= upper_flow)
+				if(sup_flow(upper_flow))
 					return false;
 				init_cylinder();
 				add_cylinder();
@@ -158,7 +179,7 @@ public:
 				time_t total_time = 0;
 				int nPaths = 0;
 				augment();
-				if(flow >= upper_flow)
+				if(sup_flow(upper_flow))
 					return false;
 				init_cylinder();
 				add_cylinder();
@@ -169,7 +190,7 @@ public:
 					nPaths++;
 					total_time += (t2-t1);
 					augment();
-					if(flow >= upper_flow)
+					if(sup_flow(upper_flow))
 						return false;
 					add_cylinder();
 					t1 = clock();
@@ -188,7 +209,7 @@ public:
 	}
 
 	/*! \returns Flow out of s */
-	type_flow get_outflow() { return flow; }
+	type_flow get_outflow() { return flow + PRECISION; }
 };
 }
 

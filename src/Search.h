@@ -25,7 +25,7 @@ public:
 	Tree tPred;
 	Proc_Base(int V) : tPred(V) { }
 	/*!  Clear the predecessors */
-	void init(int source)  {  tPred.clear();  }
+	void init(int source)  {  tPred.clear(); source = source;  }
 	/*! Skip
 	 \returns False */
 	inline bool trait(int v) { return false; }

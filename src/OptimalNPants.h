@@ -328,7 +328,7 @@ public:
 		//////////////////////////////////////////////////////////////////////////////
 
 		maxFlow.init_flow();
-		maxFlow();
+		maxFlow(next->cap());
 
 		bool move = maxFlow.get_outflow() < next->cap();
 

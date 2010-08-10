@@ -17,10 +17,10 @@
 
 namespace sgl
 {
-template<typename type_wt> inline type_wt max_val() // for old compilators (acm-icpc)...
+template<typename type> inline type max_val() // for old compilators (acm-icpc)...
 {
 	//return INT_MAX;
-	return std::numeric_limits<type_wt>::max();
+	return std::numeric_limits<type>::max();
 }
 
 class Edge_Base
