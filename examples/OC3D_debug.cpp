@@ -141,7 +141,26 @@ int main(int argc, char *argv[])
 		{
 			unsigned int num = 0;
 			if((tokens.size() == 1 || !fromString(tokens[1], num)) || num >= io().cuts.size())
-				help();
+			{
+				time_t t1 = clock();
+				if(use_neighbors)
+				{
+					Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(),
+						io_tet_adj.get_t(), io_tet_adj.cuts[num]->cap(), io_tet_adj, continue_bfs, details);
+					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_adj.dual);
+					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Neighborhood<> > OptimalNPants;
+					OptimalNPants::optimize(io_tet_adj, neighborhood, cut_vertices);
+				}
+				else
+				{
+					NoNullCap<Edge> noNull(io_tet.dual.V(), io_tet.get_t()); 
+					Fulkerson<type_flow, Edge, NoNullCap<Edge> > fulkerson(io_tet.dual, noNull, io_tet.get_s(), io_tet.get_t());
+					Cut_Vertices<Edge, Dual> cut_vertices(io_tet.dual);
+					OptimalNPants<>::optimize(io_tet, fulkerson, cut_vertices);
+				}
+				time_t t2 = clock();
+				show("Time: " + toString((t2-t1)/CLOCKS_PER_SEC));
+			}
 			else
 			{
 				time_t t1 = clock();
@@ -174,7 +193,6 @@ int main(int argc, char *argv[])
 			{
 				string file = tokens.size() == 1 ? "" : args_to_file(tokens, 2);
 				io().filecut_to_cut(num, file);
-				io().init_cut(num);
 				show("Cut " + toString(num) + " loaded");
 			}
 		}
@@ -189,7 +207,6 @@ int main(int argc, char *argv[])
 				io().filecut_to_cut(num, file);
 				io().shrink_cut(num, 50);
 				io().cut_to_filecut(num, io().base_name + "_cut_" + toString(num) + + "_thin" + ".cut");
-				io().init_cut(num);
 				show("Cut " + toString(num) + " loaded");
 			}
 		}
@@ -197,7 +214,10 @@ int main(int argc, char *argv[])
 		{
 			int num = 0;
 			if(tokens.size() == 1 || !fromString(tokens[1], num))
-				help();
+			{
+				for(int i = 0; i < io().cuts.size(); i++)
+					io().cut_to_filecut(i, "");
+			}
 			else
 			{
 				string file = tokens.size() == 1 ? "" : args_to_file(tokens, 2);
