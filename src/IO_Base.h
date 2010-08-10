@@ -80,7 +80,7 @@ protected:
 		}
 	}
 
-	Cut *new_cut(unsigned int num)
+	Cut *new_cut(unsigned int num = -1)
 	{
 		Cut *cut;
 		if(num < 0 || num >= cuts.size())
