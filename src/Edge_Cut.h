@@ -48,7 +48,13 @@ public:
 	{ 
 		cut.push_back(e); 
 		cap_ += e->cap();
-	} 
+	}
+
+        /*! insert a list of cuts */
+	inline void insert(const std::list<Edge *> & list) {
+          for(class std::list<Edge *>::const_iterator e = list.begin(); e != list.end(); ++e)
+            insert(*e);
+        }
 
 	/*! \returns total capacity */
 	inline type_wt cap() const { return cap_; } 

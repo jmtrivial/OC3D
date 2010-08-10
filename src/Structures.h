@@ -49,6 +49,14 @@ public:
 	{
 		return (e.v() == v_ && e.w() == w_) || (e.w() == v_ && e.v() == w_);
 	}
+
+        /*! return the last vertex, by id */
+	inline bool lastById(int u) const {
+	  if (v_ > w_)
+	    return v_ == u;
+	  else
+	    return w_ == u;
+	}
 };
 
 template<typename type_wt> std::ostream &operator<<(std::ostream &os, const Edge_Base &e)
@@ -320,7 +328,8 @@ public:
 			while(cur != NULL) 
 			{
 				nxt = cur->next;
-				if(digraph || i > cur->e->other(i)) // Avoid invalid pointer (e->v() must be different from e->w())
+				// TODO: if cur->e has been deleted, cur->e->from(i) cannot be accessed properly
+				if(digraph || cur->e->lastById(i)) // Evite d'avoir des pointeurs invalides
 					delete cur->e;
 				delete cur;
 				cur = nxt;
