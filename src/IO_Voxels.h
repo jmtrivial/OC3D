@@ -419,6 +419,9 @@ namespace oc3d
           if (l != big) {
             Cut *cut = IO_B::new_cut();
             (*cut).insert(*l);
+            (*cut).create_RevCut();
+            (*cut).get_RevCut()->set_num((*cut).get_num(), false);
+            
           }
       }
     }
@@ -510,7 +513,8 @@ namespace oc3d
       if (verbose)
         std::cout << " Build original cut from the pre-cut" << std::endl;
       createCutsFromPreCuts(result);
-
+      // then create the corresponding pant
+      IO_B::init_pants();
     }
 
 
