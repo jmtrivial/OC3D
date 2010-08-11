@@ -384,7 +384,6 @@ We need it to take into account path such as [fig].
 If v is a vertex and p a set of vertices (for example, a path), d(v, p) (and d(p, v)) is the minimal length of a shortest path, in \DualAdj{}, between v and a vertex of p. \\
 Given two set of vertices p and p', d(p, p') = max$_{v \in p}$ d(v, p'). \\
 The p-neighborhood \N{p} is the set of all vertices v such that d(v, p) $\leqslant$ 1. \\
-The strict p-neighborhood \Ns{p} is the set of all paths p' such that d(p, p') = 1. \\
 %If \Path{} = $\lbrace p_1, \ldots, p_n \rbrace$ is a set of paths, \N{\Path} = $\Delta$ \N{$p_i$} ( = ($\bigcup$  \N{$p_i$}) -  $\bigcup p_i$), and we define similarly \Ns{\Path}.
 \end{defi}
 \begin{rem}
@@ -402,10 +401,10 @@ Then, to compute a max flow, we can use the following algorithm, which I call ne
 }
 \end{algorithm} \\
 
-Of course, the first path computed may visit all the reachable edges (as in the classic Ford Fulkerson), but all other paths are searched in the growing neighborhood.
-
+Of course, the first path computed may visit all the reachable edges (as in the classic Ford Fulkerson), but all other paths are searched in the growing neighborhood. \\
+The following theorem shows that we actually get a max flow at the end of the neighborhood algorithm:
 \begin{theoreme}
-Assume we are computing a max flow in \V, using neighborhood algorithm and that we already found n (n $\leqslant$ 1) augmenting paths \Path = $\lbrace p_1, \ldots, p_n \rbrace$. \\
+Assume we are computing a max flow in \V, using neighborhood algorithm and that we already found n (n $\geqslant$ 1) augmenting paths \Path = $\lbrace p_1, \ldots, p_n \rbrace$. \\
 Let R be the residual network, and f the current flow. \\
 If there is no path from s to t in R $\cap$ \N{\Path} then f is a max flow.
 \end{theoreme}
@@ -416,8 +415,8 @@ If m $\leqslant$ 1, p$_1$ $\in$ R $\cap$ \N{\Path} and the theorem is proved. \\
 Otherwise, let v be a vertex in p$_1$ such that d(v, \Path) $\geqslant$ 2.\\
 Since d(v, \Path) $\geqslant$ 2, \N{\Path} $\cap$ \N{v} = $\varnothing$, and every edge in \N{v} has a flow equal to 0 (i.e, these edges are in the residual graph R). \\
 Let q be the path \N{v} $\cap$ p$_0$. \\
-Since all paths from s to t are homotopic (such that there is no "hole" between them), we can find a path q' in \N{v} with same extremities than q and replace q by q' such that for all vertices w added this way, d(w, \Path) < d(v, \Path). \\
-If we do this with all such vertex v, we create a path p such that d(p, \Path) < m, a contradiction. So m $\leqslant$ 1.
+Since all paths from s to t are homotopic (such that there is no "hole" between them), we can find a path q' in \N{v} with same extremities than q and replace q by q' such that for all vertices w added this way, d(w, \Path) $<$ d(v, \Path). \\
+If we do this with all such vertex v, we create a path p such that d(p, \Path) $<$ m, a contradiction. So m $\leqslant$ 1.
 \fin
 
 \begin{rem}
@@ -509,7 +508,7 @@ To compare the algorithms of max flow, I tested them on a slighty modified torus
 The examples can be found at : [url]. \\
 The timing runs were performedon a Dell inspiron 1520 with and Intel Core 2 Duo T7300 Processor (2.0GHz, 4MB L2 cache) and 2048 Mo memory. \\
 Compilation was done with Visual C++ 2008 with all optimization flags set for maximum speed. \\
-The times require by the continue neighborhood algorithm is of same order of the time required by TetGen (about 80 seconds for the torus which dual has a complexity 1750000).
+The times require by the continue neighborhood algorithm is of same order of the time required by TetGen which has  the complexity O(\S$^2$) required by Delaunay tetrahedrization (about 80 seconds for the torus which dual has a complexity 1750000), see \cite{TetGen}.
 
 \begin{table}[htbp]
 \begin{center}
@@ -552,9 +551,9 @@ Paths found & Edges & Total time & Avg time & Edges & Total time & Avg time & To
 \caption{Detailed time comparison}
 }
 \end{table}
-I didn't have the time to test this algorithm on voxels, but for non degenerated volume, the first neighborhood will be roughly four times the length of the first path found. \\
-For that example, it means that the first neighborhood is likely be about 400 edges instead of 2452 for tetrahedra, eight times less. \\
-Then I expect the neighborhood algorithm to be much more efficient with voxels.
+I didn't have the time to test this algorithm on voxels, but for non degenerated volume, the first neighborhood will be at most eight times the length of the first path found (if the path is a straight path, there is exactly eight disjoint paths adjacent to it. \\
+For that example, it means that the first neighborhood is likely be about 800 edges instead of 2452 for tetrahedra, three times less. \\
+Then I expect the neighborhood algorithm to be more efficient with voxels.
 
 \begin{figure}[h]
 \begin{center}
@@ -588,6 +587,7 @@ shortest homotopic cycles on an orientable surface. Proceedings of the 11th Symp
 \bibitem{Cormen90} T. Cormen, C. Leiserson, R. Rivest. Introduction to algorithms. MIT Press, 1990.
 \bibitem{Diestel02} R. Diestel. Graph Theory, volume 173 of Graduate Texts in Mathematics. Springer-Verlag, 2000.
 \bibitem{Papa98} C. H. Papadimitriou, K. Steiglitz. Combinatorial optimization: Algorithms and Complexity. Dover Publications, 1998.
+\bibitem{TetGen} H. Si. TetGen: User's manual. 2006.
 \end{thebibliography}
 \end{small}
 

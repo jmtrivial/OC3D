@@ -52,7 +52,7 @@ public:
 			for(Tetrahedra::const_iterator j = adj_tet.begin(); j != adj_tet.end(); ++j)
 					clique.push_back((long int)(*j)->getInfo());
 			make_clique(clique);
-		}
+		} 
 		/*for (TetVertices::const_iterator i = IO_T::mesh.Vertices().begin(); i != IO_T::mesh.Vertices().end(); ++i)
 		{
 			TetVertex *e = *i;
