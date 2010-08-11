@@ -6,7 +6,7 @@
 \contentsline {section}{\numberline {2}Previous works on surface cutting}{4}{section.2}
 \contentsline {subsection}{\numberline {2.1}Cutting a surface to reduce its genus to 0}{5}{subsection.2.1}
 \contentsline {subsection}{\numberline {2.2}Shortest homotopic cycles on a surface}{5}{subsection.2.2}
-\contentsline {subsection}{\numberline {2.3}First attempts to a volume cutting}{6}{subsection.2.3}
+\contentsline {subsection}{\numberline {2.3}First attempts to do a volume cutting}{6}{subsection.2.3}
 \contentsline {section}{\numberline {3}General algorithm}{7}{section.3}
 \contentsline {subsection}{\numberline {3.1}Overview}{7}{subsection.3.1}
 \contentsline {subsection}{\numberline {3.2}First decomposition}{7}{subsection.3.2}
@@ -19,17 +19,17 @@
 \contentsline {subsection}{\numberline {4.1}The algorithm}{10}{subsection.4.1}
 \contentsline {subsection}{\numberline {4.2}Processing order and intersections}{12}{subsection.4.2}
 \contentsline {subsection}{\numberline {4.3}Complexity}{12}{subsection.4.3}
-\contentsline {subsection}{\numberline {4.4}Variant}{12}{subsection.4.4}
-\contentsline {section}{\numberline {5}Implementation}{12}{section.5}
-\contentsline {subsection}{\numberline {5.1}Overview}{12}{subsection.5.1}
-\contentsline {subsection}{\numberline {5.2}SGL}{12}{subsection.5.2}
-\contentsline {subsection}{\numberline {5.3}Data structures}{13}{subsection.5.3}
-\contentsline {subsection}{\numberline {5.4}Core algorithm}{13}{subsection.5.4}
-\contentsline {subsection}{\numberline {5.5}Orientation}{14}{subsection.5.5}
-\contentsline {subsection}{\numberline {5.6}Python script}{14}{subsection.5.6}
-\contentsline {subsection}{\numberline {5.7}Running time comparison}{15}{subsection.5.7}
-\contentsline {section}{\numberline {6}Conclusion}{16}{section.6}
-\contentsline {section}{\numberline {7}Appendix}{16}{section.7}
-\contentsline {subsection}{\numberline {7.1}Mathematical background}{16}{subsection.7.1}
-\contentsline {subsection}{\numberline {7.2}Applications}{17}{subsection.7.2}
-\contentsline {subsection}{\numberline {7.3}SGL}{17}{subsection.7.3}
+\contentsline {subsection}{\numberline {4.4}Variant}{13}{subsection.4.4}
+\contentsline {section}{\numberline {5}Implementation}{13}{section.5}
+\contentsline {subsection}{\numberline {5.1}Overview}{13}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}SGL}{14}{subsection.5.2}
+\contentsline {subsection}{\numberline {5.3}Data structures}{14}{subsection.5.3}
+\contentsline {subsection}{\numberline {5.4}Core algorithm}{14}{subsection.5.4}
+\contentsline {subsection}{\numberline {5.5}Orientation}{15}{subsection.5.5}
+\contentsline {subsection}{\numberline {5.6}Python script}{16}{subsection.5.6}
+\contentsline {subsection}{\numberline {5.7}Running time comparison}{16}{subsection.5.7}
+\contentsline {section}{\numberline {6}Conclusion}{17}{section.6}
+\contentsline {section}{\numberline {7}Appendix}{18}{section.7}
+\contentsline {subsection}{\numberline {7.1}Mathematical background}{18}{subsection.7.1}
+\contentsline {subsection}{\numberline {7.2}Applications}{18}{subsection.7.2}
+\contentsline {subsection}{\numberline {7.3}SGL}{18}{subsection.7.3}

@@ -42,7 +42,6 @@ $\Box$
 \newcommand{\K}{$\mathcal{K}$}
 \newcommand{\MinC}{\C$_{min}$}
 \newcommand{\N}[1]{$\mathcal{N}_{\textnormal{#1}}$}
-\newcommand{\Ns}[1]{\D{\N{#1}}}
 \newcommand{\Path}{$\mathcal{P}$}
 \newcommand{\Cut}[2]{scissor(#1, #2)}
 
@@ -163,7 +162,7 @@ The size of \V{} is polynomial in the size of \S{} according to the isoperimetri
 The same theorem holds for tetrahedra if we restrict the problem to PLC (\textit{piecewise linear complex}) which can be tetrahedrized (not all surfaces can be tetrahedrized).
 \subsection{Relations between the two problems}
 Although they have similarities, the two problems above are not identicals and especially, minimizing the area of a surface is not equivalent to minimizing its perimeter. \\
-Moreover, a surface with bounded area may have a perimeter equals to infinity.\\
+Moreover, a surface with bounded area may have a perimeter equals to infinity (figure \ref{Koch}).\\
 
 \begin{figure}[h]
 \begin{center}
@@ -176,6 +175,7 @@ Moreover, a surface with bounded area may have a perimeter equals to infinity.\\
 \end{minipage}
 \caption{Left: The Koch snowflake, a surface with finite area but with infinite perimeter. 
 Right: The optimal 1-cut (in blue) is different from the optimal 2-cut (in red) of this torus. }
+\label{Koch}
 \end{center}
 \end{figure}
 \section{Previous works on surface cutting}
@@ -220,7 +220,6 @@ This second algorithm uses \textit{n-pants} (a genus-0 surface with n boundaries
   \end{center}
 \end{figure}
 
-
 \begin{theorem}
 In a 3-pant, we can compute the shortest 1-cut \textbf{homotopic} to a a boundary of the pant in O(Vlog(V)).
 \end{theorem}
@@ -243,7 +242,7 @@ Then we can give the pant optimization algorithm: compute a pants decomposition 
 In particular, this algorithm is polynomial in its input. \\
 \cite{EricLazarus} also proves that this algorithm is optimal, in this sense: each cut in the resulting pants decomposition \P{} is the shortest cut homotopic to the initial corresponding cut in \P$_0$. However this algorithm doesn't solve \PbOne: the homotopy classes of \P{} are not, \textit{a priori}, equal to the homotopy classes of a minimum system of 1-cuts (it is worth reminding that homotopy classes can't change while optimizing, with this algorithm).
 
-\subsection{First attempts to a volume cutting}
+\subsection{First attempts to do a volume cutting}
 A first idea, suggested before the internship, is to put volumical information on the surface.
 \begin{defi}
 The medial axis (or skeleton) of \S{} is the set of all points (different from \S{}) having more than one closest point on the object's boundary, i.e the centers of the open balls tangent to this boundary in at least two points.
@@ -251,7 +250,7 @@ The medial axis (or skeleton) of \S{} is the set of all points (different from \
 \begin{defi}
 The local feature size is the distance to the medial axis.
 \end{defi}
-The method consists in defining the length of an edge as the product of the local feature size of the adjacent vertices and the Euclidean length of this edge. It is an estimation of the area that will be introduced if we are correcting an $\alpha$-junction using this edge. Then we can use a method from the previous section to compute an approximation of the shortest system of 1-cuts. However this not use all the volumic information and incoherent cuttings may happen.%[http://wiki.jmfavreau.info/post-doc_2009/projects/volumic_correction/report_june_2010]
+The method consists in defining the length of an edge as the product of the local feature size of the adjacent vertices and the Euclidean length of this edge. It is an estimation of the area that will be introduced if we are correcting an $\alpha$-junction using this edge. Then we can use a method from the previous section to compute an approximation of the shortest system of 1-cuts. However this doesn't use all the volumic information and incoherent cuttings may happen.%[http://wiki.jmfavreau.info/post-doc_2009/projects/volumic_correction/report_june_2010]
 \begin{figure}[h]
   \begin{center}
     \includegraphics[height=2cm]{LFS.eps}
@@ -266,7 +265,7 @@ Another idea, inspired by the second above algorithm, is to decompose a volume i
 The generic algorithm is the following:
 \begin{itemize}
 \item Compute a first volumic pants decomposition. 
-\item Optimize (i.e change the location while decrasing the weight) every boundary of the cuts while possible.
+\item Optimize (i.e change the location while decreasing the weight) every boundary of the cuts while possible.
 \item Among the resulting pants decomposition, select a system of 2-cuts.
 \end{itemize}
 Two algorithms result from this pattern, which I call \textit{multi pants (MPA)} and \textit{single pant (SPA) algorithms}.
@@ -344,11 +343,12 @@ We build N from \Dual the following way:
 \item Find a shortest tree $\mathcal{T}_{1}$ (resp. $\mathcal{T}_{2}$) connecting $\bigcup$\C$_{1, j}$ (resp. $\bigcup$\C$_{2, j}$). 
 \item Link s to \C$_{1, j}$ and $\mathcal{T}_{1}$ and link \C$_{2, j}$ and $\mathcal{T}_{2}$ to t.
 \end{itemize}
+The second point is needed to avoid non-connex cuts [fig]. \\
 This way, every s-t cut is homotopic to \C: \textbf{we don't change homotopy classes}.
 \subsection{Processing choice} 
 Since every optimization of a 2-cut decreases the weight of the 2-cut system \Sys, and as there are only finitely many possible total weights (for a discrete volume), our algorithms are \textit{terminating}. \\
-However, the final weight of \Sys{} and the complexity these algorithms depends crucially on the order we choose cuts to optimize. [fig] \\
-Several possible choice were considered:
+However, the final weight of \Sys{} and the complexity of these algorithms depends crucially on the order we choose cuts to optimize. [fig] \\
+Several possible choices were considered:
 \begin{itemize}
 \item Randomly.
 \item Maximum weighted 2-cut first.
@@ -368,6 +368,9 @@ Let ... Montrer que il existe cut tel que max flow le donne.
 \fin
 
 \subsection{Selection of a cutting system}
+When the SPA is finished, there is only one choice of the final system of 2-cuts (we must take all 2-cuts). \\
+However for the MPA this choice is more problematic since there are too many 2-cuts (every system of 2-cuts contains g cuts). \\
+The most "obvious" choice is to iteratively select the shortest 2-cut, while possible, but this may not be the best choice [fig]. \\
 Proof that we get a topological ball.
 
 \section{Neighborhood}
@@ -376,7 +379,7 @@ For simplicity, in all this section we assume that our volumes are made of voxel
 %\textbf{We assume that all the capacities of the edges in \Dual{} are equal to one} (this is the case, for example, if \V{}  is a set of voxels and that we put a capacity on every edge equal to the area of the corresponding face).
 
 The most time consuming part of both SPA and MPA being the computation of a max flow, one may try to improve its time complexity, and indeed, we can act more locally (for the importance of local search and neighborhood, see \cite{Papa98}). \\
-The basic idea of the neighborhood algorithm is that, during Ford Fulkerson algorithm, we can select an augmentating path "near" the previous found paths, which restricts the number of edges to visit. To define precisely what the "near" means, we need a more dense graph:
+The basic idea of the neighborhood algorithm is that, during Ford Fulkerson algorithm, we can select an augmenting path "near" the previous found paths, which restricts the number of edges to visit. To define precisely what the "near" means, we need a more dense graph:
 \begin{defi}
 The dual-adjacency graph \DualAdj{} is the graph with the same vertices as \Dual{} and with an edge (with neither a weight nor a capacity) between two vertices if the two corresponding volumic elements share at least one vertex.
 \end{defi}
@@ -392,13 +395,15 @@ d is a distance: d(p, p') = d(p', p), d(p, p') = 0 $\Longleftrightarrow$ p = p' 
 Moreover, a path p' $\in$ \N{p} if and only if d(p, p') $\leqslant$ 1.
 \end{rem}
 
-Then, to compute a max flow, we can use the following algorithm, which I call neighborhood algorithm: \\ 
+Then, to compute a max flow, we can use the following algorithm which I call neighborhood algorithm (the algorithm keep a growing neighborhood N where the paths are searched): \\ 
 \begin{algorithm}
-\Path $\leftarrow$ shortest path from s to t in R (using BFS) \;
-\While{There is an augmenting path p from s to t in R $\cap$ \Ns{\Path}}
+\caption{Neighborhood algorithm (NA)\label{}}
+Let p$_i$ be a shortest path from s to t in R (using BFS) \;
+N $\leftarrow$ \N{p$_i$} \;
+\While{There is an augmenting path p from s to t in R $\cap$ N}
 {
 	Augment flow along p. \;
-	\Path $\leftarrow$ \Path $\cup$ p \;
+	N $\leftarrow$ N $\cup$ \N{p} \;
 }
 \end{algorithm} \\
 
@@ -420,23 +425,49 @@ Since all paths from s to t are homotopic (such that there is no "hole" between 
 If we do this with all such vertex v, we create a path p such that d(p, \Path) $<$ m, a contradiction. So m $\leqslant$ 1.
 \fin
 
-\begin{rem}
-If we allow capacities to be different, we have the following weaker statement: if there is no path from s to t in R $\cap$ \N{\Path} then f is a max flow. 
-\end{rem}
-
 \subsection{Processing order and intersections}
 \subsection{Complexity}
 \begin{theorem}
-Let p be the shortest path from s to t (computed with BFS) and \C{} a min s-t cut. \\
-The neighborhood algorithm has complexity O(p\C$^2$).
+Let p be the shortest path from s to t (we assume that he is already computed with a BFS) and \C{} a min s-t cut. \\
+The neighborhood algorithm (with no computation of the first path) has complexity O(p\C$^2$).
 \end{theorem}
 \textit{Proof}:~~ \\
 Throughout the algorithm, the neighborhood grows and at the end, its size is inferior to p\C{} (the size of a complete cylinder with axis p), since the algorithm stop as soon as the min cut is found. \\ 
 So we visit at most p\C{} vertices for each BFS, and there are \C{} such BFS.
 \fin
-In the case of tetrahedra, this result is false since we can have an arbitrary number of tetrahedra adjacent to a single tetrahedra (however, the algorithm may perform very well on tetrahedra, see \ref{time}. [fig]
-\subsection{Variant}
+In the case of tetrahedra, this result is false since we can have an arbitrary number of tetrahedra adjacent to a single tetrahedra (however, the algorithm may perform very well on tetrahedra, see \ref{time}. [fig] \\
+The first path p can be computed in O(min(p$^3$, V)), indeed we stop the BFS as soon as we reach t so we can't visit more than $\frac{4}{3} \pi$ p$^3$ vertices (the size of a ball with radius p). \\
+Then the whole NA has complexity O(max(min(p$^3$, V), p\C$^2$)). \\
+Moreover, we can give an interesting asymptotic bound given by \cite{Bollo}:
+\begin{theorem}
+Let r $\geqslant$ 3.\\
+Almost all r-regular graph of order n has diameter K log(n), with K constant (informally, the probability of selecting such a graph tends to 1 as n increases).
+\end{theorem}
+\Dual{} is not exactly regular (every vertex has a degree \textit{inferior} to 4 (for tetrahedra) or 6 (for voxels)) since the vertices on the border of the volume have a smaller degree, but, for well-shaped volume we may expect this bound to be relevant, and we may expect p to be O(log(n)). \\
+Moreover, for our applications, the area of a min cut is small. \\
 
+\subsection{Variant}
+Instead of augmenting the neighborhood whenever a s-t path is found, it may be interesting to find path in the neighborhood while possible and to augment the neighborhood by step, only when no path is found. \\
+If no path is found after we augmented the neighborhood, the algorithm stops and reports a max flow. \\
+\begin{algorithm}
+\caption{Continue neighborhood algorithm (CNA)\label{}}
+Let p$_i$ be a shortest path from s to t in R (using BFS) \;
+N $\leftarrow$ \N{p$_i$} \;
+\While{There is an augmenting path p from s to t in R $\cap$ N}
+{
+	\Path $\leftarrow$ p \; 
+	Augment flow along p. \;
+	\While{There is an augmenting path p' from s to t in R $\cap$ N}
+	{
+		Augment flow along p'. \;
+		\Path $\leftarrow$ \Path $\cup$ p' \;
+	}
+	N $\leftarrow$ N $\cup$ \N{\Path} \;
+}
+\end{algorithm} \\
+The advantage of this variant is that N is more "compact", we only augment it when needed so we visit less edges. \\
+It also computes sligthy longer paths than the NA. \\
+However, this algorithm computes more BFS since every time we augment N, we do a "useless" BFS which find no path, although this BFS is performed while R $\cap$ N contains few edges so it is cheap.
 \section{Implementation}
 \subsection{Overview}
 Initially, it was planned that I develop the optimization part of the MPA, and that the rest of the team will develop the initial pants decomposition, all in C++. \\
@@ -536,7 +567,7 @@ Complexity (edges + vertices) of the dual graph & Classic & Neighborhood & Conti
 
 The advantage of a neighborhood increases significantly as the number of vertices of \Dual{} increases. \\
 I also compared, on the dual graph with complexity 900000, the time required for a BFS at different moments of the algorithms. \\
-I split the execution of the algorithms in different steps defined by the augmentation of the neighborhood used by the continue neighborhood algorithm (thus, the continue neighborhood algorithm found 1 path before augmentating, then 21, 129 and so on). \\
+I split the execution of the algorithms in different steps defined by the increase of the neighborhood used by the continue neighborhood algorithm (thus, the continue neighborhood algorithm found 1 path before augmenting, then 21, 129 and so on). \\
 Then I compared the number of edges of the neighborhood in which the paths were found, the total time during the step, and the average (shortened Avg) time of a BFS. \\
 The advantage of a neighborhood decreases slighty during the algorithm, since the neighborhood increases as the number of edges visited by a BFS on the whole graph decreases (some edges have then zero capacity and disappear from the residual graph), so the algorithm is likely to be more efficient if the min cut is small (this is especially true for voxels with capacity one, since the number of iterations is directly the number of iterations of the algorithm).
 \begin{table}[h]
@@ -598,6 +629,8 @@ shortest homotopic cycles on an orientable surface. Proceedings of the 11th Symp
 \bibitem{Diestel02} R. Diestel. Graph Theory, volume 173 of Graduate Texts in Mathematics. Springer-Verlag, 2000.
 \bibitem{Papa98} C. H. Papadimitriou, K. Steiglitz. Combinatorial optimization: Algorithms and Complexity. Dover Publications, 1998.
 \bibitem{TetGen} H. Si. TetGen: User's manual. 2006.
+\bibitem{Bollo} B. Bollobas and W. Fernandez de la Vega. The diameter of random regular
+graphs. Combinatorica 2(1982), 125-134.
 \end{thebibliography}
 \end{small}
 
