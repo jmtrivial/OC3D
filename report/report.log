@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (MiKTeX 2.8) (preloaded format=latex 2010.8.7)  11 AUG 2010 22:28
+This is pdfTeX, Version 3.1415926-1.40.10 (MiKTeX 2.8) (preloaded format=latex 2010.8.7)  11 AUG 2010 22:59
 entering extended mode
 **report.tex
 (C:\Users\Quentin\OC3D\report\report.tex
@@ -347,6 +347,9 @@ File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 LaTeX Warning: Label `' multiply defined.
 
 
+LaTeX Warning: Label `Koch' multiply defined.
+
+
 LaTeX Warning: Label `time' multiply defined.
 
 
@@ -503,45 +506,45 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: mincut.eps Graphic file (type eps)
 <mincut.eps> [9]
-Underfull \hbox (badness 10000) in paragraph at lines 377--379
+Underfull \hbox (badness 10000) in paragraph at lines 378--380
 
  []
 
 [10]
-Underfull \hbox (badness 10000) in paragraph at lines 387--391
+Underfull \hbox (badness 10000) in paragraph at lines 388--392
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 397--408
+Underfull \hbox (badness 10000) in paragraph at lines 398--409
 
  []
 
 [11]
-Underfull \hbox (badness 10000) in paragraph at lines 445--447
+Underfull \hbox (badness 10000) in paragraph at lines 446--448
 
  []
 
 [12]
-Underfull \hbox (badness 10000) in paragraph at lines 472--478
+Underfull \hbox (badness 10000) in paragraph at lines 473--479
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 480--483
+Underfull \hbox (badness 10000) in paragraph at lines 481--484
 
  []
 
 [13]
 File: edges.eps Graphic file (type eps)
  <edges.eps>
-Overfull \hbox (21.36775pt too wide) in paragraph at lines 487--488
+Overfull \hbox (21.36775pt too wide) in paragraph at lines 488--489
  [] 
  []
 
 File: IO.eps Graphic file (type eps)
 <IO.eps>
-Overfull \hbox (49.28148pt too wide) in paragraph at lines 503--504
+Overfull \hbox (49.28148pt too wide) in paragraph at lines 504--505
  [] 
  []
 
@@ -551,12 +554,12 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 [14]
 File: Max_Flow_.eps Graphic file (type eps)
  <Max_Flow_.eps>
-Overfull \hbox (57.76926pt too wide) in paragraph at lines 514--515
+Overfull \hbox (57.76926pt too wide) in paragraph at lines 515--516
  [] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 519--521
+Underfull \hbox (badness 10000) in paragraph at lines 520--522
 
  []
 
@@ -567,36 +570,42 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 File: ex_script_.eps Graphic file (type eps)
 <ex_script_.eps>
-Overfull \hbox (46.63342pt too wide) in paragraph at lines 540--541
+Overfull \hbox (46.63342pt too wide) in paragraph at lines 541--542
  [] 
  []
 
 [15]
-Overfull \hbox (45.25067pt too wide) in paragraph at lines 555--562
+File: sectionnoq.eps Graphic file (type eps)
+ <sectionnoq.eps>
+File: sectionq.eps Graphic file (type eps)
+ <sectionq.eps> [16]
+Overfull \hbox (45.25067pt too wide) in paragraph at lines 572--579
  [] 
  []
 
 
-Overfull \hbox (126.51634pt too wide) in paragraph at lines 575--589
+Overfull \hbox (126.51634pt too wide) in paragraph at lines 592--606
  [] 
  []
 
-[16]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
 File: diagram_time.eps Graphic file (type eps)
- <diagram_time.eps>
+<diagram_time.eps>
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [17] [18]
-Underfull \hbox (badness 10000) in paragraph at lines 636--637
+Underfull \hbox (badness 10000) in paragraph at lines 653--654
 
  []
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 638.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 655.
 [19]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 638.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 655.
  (C:\Users\Quentin\OC3D\report\report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 638.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 655.
 Package rerunfilecheck Info: File `report.out' has not changed.
 (rerunfilecheck)             Checksum: B49E3464B7F25E8172713362CEB91838;2336.
 
@@ -605,12 +614,12 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 6679 strings out of 495286
- 94917 string characters out of 3180412
- 195110 words of memory out of 3000000
- 9736 multiletter control sequences out of 15000+200000
+ 6683 strings out of 495286
+ 94969 string characters out of 3180412
+ 195108 words of memory out of 3000000
+ 9738 multiletter control sequences out of 15000+200000
  16130 words of font info for 60 fonts, out of 3000000 for 9000
  14 hyphenation exceptions out of 8191
- 33i,18n,31p,577b,460s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 33i,18n,31p,577b,459s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on report.dvi (19 pages, 108584 bytes).
+Output written on report.dvi (19 pages, 110276 bytes).

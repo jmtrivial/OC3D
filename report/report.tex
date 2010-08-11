@@ -550,6 +550,22 @@ The examples can be found at : [url]. \\
 The timing runs were performedon a Dell inspiron 1520 with and Intel Core 2 Duo T7300 Processor (2.0GHz, 4MB L2 cache) and 2048 Mo memory. \\
 Compilation was done with Visual C++ 2008 with all optimization flags set for maximum speed. \\
 The times require by the continue neighborhood algorithm is of same order of the time required by TetGen which has  the complexity O(\S$^2$) required by Delaunay tetrahedrization (about 80 seconds for the torus which dual has a complexity 1750000), see \cite{TetGen}.
+I noticed an improvement of the time required by the NA (and CNA) when the quality (i.e, the radius-edge ratio of the tetrahedra) of the tetrahedrization increases, since the higher the quality, the smaller the \Dual\_Adj{} (and then the neighborhood is also small). \\
+To perform tests, I used the basic option -q constraining the radius-edge ratio to be less than 2, but is also possible to more constrain the radius-edge ratio (up to 1.414 for example, see \cite{TetGen}), although this may increases the time required by TetGen. 
+\begin{figure}[h]
+\begin{center}
+\begin{minipage}{0.3\linewidth}
+\centering \includegraphics[height=2cm]{sectionnoq.eps}
+\end{minipage}
+\hfill
+\begin{minipage}{0.3\linewidth}
+\centering \includegraphics[height=2cm]{sectionq.eps}
+\end{minipage}
+\caption{Left: The Koch snowflake, a surface with finite area but with infinite perimeter. 
+Right: The optimal 1-cut (in blue) is different from the optimal 2-cut (in red) of this torus. }
+\label{Koch}
+\end{center}
+\end{figure}
 
 \begin{table}[htbp]
 \begin{center}
