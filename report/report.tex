@@ -52,6 +52,11 @@ $\Box$
 \maketitle
 \tableofcontents
 Todo: Ex ENS, diff tetgen -q, precalculer BFS pour optimize all
+
+\begin{abstract}
+After stating some results about surface cutting, this article gives an algorithm to "optimally" cut a volume, based on pants decomposition, and several variants. It introduces two new algorithms, the neighborhood algorithm and the single path algorithm, and a C++ code named OC3D, which are my main contributions. 
+\end{abstract}
+
 \section{Introduction}
 The reader not familiar with basic algebraic topology will find in the appendix the definitions needed in this report.
 \subsection{Overview}
@@ -239,14 +244,14 @@ In particular, this algorithm is polynomial in its input. \\
 \cite{EricLazarus} also proves that this algorithm is optimal, in this sense: each cut in the resulting pants decomposition \P{} is the shortest cut homotopic to the initial corresponding cut in \P$_0$. However this algorithm doesn't solve \PbOne: the homotopy classes of \P{} are not, \textit{a priori}, equal to the homotopy classes of a minimum system of 1-cuts (it is worth reminding that homotopy classes can't change while optimizing, with this algorithm).
 
 \subsection{First attempts to a volume cutting}
-A first idea is to put volumical information on the surface.
+A first idea, suggested before the internship, is to put volumical information on the surface.
 \begin{defi}
 The medial axis (or skeleton) of \S{} is the set of all points (different from \S{}) having more than one closest point on the object's boundary, i.e the centers of the open balls tangent to this boundary in at least two points.
 \end{defi}
 \begin{defi}
 The local feature size is the distance to the medial axis.
 \end{defi}
-The method consist in Creating a non-Euclidean distance on the mesh describe by this local feature size: the length of an edge is defined by the local feature size of the adjacent vertices, and by the Euclidean length of the edge, as a product. It corresponds to an estimation of the area that will be introduced if we are correcting an $\alpha$-junction using this edge. %[http://wiki.jmfavreau.info/post-doc_2009/projects/volumic_correction/report_june_2010]
+The method consists in defining the length of an edge as the product of the local feature size of the adjacent vertices and the Euclidean length of this edge. It is an estimation of the area that will be introduced if we are correcting an $\alpha$-junction using this edge. Then we can use a method from the previous section to compute an approximation of the shortest system of 1-cuts. However this not use all the volumic information and incoherent cuttings may happen.%[http://wiki.jmfavreau.info/post-doc_2009/projects/volumic_correction/report_june_2010]
 \begin{figure}[h]
   \begin{center}
     \includegraphics[height=2cm]{LFS.eps}
@@ -261,7 +266,7 @@ Another idea, inspired by the second above algorithm, is to decompose a volume i
 The generic algorithm is the following:
 \begin{itemize}
 \item Compute a first volumic pants decomposition. 
-\item Optimize (i.e change the location while decrasing the weight) every boundary of the cuts while it is possible.
+\item Optimize (i.e change the location while decrasing the weight) every boundary of the cuts while possible.
 \item Among the resulting pants decomposition, select a system of 2-cuts.
 \end{itemize}
 Two algorithms result from this pattern, which I call \textit{multi pants (MPA)} and \textit{single pant (SPA) algorithms}.
@@ -315,7 +320,7 @@ The second part of this last point is needed in order to avoid intersections bet
 Then, we compute a max flow on N (using Ford Fulkerson or Push-Relabel algorithm, for example) and we use the min cut - max flow theorem (the reader not familiar with flows on network may first read \cite{Cormen90}) to deduce a min \textit{\C s-t cut} (i.e, a min cut obtained by computing a max flow on \C) \MinC.
 However, \MinC{} is not necessarly a 2-cut, for example \D{\MinC} is not necessarily connected, but in most applications we hope that \MinC{} is indeed a 2-cut, and from now on, \textbf{we assume that every min cut computed this way is a 2-cut}. \\ 
 It is easy to see that, throughout the SPA, the pant structure is kept ((\Sys - \C) $\cup$ \MinC{} is a system of 2-cuts). \\
-Moreover, the result of the SPA is likely to be, in pratice, independant from the initial set of cuts. \\
+Moreover, the result of the SPA is likely to be, in practice, independant from the initial set of cuts. \\
 
 However, it is possible that the best cut \MinC' intersects \C, and a max flow will not take it into account. \\
 To avoid this problem, I suggested to take a \MinC{} s-t cut as a new cut, which correctness is validated by the theorem: \\
@@ -366,42 +371,59 @@ Let ... Montrer que il existe cut tel que max flow le donne.
 Proof that we get a topological ball.
 
 \section{Improvements}
-\subsection{Neighbourhood}
+\subsection{Neighborhood}
 %\textbf{We assume that all the capacities of the edges in \Dual{} are equal to one} (this is the case, for example, if \V{}  is a set of voxels and that we put a capacity on every edge equal to the area of the corresponding face).
-\begin{rem}
-In this case, according to \textit{Menger's theorem} (see \cite{Diestel02}, corollary 3.3.4), the number of edge disjoint s-t paths is equal to the weight of a min s-t cut.
-\end{rem}
 
-The most time consuming part of both SPA and MPA being the computation of a max flow, one may try to improve its time complexity, and indeed, we can act more locally (for the importance of local search and neighbourhood, see \cite{Papa98}).
+The most time consuming part of both SPA and MPA being the computation of a max flow, one may try to improve its time complexity, and indeed, we can act more locally (for the importance of local search and neighborhood, see \cite{Papa98}). \\
+The basic idea of the neighborhood algorithm is that, during Ford Fulkerson algorithm, we can select an augmentating path "near" the previous found paths, which restricts the number of edges to visit. To define precisely what the "near" means, we need a more dense graph:
 \begin{defi}
-If v is a vertex and p a path, d(v, p) (and d(p, v)) is the minimal length of a shortest path between v and a vertex of p. \\
-Given two paths p and p', d(p, p') = max$_{v \in p}$ d(v, p'). \\
-The p-neighbourhood \N{p} is the set of all paths p' such that d(p, p') $\leqslant$ 1. \\
-The strict p-neighbourhood \Ns{p} is the set of all paths p' such that d(p, p') = 1. \\
-If \Path{} = $\lbrace p_1, \ldots, p_n \rbrace$ is a set of paths, \N{\Path} = $\Delta$ \N{$p_i$} ( = ($\bigcup$  \N{$p_i$}) -  $\bigcup p_i$), and we define similarly \Ns{\Path}.
+The dual-adjacency graph \DualAdj{} is the graph with the same vertices as \Dual{} and with an edge (with neither a weight nor a capacity) between two vertices if the two corresponding volumic elements share at least one vertex.
+\end{defi}
+We need it to take into account path such as [fig].
+\begin{defi}
+If v is a vertex and p a set of vertices (for example, a path), d(v, p) (and d(p, v)) is the minimal length of a shortest path, in \DualAdj{}, between v and a vertex of p. \\
+Given two set of vertices p and p', d(p, p') = max$_{v \in p}$ d(v, p'). \\
+The p-neighborhood \N{p} is the set of all vertices v such that d(v, p) $\leqslant$ 1. \\
+The strict p-neighborhood \Ns{p} is the set of all paths p' such that d(p, p') = 1. \\
+%If \Path{} = $\lbrace p_1, \ldots, p_n \rbrace$ is a set of paths, \N{\Path} = $\Delta$ \N{$p_i$} ( = ($\bigcup$  \N{$p_i$}) -  $\bigcup p_i$), and we define similarly \Ns{\Path}.
 \end{defi}
 \begin{rem}
-d is a distance: d(p, p') = d(p', p), d(p, p') = 0 $\Longleftrightarrow$ p = p' and d(p, p'') $\leqslant$ d(p, p') + d(p', p'').
+d is a distance: d(p, p') = d(p', p), d(p, p') = 0 $\Longleftrightarrow$ p = p' and d(p, p'') $\leqslant$ d(p, p') + d(p', p''). \\
+Moreover, a path p' $\in$ \N{p} if and only if d(p, p') $\leqslant$ 1.
 \end{rem}
 
-\begin{theoreme}
-Assume we are computing a max flow in \V, using Ford Fulkerson algorithm and that we already found n augmenting paths \Path = $\lbrace p_1, \ldots, p_n \rbrace$ with BFS. \\
-Let R be the residual network, and f the current flow. \\
-If there is no path from s to t in R $\cap$ \N{\Path} then f is a max flow.
-\end{theoreme}
-\textit{Proof}:~~ \\
-\fin
-\begin{rem}
-If we allow capacities to be different, we have the following weaker statement: if there is no path from s to t in R $\cap$ \N{\Path} then f is a max flow. 
-\end{rem}
-Then, to compute a max flow, we can use the following algorithm: \\ 
+Then, to compute a max flow, we can use the following algorithm, which I call neighborhood algorithm: \\ 
 \begin{algorithm}
 \Path $\leftarrow$ shortest path from s to t in R (using BFS) \;
 \While{There is an augmenting path p from s to t in R $\cap$ \Ns{\Path}}
 {
+	Augment flow along p. \;
 	\Path $\leftarrow$ \Path $\cup$ p \;
 }
-\end{algorithm}
+\end{algorithm} \\
+
+Of course, the first path computed may visit all the reachable edges (as in the classic Ford Fulkerson), but all other paths are searched in the growing neighborhood.
+
+\begin{theoreme}
+Assume we are computing a max flow in \V, using neighborhood algorithm and that we already found n (n $\leqslant$ 1) augmenting paths \Path = $\lbrace p_1, \ldots, p_n \rbrace$. \\
+Let R be the residual network, and f the current flow. \\
+If there is no path from s to t in R $\cap$ \N{\Path} then f is a max flow.
+\end{theoreme}
+\textit{Proof}:~~ \\
+Assume f is not a max flow: there is at least one path p$_0$ from s to t in R. \\
+$\lbrace$ d(p, \Path), p path from s to t in R $\rbrace$ is a finite, non empty (p$_0$ belongs to it) set of $\mathbb{N}$ so it has a minimum m, let p$_1$ be a path such that d(p$_1$, \Path) = m. \\
+If m $\leqslant$ 1, p$_1$ $\in$ R $\cap$ \N{\Path} and the theorem is proved. \\
+Otherwise, let v be a vertex in p$_1$ such that d(v, \Path) $\geqslant$ 2.\\
+Since d(v, \Path) $\geqslant$ 2, \N{\Path} $\cap$ \N{v} = $\varnothing$, and every edge in \N{v} has a flow equal to 0 (i.e, these edges are in the residual graph R). \\
+Let q be the path \N{v} $\cap$ p$_0$. \\
+Since all paths from s to t are homotopic (such that there is no "hole" between them), we can find a path q' in \N{v} with same extremities than q and replace q by q' such that for all vertices w added this way, d(w, \Path) < d(v, \Path). \\
+If we do this with all such vertex v, we create a path p such that d(p, \Path) < m, a contradiction. So m $\leqslant$ 1.
+\fin
+
+\begin{rem}
+If we allow capacities to be different, we have the following weaker statement: if there is no path from s to t in R $\cap$ \N{\Path} then f is a max flow. 
+\end{rem}
+
 
 \subsection{Processing order and intersections}
 \subsection{Complexity}
@@ -502,6 +524,7 @@ Complexity (edges + vertices) of the dual graph & Classic & Neighborhood & Conti
 \label{time}
 \caption{Running time in seconds of the optimization of one 2-Cut using several algorithms of max flow (K stands for 1000).}
 \end{table}
+
 The advantage of a neighborhood increases significantly as the number of vertices of \Dual{} increases. \\
 I also compared, on the dual graph with complexity 900000, the time required for a BFS at different moments of the algorithms. \\
 I split the execution of the algorithms in different steps defined by the augmentation of the neighborhood used by the continue neighborhood algorithm (thus, the continue neighborhood algorithm found 1 path before augmentating, then 21, 129 and so on). \\
@@ -514,7 +537,7 @@ The advantage of a neighborhood decreases slighty during the algorithm, since th
 \hline
  & \multicolumn{ 3}{c|}{Continue neighborhood} & \multicolumn{ 3}{c|}{Neighborhood} & \multicolumn{ 2}{c|}{Classic} \\ \hline
 Paths found & Edges & Total time & Avg time & Edges & Total time & Avg time & Total time & Avg time \\ \hline
-1 & 0 & 250 & 250 & 0 & 250 & 250 & 250 & 250 \\ \hline
+1 & 101 (in path) & 250 & 250 & 101 (in path) & 250 & 250 & 250 & 250 \\ \hline
 21 & 2452 & 41 & 1,95 & 2452 & 49 & 2,33 & 4917 & 234,14 \\ \hline
 129 & 4240 & 283 & 2,19 & 5084 & 446 & 3,46 & 30140 & 233,64 \\ \hline
 363 & 9428 & 1295 & 3,57 & 11282 & 2500 & 6,89 & 86221 & 237,52 \\ \hline
@@ -529,6 +552,9 @@ Paths found & Edges & Total time & Avg time & Edges & Total time & Avg time & To
 \caption{Detailed time comparison}
 }
 \end{table}
+I didn't have the time to test this algorithm on voxels, but for non degenerated volume, the first neighborhood will be roughly four times the length of the first path found. \\
+For that example, it means that the first neighborhood is likely be about 400 edges instead of 2452 for tetrahedra, eight times less. \\
+Then I expect the neighborhood algorithm to be much more efficient with voxels.
 
 \begin{figure}[h]
 \begin{center}
@@ -536,7 +562,8 @@ Paths found & Edges & Total time & Avg time & Edges & Total time & Avg time & To
 \caption{Average time of a BFS with respect to the step in the CNA.}
 \end{center}
 \end{figure}
-
+\section{Conclusion}
+Integrated to FAST project.
 \section{Appendix}
 \subsection{Mathematical background}
 \begin{defi}

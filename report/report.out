@@ -16,7 +16,7 @@
 \BOOKMARK [2][-]{subsection.3.4}{Processing choice}{section.3}% 16
 \BOOKMARK [2][-]{subsection.3.5}{Selection of a cutting system}{section.3}% 17
 \BOOKMARK [1][-]{section.4}{Improvements}{}% 18
-\BOOKMARK [2][-]{subsection.4.1}{Neighbourhood}{section.4}% 19
+\BOOKMARK [2][-]{subsection.4.1}{Neighborhood}{section.4}% 19
 \BOOKMARK [2][-]{subsection.4.2}{Processing order and intersections}{section.4}% 20
 \BOOKMARK [2][-]{subsection.4.3}{Complexity}{section.4}% 21
 \BOOKMARK [1][-]{section.5}{Implementation}{}% 22
@@ -27,7 +27,8 @@
 \BOOKMARK [2][-]{subsection.5.5}{Orientation}{section.5}% 27
 \BOOKMARK [2][-]{subsection.5.6}{Python script}{section.5}% 28
 \BOOKMARK [2][-]{subsection.5.7}{Running time comparison}{section.5}% 29
-\BOOKMARK [1][-]{section.6}{Appendix}{}% 30
-\BOOKMARK [2][-]{subsection.6.1}{Mathematical background}{section.6}% 31
-\BOOKMARK [2][-]{subsection.6.2}{Applications}{section.6}% 32
-\BOOKMARK [2][-]{subsection.6.3}{SGL}{section.6}% 33
+\BOOKMARK [1][-]{section.6}{Conclusion}{}% 30
+\BOOKMARK [1][-]{section.7}{Appendix}{}% 31
+\BOOKMARK [2][-]{subsection.7.1}{Mathematical background}{section.7}% 32
+\BOOKMARK [2][-]{subsection.7.2}{Applications}{section.7}% 33
+\BOOKMARK [2][-]{subsection.7.3}{SGL}{section.7}% 34
