@@ -9,7 +9,7 @@
 
 \usepackage{amsthm} % newtheorem
 \newtheorem{pb}{Problem}
-\newtheorem{theoreme}{Theorem}
+\newtheorem{theorem}{Theorem}
 \theoremstyle{definition}
 \newtheorem{defi}{Definition}
 \newtheorem{lemma}{Lemma}
@@ -142,18 +142,18 @@ An apparently similar problem is known to be NP-hard: \\
 Given a discrete surface \S, possibly with boundary, find a minimum cutting to obtain a single topological disk (i.e the resulting cutting product must have genus 0 and with no boundary).
 \end{pb}
 
-\begin{theoreme}
+\begin{theorem}
 \PbOne -BOUNDARY is NP-hard
-\end{theoreme}
+\end{theorem}
 \textit{Proof}:~~ \\
 \cite{Erickson02} reduces this problem to the \textit{rectilinear Steiner tree problem} (i.e,  given n points in the plane, find a tree connecting them all with only vertical and horizontal line segments), which is known to be NP-hard.
 \fin
 
 However, it is not known if \PbOne{} and \PbTwo{} are NP-hard, but the two problems are linked. \\
 In the case of voxels, we have:
-\begin{theoreme}
+\begin{theorem}
 \PbOne{} reduces to \PbTwo.
-\end{theoreme}
+\end{theorem}
 \textit{Proof}:~~ \\
 Let \S{} be an instance of \PbOne: according to Jordan's theorem, \S{} bounds only one volume \V. \\
 For each face of \V, we put a weight equals to sum of weights of the edges of this face that are in \S. 
@@ -205,9 +205,9 @@ Every 1-cut of \S{} crosses \Sys.
 If a 1-cut doesn't cross \Sys, it is included in \Cut{\S}{\Sys} which is a genus 0 surface. Every loop on such a surface is contractible so separating, a contradiction.
 \fin
 By calculating the shortest 1-cut passing through every triangle of \Sys, we have:
-\begin{theoreme}
+\begin{theorem}
 We can compute a shortest 1-cut in O($\vert$ \Sys{} $\vert$ Vlog(V)).
-\end{theoreme}
+\end{theorem}
 
 The algorithm consists in iteratively calculating the shortest 1-cut, while possible. This may not lead to the minimum system of 1-cuts.
 
@@ -221,9 +221,9 @@ This second algorithm uses \textit{n-pants} (a genus-0 surface with n boundaries
 \end{figure}
 
 
-\begin{theoreme}
+\begin{theorem}
 In a 3-pant, we can compute the shortest 1-cut \textbf{homotopic} to a a boundary of the pant in O(Vlog(V)).
-\end{theoreme}
+\end{theorem}
 \textit{Proof}:~~ \\
 To establish this result, we need (see proof in: \cite{EricCours})
 \begin{lemma}
@@ -290,10 +290,10 @@ Right: Cuts associated to this skeleton. }
 \end{figure}
 Let B be the set of all intersection points of \K: the MPA basically compute the B-cut locus and use its connected components as a pants decomposition. \\
 All the resulting pants need not have the same number of boundaries, but assuming that it is the case, we can know precisely the number of such pants:
-\begin{theoreme}
+\begin{theorem}
 Let p be the number of pants and c the number of cycles of any n-pant decomposition of \S{}.\\
 Then p = 2(g-1) and c = 3(g-1).
-\end{theoreme}
+\end{theorem}
 \textit{Proof}:~~ \\
 For one pant P, according to Euler's formula: $V_P - E_P + F_P$ = 2 - b = - 1.\\
 Since every couple of pants share a number of vertices equals to the number of edges shared, the number of pants is: $\sum_{P pant} (-V_P + E_P - F_P)$ = $V - E + F$ = 2 - 2g. \\
@@ -324,9 +324,9 @@ Moreover, the result of the SPA is likely to be, in practice, independant from t
 
 However, it is possible that the best cut \MinC' intersects \C, and a max flow will not take it into account. \\
 To avoid this problem, I suggested to take a \MinC{} s-t cut as a new cut, which correctness is validated by the theorem: \\
-\begin{theoreme}
+\begin{theorem}
 \MinC' doesn't intersect \MinC. 
-\end{theoreme}
+\end{theorem}
 \textit{Proof}:~~ \\
 \fin
 
@@ -359,10 +359,10 @@ Bounding the number of iteration required for the 2 first points is likely to be
 However the All-Min choice requires $\Omega$(g$^2$) max flow, with the SPA: at the beginning there are g 2-cuts to optimize, so we compute g max flow, then we fix one 2-cut so we compute g - 1 max flow, and so on. \\
 And indeed, g + g - 1 + $\ldots$ + 1 = $\frac{g(g+1)}{2}$ = $\Omega$(g$^2$). \\
 Moreover, the validity of the All-Min choice is validated by:
-\begin{theoreme}
+\begin{theorem}
 Let \C$_1$, $\ldots$, \C$_k$ be the first k 2-cuts chosen by All-Min \\
 C$_k$ is the minimum [non separating of the decoupage]2-Cut among all cuts not intersecting
-\end{theoreme}
+\end{theorem}
 \textit{Proof}:~~ \\
 Let ... Montrer que il existe cut tel que max flow le donne.
 \fin
@@ -370,8 +370,9 @@ Let ... Montrer que il existe cut tel que max flow le donne.
 \subsection{Selection of a cutting system}
 Proof that we get a topological ball.
 
-\section{Improvements}
-\subsection{Neighborhood}
+\section{Neighborhood}
+\subsection{The algorithm}
+For simplicity, in all this section we assume that our volumes are made of voxels, unless explicitly stated. \\
 %\textbf{We assume that all the capacities of the edges in \Dual{} are equal to one} (this is the case, for example, if \V{}  is a set of voxels and that we put a capacity on every edge equal to the area of the corresponding face).
 
 The most time consuming part of both SPA and MPA being the computation of a max flow, one may try to improve its time complexity, and indeed, we can act more locally (for the importance of local search and neighborhood, see \cite{Papa98}). \\
@@ -403,11 +404,11 @@ Then, to compute a max flow, we can use the following algorithm, which I call ne
 
 Of course, the first path computed may visit all the reachable edges (as in the classic Ford Fulkerson), but all other paths are searched in the growing neighborhood. \\
 The following theorem shows that we actually get a max flow at the end of the neighborhood algorithm:
-\begin{theoreme}
+\begin{theorem}
 Assume we are computing a max flow in \V, using neighborhood algorithm and that we already found n (n $\geqslant$ 1) augmenting paths \Path = $\lbrace p_1, \ldots, p_n \rbrace$. \\
 Let R be the residual network, and f the current flow. \\
 If there is no path from s to t in R $\cap$ \N{\Path} then f is a max flow.
-\end{theoreme}
+\end{theorem}
 \textit{Proof}:~~ \\
 Assume f is not a max flow: there is at least one path p$_0$ from s to t in R. \\
 $\lbrace$ d(p, \Path), p path from s to t in R $\rbrace$ is a finite, non empty (p$_0$ belongs to it) set of $\mathbb{N}$ so it has a minimum m, let p$_1$ be a path such that d(p$_1$, \Path) = m. \\
@@ -423,9 +424,18 @@ If we do this with all such vertex v, we create a path p such that d(p, \Path) $
 If we allow capacities to be different, we have the following weaker statement: if there is no path from s to t in R $\cap$ \N{\Path} then f is a max flow. 
 \end{rem}
 
-
 \subsection{Processing order and intersections}
 \subsection{Complexity}
+\begin{theorem}
+Let p be the shortest path from s to t (computed with BFS) and \C{} a min s-t cut. \\
+The neighborhood algorithm has complexity O(p\C$^2$).
+\end{theorem}
+\textit{Proof}:~~ \\
+Throughout the algorithm, the neighborhood grows and at the end, its size is inferior to p\C{} (the size of a complete cylinder with axis p), since the algorithm stop as soon as the min cut is found. \\ 
+So we visit at most p\C{} vertices for each BFS, and there are \C{} such BFS.
+\fin
+In the case of tetrahedra, this result is false since we can have an arbitrary number of tetrahedra adjacent to a single tetrahedra (however, the algorithm may perform very well on tetrahedra, see \ref{time}. [fig]
+\subsection{Variant}
 
 \section{Implementation}
 \subsection{Overview}
@@ -503,7 +513,7 @@ To avoid freezing Blender while optimizing a cut I used several threads and I ha
 \end{figure}
 
 
-\subsection{Running time comparison}
+\subsection{Running time comparison} \label{time}
 To compare the algorithms of max flow, I tested them on a slighty modified torus, with various number of vertices. \\
 The examples can be found at : [url]. \\
 The timing runs were performedon a Dell inspiron 1520 with and Intel Core 2 Duo T7300 Processor (2.0GHz, 4MB L2 cache) and 2048 Mo memory. \\
