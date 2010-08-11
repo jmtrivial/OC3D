@@ -27,7 +27,7 @@ private:
 	const Dual_Adj &dual_adj;
 	IO &io;
 	const bool continue_bfs, details;
-	std::vector<int> edges_in_N;
+	std::vector<bool> edges_in_N;
 	std::vector<int> toLink;
 	std::vector<bool> in_cylinder; 
 	Proc proc;
@@ -196,7 +196,7 @@ public:
 					t1 = clock();
 				}
 				t2 = clock();
-				if(details)
+				if(details && nPaths)
 				{
 					show("Average time: " + toString(total_time/nPaths));
 					show("Total time: " + toString(total_time));
