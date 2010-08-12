@@ -1,5 +1,11 @@
-#ifndef FORD_NEIGHBORHOOD_H
-#define FORD_NEIGHBORHOOD_H
+/*!
+* \file Neighborhood.h
+* \author Quentin Fortier
+*  Neighborhood algorithm 
+*/
+
+#ifndef NEIGHBORHOOD_H
+#define NEIGHBORHOOD_H
 
 #include "Search.h"
 #include "Flow.h"

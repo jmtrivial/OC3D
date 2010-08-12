@@ -1,5 +1,6 @@
 /*!
 * \file Structures.h
+* \author Quentin Fortier
 *  General definitions of edges and graphs
 */
 

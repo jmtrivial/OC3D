@@ -1,5 +1,6 @@
 /*!
 * \file Edge_Dual.h
+* \author Quentin Fortier
 *  Dual edge class
 */
 

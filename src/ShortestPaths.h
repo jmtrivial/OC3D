@@ -1,5 +1,6 @@
 /*!
  * \file ShortestPaths.h
+ * \author Quentin Fortier
  *  Shortest paths algorithms
  */
 

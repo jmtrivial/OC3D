@@ -1,5 +1,6 @@
 /*!
 * \file Edge_Cut.h
+* \author Quentin Fortier
 *  Cut class, as an edge in the pant graph
 */
 

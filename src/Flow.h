@@ -1,5 +1,6 @@
 /*!
 * \file Flow.h
+* \author Quentin Fortier
 *  Flow algorithms
 */
 

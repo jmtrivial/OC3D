@@ -1,5 +1,6 @@
 /*!
 * \file OptimalNPants.h
+* \author Quentin Fortier
 *  Search for optimal cuts in a pants decomposition
 */
 

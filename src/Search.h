@@ -1,5 +1,6 @@
 /*!
  * \file Search.h
+ * \author Quentin Fortier
  *  Search algorithms
  */
 
