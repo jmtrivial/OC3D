@@ -17,10 +17,10 @@
 
 namespace sgl
 {
-template<typename type_wt> inline type_wt max_val() // for old compilators (acm-icpc)...
+template<typename type> inline type max_val() // for old compilators (acm-icpc)...
 {
 	//return INT_MAX;
-	return std::numeric_limits<type_wt>::max();
+	return std::numeric_limits<type>::max();
 }
 
 class Edge_Base
@@ -383,7 +383,7 @@ public:
 		if (!digraph) 
 		{
 			node * tmp_ = adj[e->w()];
-			if(sameEdgePtr) // warning : ne pas ecrire adj[e->w()] = adj[e->v()]; car sinon les nodes sont les memes!
+			if(sameEdgePtr) // (warning : ne pas ecrire adj[e->w()] = adj[e->v()]; car sinon les nodes sont les memes!)
 				adj[e->w()] = new node(e, tmp_, NULL);  
 			else
 				adj[e->w()] = new node(new Edge(*e), tmp_, NULL); 

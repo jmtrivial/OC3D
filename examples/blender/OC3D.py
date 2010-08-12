@@ -6,6 +6,7 @@ Name: 'Optimal Cutting 3D'
 Blender: 100
 Group: 'Misc'
 Tooltip: 'Cut a volume to reduce its genus'
+Author: 'Quentin Fortier'
 """
 
 import Blender
@@ -34,6 +35,8 @@ EXT_THIN = "_thin"
 
 Num_Cut = Create(0)
 Neighbors_Toggle = Create(1)
+Continue_Toggle = Create(1)
+Details_Toggle = Create(1)
 
 last_cmd = []
 numToCut = []	
@@ -46,7 +49,9 @@ CMD_PASS = 0
 CMD_MAKE_DUAL = CMD_PASS + 1
 CMD_OPT = CMD_MAKE_DUAL + 1
 CMD_SAVE_CUT = CMD_OPT + 1
+CMD_SAVE_ALL_CUTS = CMD_SAVE_CUT + 1
 CMD_LOAD_THICK = CMD_SAVE_CUT + 1
+CMD_LOAD_TET = CMD_LOAD_THICK + 1
 
 # Events
 EVENT_NOEVENT = 0 
@@ -62,9 +67,11 @@ EVENT_SAVE_THICK_CUT = EVENT_SAVE_CUT + 1
 
 EVENT_OPTIMIZE_CUT = EVENT_SAVE_THICK_CUT + 1
 EVENT_UNDO = EVENT_OPTIMIZE_CUT + 1
-EVENT_OPTIMIZE_ALL = EVENT_UNDO + 1
+EVENT_DETAILS = EVENT_UNDO + 1
+EVENT_OPTIMIZE_ALL = EVENT_DETAILS + 1
 
-EVENT_NEIGHBORHOOD = EVENT_OPTIMIZE_ALL + 1
+EVENT_CONTINUE = EVENT_OPTIMIZE_ALL + 1
+EVENT_NEIGHBORHOOD = EVENT_CONTINUE + 1
 EVENT_LOAD_ALL = EVENT_NEIGHBORHOOD + 1
 EVENT_EXIT = EVENT_LOAD_ALL + 1
 
@@ -88,11 +95,11 @@ def read_all(filename):
 	tet_file = base_file + ".1"
 	set_layer(2)
 	read(tet_file + ".off")
+	dual_made = False
 	oc3d.stdin.write("load " + tet_file + ".ele" + "\n")
 	last_cmd.append((CMD_PASS, 0))
 	oc3d.stdin.write("make_dual\n")
 	last_cmd.append((CMD_MAKE_DUAL, base_file + EXT_DUAL))
-	dual_made = False
 	while(dual_made == False): time.sleep(0.1)
 	i = 0
 	while read_cut(i, file_cut(i)):
@@ -134,28 +141,28 @@ def write_off(filename):
 	message = 'Successfully exported "%s"' % Blender.sys.basename(filename)
 	
 def read_cut(num, filename):
-	global numToCut
-	try:
-		file = open(filename, "rb")
-	except:
-		print "Error: can't read cut file " + filename
-		return False
-	lEdges = file.readline()
-	E = map(int, lEdges.split())
-	while(num >= len(numToCut)):
-		numToCut.append([])
-	numToCut[num] = []
-	mesh = bpy.data.scenes.active.objects.active.getData(mesh=1)
-	for l in file:
-		try:
-			u, v = map(int, l.split())
-			e = mesh.findEdges(u, v)
-			numToCut[num].append(mesh.edges[e])
-		except:
-			print "Error: can't read edge (" + str(u) + ", " + str(v) + ")"
-	file.close()
-	print "Read cut " + str(num) + " with " + str(len(numToCut[num])) + "edges in file " +  filename
-	return True
+    global numToCut
+    try:
+        file = open(filename, "rb")
+    except:
+        print (str("Error: cannot read cut file ") + filename)
+        return False
+    lEdges = file.readline()
+    E = map(int, lEdges.split())
+    while(num >= len(numToCut)):
+        numToCut.append([])
+    numToCut[num] = []
+    mesh = bpy.data.scenes.active.objects.active.getData(mesh=1)
+    for l in file:
+        try:
+            u, v = map(int, l.split())
+            e = mesh.findEdges(u, v)
+            numToCut[num].append(mesh.edges[e])
+        except:
+            print ("Error: can't read edge (" + str(u) + ", " + str(v) + ")")
+    file.close()
+    print ("Read cut " + str(num) + " with " + str(len(numToCut[num])) + "edges in file " +  filename)
+    return True
 	
 def write_cut(num, filename):
 	global numToCut
@@ -183,7 +190,7 @@ def select(num):
 			e.sel = 1
 		Blender.Window.EditMode(1)
 	except:
-		print "Error: Can't select cut %d" % num
+		print ("Error: Can't select cut %d" % num)
 			
 def unselect():
 	try:
@@ -194,13 +201,13 @@ def unselect():
 		mesh.update()
 		if in_editmode: Blender.Window.EditMode(1)
 	except:
-		print "Warning: can't unselect"
+		print ("Warning: can't unselect")
 	
 def write(file):
 	try:
 		write_off(file)
 	except IOError:
-		print "Error: can't write " + file
+		print ("Error: can't write " + file)
 		return False
 	return True
 
@@ -208,9 +215,9 @@ def read(file):
 	try:
 		off_import.read(file)
 	except:
-		print "Error: can't read " + file
+		print ("Error: can't read " + file)
 		return False
-	print "Read " + file
+	print ("Read " + file)
 	return True
 		
 def tetgen(file):
@@ -227,12 +234,12 @@ def tetgen(file):
 	try:
 		p = subprocess.Popen(args=[PATH_TETGEN,"-Oq",file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
 	except:
-		print "Error: can't execute " + PATH_TETGEN
+		print ("Error: can't execute " + PATH_TETGEN)
 		return False
 	outputlines = p.stdout.readlines()
 	p.wait()
 	for l in outputlines:
-		print l,
+		print (l, )
 	set_layer(2)
 	read(tet_file + ".off")
 	Blender.Window.WaitCursor(0)
@@ -240,14 +247,14 @@ def tetgen(file):
 
 def read_output():
 	import string
-	global oc3d, last_cmd, dual_made, Num_Cut
+	global oc3d, last_cmd, dual_made, Num_Cut, numToCut
 	while(True):
-		time.sleep(0.1)
+		#time.sleep(0.1)
 		l = oc3d.stdout.readline()
 		l_split = str.split(l, "\n")
 		nEnd = string.count(l, "END")
 		if(nEnd == 0):
-			print l_split[0]
+			print (l_split[0])
 		while(nEnd >= 1):
 			nEnd = nEnd - 1
 			if(last_cmd):
@@ -255,6 +262,9 @@ def read_output():
 				if(cmd == CMD_SAVE_CUT):
 					read_cut(info, file_cut(info))
 					select(info)
+				elif(cmd == CMD_SAVE_ALL_CUTS):
+					for i in range(len(numToCut)):
+						read_cut(i, file_cut(i))
 				elif(cmd == CMD_MAKE_DUAL):
 					set_layer(3)
 					read(info)
@@ -264,14 +274,18 @@ def read_output():
 					select(info)
 				elif(cmd == CMD_PASS):
 					pass
-			else: print "Error: can't find last command"
+				elif(cmd == CMD_LOAD_TET):
+					oc3d.stdin.write("make_dual\n")
+					last_cmd.append((CMD_MAKE_DUAL, base_file + EXT_DUAL))
+					
+			else: print ("Error: can't find last command")
 
 def set_layer(num):
 	ViewLayers([num])
 	SetActiveLayer(1<<(num-1))
 
 def gui():
-	global Num_Cut, Neighbors_Toggle, oc3d
+	global Num_Cut, Neighbors_Toggle, Continue_Toggle, Details_Toggle, oc3d
 
 	glClear(GL_COLOR_BUFFER_BIT)
 	
@@ -293,17 +307,19 @@ def gui():
 		if (num < len(numToCut)): select(num)
 	
 	Num_Cut = Number("Cut n°", EVENT_NOEVENT, col_separation, bottom, width, height, Num_Cut.val, 0, len(numToCut), "Select the i-th cut", num_changed, 1)
-	Button("Save thick cut", EVENT_SAVE_THICK_CUT, col_separation, bottom + 3*height, width, height, "Save selected thick cut as " + file_cut(Num_Cut.val))
+	#Button("Save thick cut", EVENT_SAVE_THICK_CUT, col_separation, bottom + 3*height, width, height, "Save selected thick cut as " + file_cut(Num_Cut.val))
 	Button("Save cut", EVENT_SAVE_CUT, col_separation, bottom + 2*height, width, height, "Save selected cut as " + file_cut(Num_Cut.val))
 	Button("Load cut", EVENT_LOAD_CUT, col_separation, bottom + height, width, height, "Load " + file_cut(Num_Cut.val))
 
 	# Optimize
 	# Button("Undo / redo", EVENT_UNDO, col_separation*2, bottom + 2*height, width, height, "Undo / redo last optimization")
+	Details_Toggle = Toggle("Optimization details", EVENT_DETAILS, col_separation*2, bottom + 2*height, width, height, Details_Toggle.val, "Gives more information in the console")
 	Button("Optimize cut", EVENT_OPTIMIZE_CUT, col_separation*2, bottom + height, width, height, "Optimize cut " + str(Num_Cut.val))
 	Button("Optimize all", EVENT_OPTIMIZE_ALL, col_separation*2, bottom, width, height, "Optimize cut " + str(Num_Cut.val))
 	
 	# Options
 	#Button("Save all", EVENT_SAVE_CONFIG, col_separation*3, bottom + 2*height, width, height)
+	Continue_Toggle = Toggle("Continue", EVENT_CONTINUE, col_separation*3, bottom + 3*height, width, height, Continue_Toggle.val, str("Enable the variant of neighborhood algorithm searching all possible paths before augmentating "))
 	Neighbors_Toggle = Toggle("Neighborhood", EVENT_NEIGHBORHOOD, col_separation*3, bottom + 2*height, width, height, Neighbors_Toggle.val, "Enable the use of neighborhood during max flow")
 	Button("Load all", EVENT_LOAD_ALL, col_separation*3, bottom + height, width, height, "Select a .off file and load all related files")
 	Button("Exit",EVENT_EXIT , col_separation*3, bottom, width, height)
@@ -324,7 +340,7 @@ def load_tet(file):
 	last_cmd.append((CMD_MAKE_DUAL, base_file + EXT_DUAL))
 	
 def bevent(evt):
-	global numToCut, oc3d, tet_file, base_file, numToCut
+	global numToCut, oc3d, tet_file, base_file, dual_made
 	
 	if evt == EVENT_EXIT:
 		if(oc3d):
@@ -343,12 +359,14 @@ def bevent(evt):
 					tetgen(split_file[0] + ".off")
 			FileSelector(save, "Save as .off mesh", PATH_DEFAULT + "\\" + bpy.data.scenes.active.objects.active.getName() + ".off")
 			
-	elif evt == EVENT_MAKE_DUAL:	
+	elif evt == EVENT_MAKE_DUAL:
+		dual_made = False	
 		oc3d.stdin.write("load " + tet_file + ".ele" + "\n")
 		last_cmd.append((CMD_PASS, 0))
 		oc3d.stdin.write("make_dual\n")
 		last_cmd.append((CMD_MAKE_DUAL, base_file + EXT_DUAL))
-		
+		while(dual_made == False): time.sleep(0.1)
+			
 	elif evt == EVENT_LOAD_CUT:
 		read_cut(Num_Cut.val, file_cut(Num_Cut.val))
 		select(Num_Cut.val)
@@ -369,7 +387,7 @@ def bevent(evt):
 		
 	elif evt == EVENT_OPTIMIZE_CUT:
 		if(Num_Cut.val >= len(numToCut)):
-			print "Error: cut " + str(Num_Cut.val) + " not saved"
+			print ("Error: cut " + str(Num_Cut.val) + " not saved")
 			return
 		oc3d.stdin.write("init\n")
 		last_cmd.append((CMD_PASS, 0))
@@ -377,12 +395,28 @@ def bevent(evt):
 		last_cmd.append((CMD_PASS, 0))
 		oc3d.stdin.write("save_cut " + str(Num_Cut.val) + "\n")
 		last_cmd.append((CMD_SAVE_CUT, Num_Cut.val))
+
+	elif evt == EVENT_OPTIMIZE_ALL:
+		oc3d.stdin.write("init\n")
+		last_cmd.append((CMD_PASS, 0))
+		oc3d.stdin.write("opt\n")
+		last_cmd.append((CMD_PASS, 0))
+		oc3d.stdin.write("save_cut" + "\n")
+		last_cmd.append((CMD_SAVE_ALL_CUTS, 0))
 		
 	elif evt == EVENT_LOAD_ALL:
 		FileSelector(read_all, "Load a base .off mesh", PATH_DEFAULT + ".off")
 	
 	elif evt == EVENT_NEIGHBORHOOD:
 		oc3d.stdin.write("neighbors\n")
+		last_cmd.append((CMD_PASS, 0))
+	
+	elif evt == EVENT_CONTINUE:
+		oc3d.stdin.write("continue\n")
+		last_cmd.append((CMD_PASS, 0))
+	
+	elif evt == EVENT_DETAILS:
+		oc3d.stdin.write("details\n")
 		last_cmd.append((CMD_PASS, 0))
 		
 oc3d = subprocess.Popen(args=[PATH_OC3D], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin = subprocess.PIPE, shell=False)	

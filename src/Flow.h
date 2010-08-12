@@ -124,7 +124,7 @@ public:
 	/*! Computes a maxflow in G using proc_ful
 	\param s Source of the maxflow
 	\param t Sink (t must be different from s) */
-	void operator()()
+	void operator()(int upper_flow)
 	{
 		do{
 			while(search((*this).s)) // Must return true if there exist a path from s to t
