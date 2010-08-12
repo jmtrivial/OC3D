@@ -517,6 +517,11 @@ namespace oc3d
             }
         }
       }
+#ifndef NDEBUG
+      else  {
+        std::cout << "WARNING: a pre-cut (location: " << index << ") produced only " << l_cuts.size() << " cut." << std::endl;
+      }
+#endif
     }
 
     /*! create initial cuts from pre-cuts. \see propagateFromPoint */
@@ -619,6 +624,11 @@ namespace oc3d
       createCutsFromPreCuts(result);
       // then create the corresponding pant
       IO_B::init_pants();
+
+#ifndef NDEBUG
+      exportCutsImage("/tmp/initial-cut.nii.gz");
+      exportPantsImage("/tmp/pants.nii.gz");
+#endif
     }
 
     /*! save the cut in an image */
@@ -634,9 +644,10 @@ namespace oc3d
       // then for each cut, and for each edge of the cut, draw it in the image (2, 3)
       for(unsigned int i = 0; i < IO_B::cuts.size(); i++) {
         CutIterator it(IO_B::cuts[i]);
+
         for(const Edge *e = it.beg(); !it.end(); e = it.nxt()) {
-          (*result).SetPixel(intToVoxel[(*e).v()], 2);
-          (*result).SetPixel(intToVoxel[(*e).w()], 3);
+          (*result).SetPixel(intToVoxel[(*e).v()], 2 + (i * 2));
+          (*result).SetPixel(intToVoxel[(*e).w()], 3 + (i * 2));
         }
       }
       // then write the image
@@ -645,6 +656,64 @@ namespace oc3d
       writer->SetInput(result);
       writer->Update();
 
+    }
+
+    /*! export the pant decomposition in an image */
+    void exportPantsImage(const std::string & filename) {
+      // copy the image
+      typedef class itk::ImageDuplicator<Image> DuplicatorType;
+      typedef class itk::ImageDuplicator<Image>::Pointer DuplicatorPointerType;
+      DuplicatorPointerType duplicator = DuplicatorType::New();
+      duplicator->SetInputImage(image);
+      duplicator->Update();
+      ImagePointer result = duplicator->GetOutput();
+
+      // use the cuts to draw the boundaries of the pants
+      for(class std::vector<Cut *>::const_iterator cut = IO_B::cuts.begin(); cut != IO_B::cuts.end(); ++cut) {
+        typename Cut::iterator it(*cut);
+        for(Edge *e = it.beg(); !it.end(); e = it.nxt()) {
+          result->SetPixel(intToVoxel[(*e).v()], (**cut).v() + 2);
+          result->SetPixel(intToVoxel[(*e).w()], (**cut).w() + 2);
+        }
+      }
+
+      // fill the pants
+      RType radius;
+      radius.Fill(1);
+      NeighborhoodIteratorType itImg(radius, result, result->GetRequestedRegion());
+      BCondition bCond;
+      bCond.SetConstant(0);
+      itImg.SetBoundaryCondition(bCond);
+
+      for(class std::vector<Cut *>::const_iterator cut = IO_B::cuts.begin(); cut != IO_B::cuts.end(); ++cut) {
+        typename Cut::iterator it(*cut);
+        for(Edge *e = it.beg(); !it.end(); e = it.nxt()) {
+          itImg.SetLocation(intToVoxel[(*e).v()]);
+          for (unsigned int i = 0; i < 6; ++i)
+            if (itImg.GetPixel(directions6[i]) == 1)
+              fillCC(result, itImg.GetIndex(directions6[i]), 1, (**cut).v() + 2);
+          itImg.SetLocation(intToVoxel[(*e).w()]);
+          for (unsigned int i = 0; i < 6; ++i)
+            if (itImg.GetPixel(directions6[i]) == 1)
+              fillCC(result, itImg.GetIndex(directions6[i]), 1, (**cut).w() + 2);
+        }
+      }
+
+      // remove the cuts
+      for(class std::vector<Cut *>::const_iterator cut = IO_B::cuts.begin(); cut != IO_B::cuts.end(); ++cut) {
+        typename Cut::iterator it(*cut);
+        for(Edge *e = it.beg(); !it.end(); e = it.nxt()) {
+          result->SetPixel(intToVoxel[(*e).v()], 1);
+          result->SetPixel(intToVoxel[(*e).w()], 1);
+        }
+}
+
+
+      // then write the image
+      ImageWriterPointer writer = ImageWriter::New();
+      writer->SetFileName(filename);
+      writer->SetInput(result);
+      writer->Update();
     }
   };
 
