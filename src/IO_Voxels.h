@@ -26,6 +26,10 @@
 #include "itkConstantBoundaryCondition.h"
 #include "itkImageDuplicator.h"
 #include "itkImageFileWriter.h"
+#include "itkBinaryThresholdImageFilter.h"
+#include "itkConnectedComponentImageFilter.h"
+#include "itkRelabelComponentImageFilter.h"
+
 
 // oc3d
 #include <IO_Base.h>
@@ -131,6 +135,49 @@ namespace oc3d
       return sqrt((index1[0] - index2[0]) * (index1[0] - index2[0]) +
                   (index1[1] - index2[1]) * (index1[1] - index2[1]) +
                   (index1[2] - index2[2]) * (index1[2] - index2[2]));
+    }
+
+    /*! given an image, return the number of connected components of the given value */
+    static unsigned int debugCheckNumberCC(const ImagePointer & img, unsigned char value) {
+      std::cout << "DEBUG: check for number of connected components" << std::endl;
+      // copy the image
+      typedef class itk::ImageDuplicator<Image> DuplicatorType;
+      typedef class itk::ImageDuplicator<Image>::Pointer DuplicatorPointerType;
+      DuplicatorPointerType duplicator = DuplicatorType::New();
+      duplicator->SetInputImage(img);
+      duplicator->Update();
+      ImagePointer result = duplicator->GetOutput();
+
+      typedef class itk::BinaryThresholdImageFilter<Image, Image> FilterType;
+      typedef class itk::BinaryThresholdImageFilter<Image, Image>::Pointer FilterTypePointer;
+      FilterTypePointer thresholder = FilterType::New();
+      thresholder->SetInput(duplicator->GetOutput());
+
+      thresholder->SetOutsideValue(0);
+      thresholder->SetInsideValue(1);
+      thresholder->SetLowerThreshold(value);
+      thresholder->SetUpperThreshold(value);
+      thresholder->Update();
+
+      typedef class itk::ConnectedComponentImageFilter<Image, Image> ComponentFilter;
+      typedef class itk::ConnectedComponentImageFilter<Image, Image>::Pointer ComponentFilterPointer;
+      ComponentFilterPointer component = ComponentFilter::New();
+      component->FullyConnectedOff();
+      component->SetInput(thresholder->GetOutput());
+      component->Update();
+
+      // sort components by size
+      typedef class itk::RelabelComponentImageFilter<Image, Image> RelabelFilterType;
+      typedef class itk::RelabelComponentImageFilter<Image, Image>::Pointer RelabelFilterTypePointer;
+      RelabelFilterTypePointer relabel = RelabelFilterType::New();
+      relabel->SetInput(component->GetOutput());
+      try {
+        relabel->Update();
+      } catch (itk::ExceptionObject & excep) {
+        return std::numeric_limits<unsigned int>::max();
+      }
+
+      return relabel->GetNumberOfObjects();
     }
 
     static unsigned int fillCC(ImagePointer & img, const ImageIndexType point, int in, int out) {
@@ -558,6 +605,7 @@ namespace oc3d
 
 #ifndef NDEBUG
      {
+       assert(debugCheckNumberCC(result, 3) == 1);
        ImageWriterPointer writer = ImageWriter::New();
        writer->SetFileName("/tmp/pre-cut.nii.gz");
        writer->SetInput(result);
