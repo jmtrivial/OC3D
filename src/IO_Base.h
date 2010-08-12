@@ -243,7 +243,10 @@ public:
 			Proc proc(dual.V() - 2);
 			proc.source = start;
 			sgl::BFS<Edge, Proc, Dual> bfs(dual, proc);
-			bfs(start);
+
+                        if (bfs(start)) {
+                          show("Warning: empty pant.");
+                        }
 
 			for(unsigned int j = firstCut; j < cuts.size(); j++) // Sets every cut found by bfs
 			{
@@ -261,9 +264,9 @@ public:
 				{
 					setCut->set_w(curPant);
 					setCut->get_RevCut()->set_v(curPant);
-				}
+                                }
 			}
-		} // for(int curPant = 0; ; curPant++) 
+		} // for(int curPant = 0; ; curPant++)
 
 		for(typename std::list<Edge*>::const_iterator it_del = delEdges.begin(); it_del != delEdges.end(); ++it_del)
 			dual.insert(*it_del);

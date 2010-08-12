@@ -26,6 +26,10 @@
 #include "itkConstantBoundaryCondition.h"
 #include "itkImageDuplicator.h"
 #include "itkImageFileWriter.h"
+#include "itkBinaryThresholdImageFilter.h"
+#include "itkConnectedComponentImageFilter.h"
+#include "itkRelabelComponentImageFilter.h"
+
 
 // oc3d
 #include <IO_Base.h>
@@ -133,6 +137,49 @@ namespace oc3d
                   (index1[2] - index2[2]) * (index1[2] - index2[2]));
     }
 
+    /*! given an image, return the number of connected components of the given value */
+    static unsigned int debugCheckNumberCC(const ImagePointer & img, unsigned char value) {
+      std::cout << "DEBUG: check for number of connected components" << std::endl;
+      // copy the image
+      typedef class itk::ImageDuplicator<Image> DuplicatorType;
+      typedef class itk::ImageDuplicator<Image>::Pointer DuplicatorPointerType;
+      DuplicatorPointerType duplicator = DuplicatorType::New();
+      duplicator->SetInputImage(img);
+      duplicator->Update();
+      ImagePointer result = duplicator->GetOutput();
+
+      typedef class itk::BinaryThresholdImageFilter<Image, Image> FilterType;
+      typedef class itk::BinaryThresholdImageFilter<Image, Image>::Pointer FilterTypePointer;
+      FilterTypePointer thresholder = FilterType::New();
+      thresholder->SetInput(duplicator->GetOutput());
+
+      thresholder->SetOutsideValue(0);
+      thresholder->SetInsideValue(1);
+      thresholder->SetLowerThreshold(value);
+      thresholder->SetUpperThreshold(value);
+      thresholder->Update();
+
+      typedef class itk::ConnectedComponentImageFilter<Image, Image> ComponentFilter;
+      typedef class itk::ConnectedComponentImageFilter<Image, Image>::Pointer ComponentFilterPointer;
+      ComponentFilterPointer component = ComponentFilter::New();
+      component->FullyConnectedOff();
+      component->SetInput(thresholder->GetOutput());
+      component->Update();
+
+      // sort components by size
+      typedef class itk::RelabelComponentImageFilter<Image, Image> RelabelFilterType;
+      typedef class itk::RelabelComponentImageFilter<Image, Image>::Pointer RelabelFilterTypePointer;
+      RelabelFilterTypePointer relabel = RelabelFilterType::New();
+      relabel->SetInput(component->GetOutput());
+      try {
+        relabel->Update();
+      } catch (itk::ExceptionObject & excep) {
+        return std::numeric_limits<unsigned int>::max();
+      }
+
+      return relabel->GetNumberOfObjects();
+    }
+
     static unsigned int fillCC(ImagePointer & img, const ImageIndexType point, int in, int out) {
       unsigned int nb = 0;
 
@@ -165,7 +212,7 @@ namespace oc3d
 
 
     /*! given a binary image, return the closest point of the object from its barycenter */
-    ImageIndexType getMiddlePoint(const ImagePointer & img) {
+    static ImageIndexType getMiddlePoint(const ImagePointer & img) {
       Coord3DT<unsigned long int> barycenter;
       typedef itk::ImageRegionConstIteratorWithIndex<Image> IteratorWithIndexType;
       {
@@ -201,7 +248,7 @@ namespace oc3d
     }
 
     /*! return true if the given voxel is a front voxel */
-    bool isValidFrontNeighborhood(ImagePointer & img, NeighborhoodIteratorType & it) {
+    static bool isValidFrontNeighborhood(ImagePointer & img, NeighborhoodIteratorType & it) {
       bool result = true;
 
       // translate 3-labeled neighbors into 4-labeled voxels
@@ -215,27 +262,52 @@ namespace oc3d
         return result;
 
 
-      // get the first connected component labeled 4, correct it with 3, then check for other 3 points
+      // get the first connected component labeled 4 in the 6-neighborhood, correct it with 3, then check for other 3 points
       bool first = true;
-      for (unsigned int i = 0; i < it.Size(); ++i)
-        if (it.GetPixel(i) == 4) {
+      for (unsigned int i = 0; i < 6; ++i)
+        if (it.GetPixel(directions6[i]) == 4) {
           if (first) {
-            fillCC(img, it.GetIndex(i), 4, 3);
+            fillCC(img, it.GetIndex(directions6[i]), 4, 3);
             first = false;
           }
           else {
-            it.SetPixel(i, 3);
+            it.SetPixel(directions6[i], 3);
             result = false;
           }
         }
+
+      // reset the other voxels (corner points)
+      for (unsigned int i = 0; i < it.Size(); ++i)
+        if (it.GetPixel(i) == 4)
+          it.SetPixel(i, 3);
+
       return result;
+    }
+
+
+    /*! return true if all the 6-neighbors of the given points are 0, 1 or 2 labeled */
+    inline static bool isSinglePoint(const ImagePointer & img, const ImageIndexType & index) {
+      RType radius;
+      radius.Fill(1);
+      ConstNeighborhoodIteratorType it(radius, img, img->GetRequestedRegion());
+      BCondition bCond;
+      bCond.SetConstant(0);
+      it.SetBoundaryCondition(bCond);
+
+      it.SetLocation(index);
+      for (unsigned int i = 0; i < 6; ++i) {
+        unsigned char v = it.GetPixel(directions6[i]);
+        if ((v != 0) && (v != 1) && (v != 2))
+          return false;
+      }
+      return true;
     }
 
     /*! propagate a shape in the object from the middle point, preserving the topology of the growing ball
     After this propagation, voxels of img with value=1 are the pre-cuts, voxels with value=3 are inside the growing ball,
     and voxels with value=0 are outside of the object.
     */
-    void propagateFromPoint(ImagePointer & img, const ImageIndexType & middle) {
+    static void propagateFromPoint(ImagePointer & img, const ImageIndexType & middle) {
 
       RType radius;
       radius.Fill(1);
@@ -259,10 +331,10 @@ namespace oc3d
         if (isValidFrontNeighborhood(img, it)) {
           // move the current voxel in the close list
           img->SetPixel(current, 3);
-          for (unsigned int i = 0; i < 6; ++i)
-            if (it.GetPixel(directions6[i]) == 1) {
-              open.push(current + directions6[i]);
-              it.SetPixel(directions6[i], 2);
+          for (unsigned int i = 0; i < it.Size(); ++i)
+            if ((it.GetPixel(i) == 1) && (!isSinglePoint(img, it.GetIndex(i)))) {
+              open.push(it.GetIndex(i));
+              it.SetPixel(i, 2);
             }
         }
         else {
@@ -284,7 +356,7 @@ namespace oc3d
       - neigborhoods: 6
       - outside: 0
     */
-    void buildPreCutNeighbors(ImagePointer & img, const ImageIndexType & index) {
+    static void buildPreCutNeighbors(ImagePointer & img, const ImageIndexType & index) {
       RType radius;
       radius.Fill(1);
       NeighborhoodIteratorType it(radius, img, img->GetRequestedRegion());
@@ -341,8 +413,10 @@ namespace oc3d
         const ImageIndexType current = open.front();
         open.pop();
         it.SetLocation(current);
+        assert(img->GetPixel(current) == 3);
         assert(voxelList.find(Coord3D(current, image)) != voxelList.end());
         const unsigned int idCurrentVertex = voxelList[Coord3D(current, image)];
+        assert(intToVoxel[idCurrentVertex] == current);
         for (unsigned int i = 0; i < 6; ++i)
           if (it.GetPixel(directions6[i]) == 6) {
             open.push(current + directions6[i]);
@@ -351,9 +425,21 @@ namespace oc3d
           else if ((it.GetPixel(directions6[i]) == 5) || (it.GetPixel(directions6[i]) == 7)) {
             assert(voxelList.find(Coord3D(it.GetIndex(directions6[i]), image)) != voxelList.end());
             const unsigned int idInsideVertex = voxelList[Coord3D(it.GetIndex(directions6[i]), image)];
+            assert(intToVoxel[idInsideVertex] == it.GetIndex(directions6[i]));
             result.push_back(IO_B::dual.edge(idInsideVertex, idCurrentVertex));
           }
       }
+
+/*      if (result.empty()) {
+        std::cout << "empty!!! " << index << std::endl;
+        img->SetPixel(index, 20);
+        ImageWriterPointer writer = ImageWriter::New();
+        writer->SetFileName("/tmp/empty.nii.gz");
+        writer->SetInput(img);
+        writer->Update();
+        exit(1);
+      }
+      assert(!result.empty());*/
       return result;
     }
 
@@ -389,6 +475,8 @@ namespace oc3d
         for (unsigned int i = 0; i < it.Size(); ++i)
           if (it.GetPixel(i) == 6) {
             result.push_back(getCutFromPreCut(img, it.GetIndex(i)));
+            if (result.back().empty())
+              result.pop_back();
           }
           else if (it.GetPixel(i) == 5) {
             it.SetPixel(i, 7);
@@ -407,29 +495,33 @@ namespace oc3d
 
       // build a pre-cut by CC in the neighborhood
       std::list<std::list<Edge *> > l_cuts = getCutsFromPreCut(img, index);
-      assert(l_cuts.size() > 1);
 
-      // find the biggest one
-      unsigned int maxSize = 0;
-      class std::list<std::list<Edge *> >::const_iterator big = l_cuts.end();
-      for(class std::list<std::list<Edge *> >::const_iterator l = l_cuts.begin(); l != l_cuts.end(); ++l) {
-        unsigned int s = (*l).size();
-        if (s > maxSize) {
-          maxSize = s;
-          big = l;
+      if (l_cuts.size() > 1) {
+        // find the biggest one
+        unsigned int maxSize = 0;
+        class std::list<std::list<Edge *> >::const_iterator big = l_cuts.end();
+        for(class std::list<std::list<Edge *> >::const_iterator l = l_cuts.begin(); l != l_cuts.end(); ++l) {
+          unsigned int s = (*l).size();
+          if (s > maxSize) {
+            maxSize = s;
+            big = l;
+          }
+        }
+        // create the new cuts (except the biggest one) and insert the corresponding edges
+        if (big != l_cuts.end()) {
+          for(class std::list<std::list<Edge *> >::const_iterator l = l_cuts.begin(); l != l_cuts.end(); ++l)
+            if (l != big) {
+              Cut *cut = IO_B::new_cut();
+              (*cut).insert(*l);
+              init_cut(cut);
+            }
         }
       }
-      // create the new cuts (except the biggest one) and insert the corresponding edges
-      if (big != l_cuts.end()) {
-        for(class std::list<std::list<Edge *> >::const_iterator l = l_cuts.begin(); l != l_cuts.end(); ++l)
-          if (l != big) {
-            Cut *cut = IO_B::new_cut();
-            (*cut).insert(*l);
-            (*cut).create_RevCut();
-            (*cut).get_RevCut()->set_num((*cut).get_num(), false);
-            
-          }
+#ifndef NDEBUG
+      else  {
+        std::cout << "WARNING: a pre-cut (location: " << index << ") produced only " << l_cuts.size() << " cut." << std::endl;
       }
+#endif
     }
 
     /*! create initial cuts from pre-cuts. \see propagateFromPoint */
@@ -486,8 +578,8 @@ namespace oc3d
               unsigned int nbId = voxelList[Coord3D(it.GetIndex() + directions[i], image)];
 
               Edge *e = new Edge(itId, nbId, 1, 1, index++);
-              IO_B::dual.insert(e, false);
-              IO_B::dual.insert(e->get_RevEdge(), false);
+              IO_B::dual.insert(e);
+              IO_B::dual.insert(e->get_RevEdge());
             }
         }
       }
@@ -516,14 +608,31 @@ namespace oc3d
         std::cout << " Front propagation (pre-cut generation)" << std::endl;
       propagateFromPoint(result, middle);
 
+#ifndef NDEBUG
+     {
+       assert(debugCheckNumberCC(result, 3) == 1);
+       ImageWriterPointer writer = ImageWriter::New();
+       writer->SetFileName("/tmp/pre-cut.nii.gz");
+       writer->SetInput(result);
+       writer->Update();
+     }
+#endif
+
       // compute the cut using this pre-cut
       if (verbose)
         std::cout << " Build original cut from the pre-cut" << std::endl;
       createCutsFromPreCuts(result);
       // then create the corresponding pant
       IO_B::init_pants();
+
+#ifndef NDEBUG
+      exportCutsImage("/tmp/initial-cut.nii.gz");
+      exportPantsImage("/tmp/pants.nii.gz");
+#endif
     }
-    void saveResult(const std::string & filename) {
+
+    /*! save the cut in an image */
+    void exportCutsImage(const std::string & filename) {
       // copy the image
       typedef class itk::ImageDuplicator<Image> DuplicatorType;
       typedef class itk::ImageDuplicator<Image>::Pointer DuplicatorPointerType;
@@ -535,9 +644,10 @@ namespace oc3d
       // then for each cut, and for each edge of the cut, draw it in the image (2, 3)
       for(unsigned int i = 0; i < IO_B::cuts.size(); i++) {
         CutIterator it(IO_B::cuts[i]);
+
         for(const Edge *e = it.beg(); !it.end(); e = it.nxt()) {
-          (*result).SetPixel(intToVoxel[(*e).v()], 2);
-          (*result).SetPixel(intToVoxel[(*e).w()], 3);
+          (*result).SetPixel(intToVoxel[(*e).v()], 2 + (i * 2));
+          (*result).SetPixel(intToVoxel[(*e).w()], 3 + (i * 2));
         }
       }
       // then write the image
@@ -546,6 +656,64 @@ namespace oc3d
       writer->SetInput(result);
       writer->Update();
 
+    }
+
+    /*! export the pant decomposition in an image */
+    void exportPantsImage(const std::string & filename) {
+      // copy the image
+      typedef class itk::ImageDuplicator<Image> DuplicatorType;
+      typedef class itk::ImageDuplicator<Image>::Pointer DuplicatorPointerType;
+      DuplicatorPointerType duplicator = DuplicatorType::New();
+      duplicator->SetInputImage(image);
+      duplicator->Update();
+      ImagePointer result = duplicator->GetOutput();
+
+      // use the cuts to draw the boundaries of the pants
+      for(class std::vector<Cut *>::const_iterator cut = IO_B::cuts.begin(); cut != IO_B::cuts.end(); ++cut) {
+        typename Cut::iterator it(*cut);
+        for(Edge *e = it.beg(); !it.end(); e = it.nxt()) {
+          result->SetPixel(intToVoxel[(*e).v()], (**cut).v() + 2);
+          result->SetPixel(intToVoxel[(*e).w()], (**cut).w() + 2);
+        }
+      }
+
+      // fill the pants
+      RType radius;
+      radius.Fill(1);
+      NeighborhoodIteratorType itImg(radius, result, result->GetRequestedRegion());
+      BCondition bCond;
+      bCond.SetConstant(0);
+      itImg.SetBoundaryCondition(bCond);
+
+      for(class std::vector<Cut *>::const_iterator cut = IO_B::cuts.begin(); cut != IO_B::cuts.end(); ++cut) {
+        typename Cut::iterator it(*cut);
+        for(Edge *e = it.beg(); !it.end(); e = it.nxt()) {
+          itImg.SetLocation(intToVoxel[(*e).v()]);
+          for (unsigned int i = 0; i < 6; ++i)
+            if (itImg.GetPixel(directions6[i]) == 1)
+              fillCC(result, itImg.GetIndex(directions6[i]), 1, (**cut).v() + 2);
+          itImg.SetLocation(intToVoxel[(*e).w()]);
+          for (unsigned int i = 0; i < 6; ++i)
+            if (itImg.GetPixel(directions6[i]) == 1)
+              fillCC(result, itImg.GetIndex(directions6[i]), 1, (**cut).w() + 2);
+        }
+      }
+
+      // remove the cuts
+      for(class std::vector<Cut *>::const_iterator cut = IO_B::cuts.begin(); cut != IO_B::cuts.end(); ++cut) {
+        typename Cut::iterator it(*cut);
+        for(Edge *e = it.beg(); !it.end(); e = it.nxt()) {
+          result->SetPixel(intToVoxel[(*e).v()], 1);
+          result->SetPixel(intToVoxel[(*e).w()], 1);
+        }
+}
+
+
+      // then write the image
+      ImageWriterPointer writer = ImageWriter::New();
+      writer->SetFileName(filename);
+      writer->SetInput(result);
+      writer->Update();
     }
   };
 
