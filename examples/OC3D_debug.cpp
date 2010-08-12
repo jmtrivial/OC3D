@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 			int num = 0;
 			if(tokens.size() == 1 || !fromString(tokens[1], num))
 			{
-				for(int i = 0; i < io().cuts.size(); i++)
+				for(unsigned int i = 0; i < io().cuts.size(); i++)
 					io().cut_to_filecut(i, "");
 			}
 			else

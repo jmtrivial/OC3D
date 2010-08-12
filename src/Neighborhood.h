@@ -118,8 +118,8 @@ public:
 	Graph N; // Neighborhood
 
 	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, IO &io, bool continue_bfs = true, bool details = false) : 
-	  sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), details(details), 
-		  size_G(G.size()), proc(G.V(), t), N(G.V(), false), PRECISION(1./10000)
+	sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), size_G(G.size()), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), 
+	details(details), proc(G.V(), t), PRECISION(1./10000), N(G.V(), false)
     { }
 
 	/*! Computes a maxflow */
