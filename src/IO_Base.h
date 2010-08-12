@@ -248,7 +248,6 @@ public:
                           show("Warning: empty pant.");
                         }
 
-                        unsigned int nbj = 0;
 			for(unsigned int j = firstCut; j < cuts.size(); j++) // Sets every cut found by bfs
 			{
 				Cut *setCut = cuts[j];
@@ -260,17 +259,14 @@ public:
 				{
 					setCut->set_v(curPant);
 					setCut->get_RevCut()->set_w(curPant);
-                                        ++nbj;
 				}
 				if(!proc.tPred.isolated(e->w()))
 				{
 					setCut->set_w(curPant);
 					setCut->get_RevCut()->set_v(curPant);
-                                        ++nbj;
                                 }
 			}
-			assert(nbj != 0);
-		} // for(int curPant = 0; ; curPant++) 
+		} // for(int curPant = 0; ; curPant++)
 
 		for(typename std::list<Edge*>::const_iterator it_del = delEdges.begin(); it_del != delEdges.end(); ++it_del)
 			dual.insert(*it_del);
