@@ -215,19 +215,25 @@ namespace oc3d
         return result;
 
 
-      // get the first connected component labeled 4, correct it with 3, then check for other 3 points
+      // get the first connected component labeled 4 in the 6-neighborhood, correct it with 3, then check for other 3 points
       bool first = true;
-      for (unsigned int i = 0; i < it.Size(); ++i)
-        if (it.GetPixel(i) == 4) {
+      for (unsigned int i = 0; i < 6; ++i)
+        if (it.GetPixel(directions6[i]) == 4) {
           if (first) {
-            fillCC(img, it.GetIndex(i), 4, 3);
+            fillCC(img, it.GetIndex(directions6[i]), 4, 3);
             first = false;
           }
           else {
-            it.SetPixel(i, 3);
+            it.SetPixel(directions6[i], 3);
             result = false;
           }
         }
+
+      // reset the other voxels (corner points)
+      for (unsigned int i = 0; i < it.Size(); ++i)
+        if (it.GetPixel(i) == 4)
+          it.SetPixel(i, 3);
+
       return result;
     }
 
@@ -376,6 +382,17 @@ namespace oc3d
             result.push_back(IO_B::dual.edge(idInsideVertex, idCurrentVertex));
           }
       }
+
+/*      if (result.empty()) {
+        std::cout << "empty!!! " << index << std::endl;
+        img->SetPixel(index, 20);
+        ImageWriterPointer writer = ImageWriter::New();
+        writer->SetFileName("/tmp/empty.nii.gz");
+        writer->SetInput(img);
+        writer->Update();
+        exit(1);
+      }
+      assert(!result.empty());*/
       return result;
     }
 
@@ -411,7 +428,8 @@ namespace oc3d
         for (unsigned int i = 0; i < it.Size(); ++i)
           if (it.GetPixel(i) == 6) {
             result.push_back(getCutFromPreCut(img, it.GetIndex(i)));
-            assert(!result.back().empty());
+            if (result.back().empty())
+              result.pop_back();
           }
           else if (it.GetPixel(i) == 5) {
             it.SetPixel(i, 7);
