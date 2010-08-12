@@ -114,13 +114,13 @@ int main(int argc, const char** argv) {
     std::cout << "Create initial cut" << std::endl;
     io_voxels.make_initialcut_BFS(true);
 
+    std::cout << "Number of initial cuts: " << io_voxels.cuts.size() << std::endl;
+
     // check for the number of pants
-    if (io_voxels.pants.size() != 1) {
-      std::cout << "Error: " << io_voxels.pants.size() << " pants, should be 1" << std::endl;
+    if (io_voxels.pants.V() != 1) {
+      std::cout << "Error: " << io_voxels.pants.V() << " pants, should be 1" << std::endl;
       return 1;
     }
-
-    std::cout << "Number of initial cuts: " << io_voxels.cuts.size() << std::endl;
 
     // then optimize the structure
     NoNullCap<Edge> noNull(io_voxels.dual.V(), io_voxels.get_t());

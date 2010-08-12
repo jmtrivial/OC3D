@@ -556,6 +556,15 @@ namespace oc3d
         std::cout << " Front propagation (pre-cut generation)" << std::endl;
       propagateFromPoint(result, middle);
 
+#ifndef NDEBUG
+     {
+       ImageWriterPointer writer = ImageWriter::New();
+       writer->SetFileName("/tmp/pre-cut.nii.gz");
+       writer->SetInput(result);
+       writer->Update();
+     }
+#endif
+
       // compute the cut using this pre-cut
       if (verbose)
         std::cout << " Build original cut from the pre-cut" << std::endl;
