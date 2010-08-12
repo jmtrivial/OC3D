@@ -349,7 +349,7 @@ public:
 			show("Cut " + toString(next->get_num()) + " optimized: new cut with " + toString(next->size()) + " faces and area " + toString(next->cap()));
 		}
 		else
-			show("Can't optimize cut " + toString(next->get_num()));
+                  show("Can't optimize cut " + toString(next->get_num()) + ", " + toString(maxFlow.get_outflow()) + " >= " + toString(next->cap()));
 		/////////////////////////////////////////////////////////////////////////////////////////////////
 		//     Erases the edges from s and to t, adds the edges on the boundaries previously removed   //
 		/////////////////////////////////////////////////////////////////////////////////////////////////
