@@ -15,11 +15,11 @@
 \BOOKMARK [3][-]{subsubsection.3.3.2}{Optimization of a 2-cut C \(not auto\)}{subsection.3.3}% 15
 \BOOKMARK [2][-]{subsection.3.4}{Processing choice}{section.3}% 16
 \BOOKMARK [2][-]{subsection.3.5}{Selection of a cutting system}{section.3}% 17
-\BOOKMARK [1][-]{section.4}{Neighborhood}{}% 18
-\BOOKMARK [2][-]{subsection.4.1}{The algorithm}{section.4}% 19
-\BOOKMARK [2][-]{subsection.4.2}{Processing order and intersections}{section.4}% 20
-\BOOKMARK [2][-]{subsection.4.3}{Complexity}{section.4}% 21
-\BOOKMARK [2][-]{subsection.4.4}{Variant}{section.4}% 22
+\BOOKMARK [2][-]{subsection.3.6}{Parallelization}{section.3}% 18
+\BOOKMARK [1][-]{section.4}{Neighborhood}{}% 19
+\BOOKMARK [2][-]{subsection.4.1}{The algorithm}{section.4}% 20
+\BOOKMARK [2][-]{subsection.4.2}{Complexity}{section.4}% 21
+\BOOKMARK [2][-]{subsection.4.3}{Variant}{section.4}% 22
 \BOOKMARK [1][-]{section.5}{Implementation}{}% 23
 \BOOKMARK [2][-]{subsection.5.1}{Overview}{section.5}% 24
 \BOOKMARK [2][-]{subsection.5.2}{SGL}{section.5}% 25
@@ -31,5 +31,3 @@
 \BOOKMARK [1][-]{section.6}{Conclusion}{}% 31
 \BOOKMARK [1][-]{section.7}{Appendix}{}% 32
 \BOOKMARK [2][-]{subsection.7.1}{Mathematical background}{section.7}% 33
-\BOOKMARK [2][-]{subsection.7.2}{Applications}{section.7}% 34
-\BOOKMARK [2][-]{subsection.7.3}{SGL}{section.7}% 35
