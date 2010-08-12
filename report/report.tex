@@ -5,8 +5,8 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{float}
-%\usepackage{bbding}
-%\ScissorHollowRight
+\usepackage[perpage]{footmisc}
+\usepackage{bbding}
 
 \usepackage{amsthm} % newtheorem
 \newtheorem{pb}{Problem}
@@ -44,50 +44,43 @@ $\Box$
 \newcommand{\MinC}{\C$_{min}$}
 \newcommand{\N}[1]{$\mathcal{N}_{\textnormal{#1}}$}
 \newcommand{\Path}{$\mathcal{P}$}
-\newcommand{\Cut}[2]{scissor(#1, #2)}
+\newcommand{\Cut}[2]{\ScissorHollowRight(#1, #2)}
 
 \author{Quentin Fortier}
 \title{Graph-based models of volumetric medical data and applications to topological correction}
 \begin{document}
 \maketitle
 %\tableofcontents
-Todo: Ex ENS, precalculer BFS pour optimize all
 
 \footnotetext[0]{Univ. Blaise Pascal - LIMOS - UMR 6158
-Campus Scientifique des Cézeaux, 63177 Aubière Cedex, France
+Campus Scientifique des Cézeaux, 63177 Aubière Cedex, France,
 e-mail: $\lbrace$Jean-Marie.Favreau,Vincent.Barra $\rbrace$@isima.fr}
-Supervisors: Vincent Barra\footnotemark[0] , Jean Marie Favreau\footnotemark[0], Marco Attene\footnote{Istituto per la Matematica Applicata e le Tecnologie Informatiche, Consiglio Nazionale delle
+\textbf{Supervisors}: Vincent Barra\footnotemark[0] , Jean-Marie Favreau\footnotemark[0], Marco Attene\footnote{Istituto per la Matematica Applicata e le Tecnologie Informatiche, Consiglio Nazionale delle
 Ricerche, Via De Marini 6, 16149 Genova, Italy, e-mail: attene@ge.imati.cnr.it}.
 \begin{abstract}
 After stating some results about surface cutting, this article gives an algorithm to "optimally" cut a volume, based on pants decomposition, and several variants. It introduces two new algorithms, the neighborhood algorithm and the single path algorithm, and a C++ code named OC3D, which are my main contributions. 
 \end{abstract}
-
 \section{Introduction}
 The reader not familiar with basic algebraic topology will find in the appendix the definitions needed in this report.
 \subsection{Overview}
 The limited resolution or the noise may increase the genus of the surfaces given by medical images and
 we want to remove them, both to have a more accurate image and apply algorithms that need genus 0 surfaces. \\
 For that purpose, important works have been done in finding the shortest system of loops cutting reducing the genus to 0: several methods were proposed, for example in \cite{JMThese} or \cite{EricThese}. \\
-The goal of this internship is to extend these methods to a volumic topological correction, in which only few works have been done. \\
-
+The goal of this internship is to extend these methods to a volumic topological correction, in which only few works have been done. 
 \subsection{Modelling}
 For more precision, we first need some definitions: (all surfaces are assumed to be closed)
-
 \begin{defi}
 A \textit{volume} \V{} (resp. \textit{surface}) is a topological 3(resp. 2)-manifold.
 We assume a volume has one boundary \D{\V} and the genus g of \V{} (i.e the genus of \D{\V}) is assumed to be different from 0.
 \end{defi}
-
 From an algorithmic point of view, instead of an abstract 3-manifold we deal with either a 3-mesh (a set of tetrahedra) or voxels, which are obviously a volume in the sense of the above definition. We will refer to them as discrete volume. Discrete surfaces are either sets of triangles or of faces of a voxel set.\\
-Moreover, we assume these discrete volumes or surfaces to have a weight on their faces or edges (typically, the weight will be the length for an edge and the area for a face or the probability that the two volumic elements are adjacent, given by the segmentation step). \\
-
+Moreover, we assume these discrete volumes or surfaces to have a weight on their faces or edges (typically, the weight will be the length for an edge and the area for a face or the probability that the two volumic elements are adjacent, given by the segmentation step). 
 \begin{figure}[htb]
   \begin{center}
     \includegraphics[height=2cm]{voxels.eps}
     \caption{Voxels}
   \end{center}
 \end{figure}
-
 \begin{defi}
 Given a discrete volume \V, the \textit{dual graph} \Dual{} = (V, E) of \V{} is contructed the following way:
 \begin{itemize}
@@ -96,61 +89,48 @@ Given a discrete volume \V, the \textit{dual graph} \Dual{} = (V, E) of \V{} is 
 \end{itemize}
 Two edges of \Dual{} are adjacent if the corresponding faces share an edge of \V{}.
 \end{defi}
-
 Since every edge in \Dual{} has a degree at most d, with d =  6 if \V{} is a voxel set and d = 4 if \V{} is a 3-mesh, 2 E = $\sum deg(v)$ $\leqslant$ d V, so O(E) = O(V).
-
 \begin{defi}
 Let A, B be two sets such that A $\subset$ B and B is connected. \\
 A is B-\textit{non-separating} if B - A is connected. \\
 Similarly, if $A_i$ $\subset$ B, $\lbrace A_1, \ldots, A_n \rbrace$ is B-non-separating if B - $\bigcup$ $A_i$ is connected.
 \end{defi}
-
 \begin{defi}
 A \textit{1-cut} \L{} (on a surface \S{}) is a \S{}-non-separating loop.
 \end{defi}
-
 On \Dual{}, a 1-cut is a simple cycle of edges.
-
 \begin{defi}
 A \textit{2-cut} \C{} (in \V{}) is a connected, \V{}-non-separating, genus-0 surface such that \D{\C} lies on \D{\V}.
 \end{defi}
-
 On \Dual{}, a 2-cut is a set of adjacent edges (however it is not sufficient, since we require the set to be a manifold).
-
 \begin{defi}
-The \textit{cutting product} of a surface along a 1-cut \L{} is, informally, the surface produced by duplicating every edge and vertex and removing the adjacences between faces sharing an edge in \L{}. \\
-The informal definition is similar for a volume. \\
-See \cite{JMThese}, p. 35, for a more precise definition.
+The \textit{cutting product} of a surface \S{} along a 1-cut \L{} (written \Cut{\S}{\L}) is, informally, the surface produced by duplicating every edge and vertex and removing the adjacences between faces sharing an edge in \L{}. \\
+The informal definition is similar for a volume and a 2-cut. \\
+See \cite{JMThese}, p. 35, for a more precise definition. 
 \end{defi}
-
 \begin{defi}
 A \textit{system of} 2(resp. 1)-\textit{cuts} of \V{} (resp. \S) is a \V{}(resp. \S{})-non-separating set of 2(resp. 1)-cuts such that the resulting cutting product has genus 0 and every pair of cuts doesn't intersect. 
 \end{defi}
-
 We can now give the main issue of this report: 
 \begin{pb} [\PbTwo]
 Given a discrete volume \V, find a minimum system of 2-cuts. 
 \end{pb}
-
 We are also interested in the related problem on surface, which we will investigate first:
 \begin{pb} [\PbOne]
 Given a discrete surface \S, find a minimum system of 1-cuts. 
 \end{pb}
-These minimums exist: there are finitely many sets of g 1-cuts (resp. 2-cuts).
-
+These minimums exist, since there are finitely many sets of g 1-cuts (resp. 2-cuts).
 \subsection{NP-hardness}
-An apparently similar problem is known to be NP-hard: \\
+An apparently similar problem is known to be NP-hard: 
 \begin{pb} [\PbOne -BOUNDARY]
 Given a discrete surface \S, possibly with boundary, find a minimum cutting to obtain a single topological disk (i.e the resulting cutting product must have genus 0 and with no boundary).
 \end{pb}
-
 \begin{theorem}
 \PbOne -BOUNDARY is NP-hard
 \end{theorem}
 \textit{Proof}:~~ \\
 \cite{Erickson02} reduces this problem to the \textit{rectilinear Steiner tree problem} (i.e,  given n points in the plane, find a tree connecting them all with only vertical and horizontal line segments), which is known to be NP-hard.
 \fin
-
 However, it is not known if \PbOne{} and \PbTwo{} are NP-hard, but the two problems are linked. \\
 In the case of voxels, we have:
 \begin{theorem}
@@ -166,7 +146,6 @@ The same theorem holds for tetrahedra if we restrict the problem to PLC (\textit
 \subsection{Relations between the two problems}
 Although they have similarities, the two problems above are not identicals and especially, minimizing the area of a surface is not equivalent to minimizing its perimeter. \\
 Moreover, a surface with bounded area may have a perimeter equals to infinity (figure \ref{Koch}).\\
-
 \begin{figure}[H]
 \begin{center}
 \begin{minipage}{0.4\linewidth}
@@ -185,9 +164,7 @@ Right: The optimal 1-cut (in blue) is different from the optimal 2-cut (in red) 
 In all this section, let \S{} be a surface with genus g.\\
 This section introduce two algorithms dealing with \textbf{surface cutting}, the first described in \cite{JMThese}, chap. 3 and the second in \cite{EricThese}, chap. 3.\\
 Both use a similar approach to find 1-cuts: they first show that computing a 1-cut is easy if we add constraints to it and then they split the surface, to force the wanted constraints.
-
 \subsection{Cutting a surface to reduce its genus to 0}
-
 Using the following approach, we can get a good approximation of a minimum system of 1-cuts of \S.
 \begin{lemma}
 We can calculate the shortest 1-cut on \S{} passing through a fixed point p in O(Vlog(V)).
@@ -211,11 +188,9 @@ By calculating the shortest 1-cut passing through every triangle of \Sys, we hav
 \begin{theorem}
 We can compute a shortest 1-cut in O($\vert$ \Sys{} $\vert$ Vlog(V)).
 \end{theorem}
-
 The algorithm consists in iteratively calculating the shortest 1-cut, while possible. This may not lead to the minimum system of 1-cuts.
-
 \subsection{Shortest homotopic cycles on a surface}
-This second algorithm uses \textit{n-pants} (a genus-0 surface with n boundaries), see figure \ref{3pant}. \\
+This second algorithm uses \textit{n-pants} (a genus-0 surface with n boundaries, see figure \ref{3pant}). \\
 \begin{figure}[htb]
   \begin{center}
     \includegraphics[height=2cm]{3pant.eps}
@@ -223,7 +198,6 @@ This second algorithm uses \textit{n-pants} (a genus-0 surface with n boundaries
     \label{3pant}
   \end{center}
 \end{figure}
-
 \begin{theorem}
 In a 3-pant, we can compute the shortest 1-cut \textbf{homotopic} to a a boundary of the pant in O(Vlog(V)).
 \end{theorem}
@@ -234,36 +208,30 @@ In a cylinder, we can compute the shortest 1-cut homotopic to a boundary of the 
 \end{lemma}
 We can use this lemma on a 3-pant by cutting along a shortest path from the two remaining boundaries.
 \fin
-
 In \cite{EricLazarus}, one can find the following result:
 \begin{lemma}
 We can compute a first 3-pants decomposition \P$_0$ (a set of disjoint 1-cuts cutting \S{} into 3-pants) in O(gV).
 \end{lemma}
-
 Then we can give the pant optimization algorithm: compute a pants decomposition and optimize locally every boundary of a pant, until no improvement is possible.
-
 \cite{EricLazarus} gives an upper bound for the number of iterations of this algorithm: the (difficult) proof uses rewriting on \textit{crossing words}, words encoding crosses between curves. \\
 In particular, this algorithm is polynomial in its input. \\
 \cite{EricLazarus} also proves that this algorithm is optimal, in this sense: each cut in the resulting pants decomposition \P{} is the shortest cut homotopic to the initial corresponding cut in \P$_0$. However this algorithm doesn't solve \PbOne: the homotopy classes of \P{} are not, \textit{a priori}, equal to the homotopy classes of a minimum system of 1-cuts (it is worth reminding that homotopy classes can't change while optimizing, with this algorithm).
-
 \subsection{First attempts to do a volume cutting}
 A first idea, suggested before the internship, is to put volumical information on the surface.
 \begin{defi}
-The medial axis (or skeleton) of \S{} is the set of all points (different from \S{}) having more than one closest point on the object's boundary, i.e the centers of the open balls tangent to this boundary in at least two points.
+The \textit{medial axis} (or \textit{skeleton}) of \S{} is the set of all points (not in \S{}) having more than one closest point on the object's boundary, i.e the centers of the open balls tangent to this boundary in at least two points.
 \end{defi}
 \begin{defi}
-The local feature size is the distance to the medial axis.
+The \textit{local feature size} is the distance to the medial axis.
 \end{defi}
-The method consists in defining the length of an edge as the product of the local feature size of the adjacent vertices and the Euclidean length of this edge. It is an estimation of the area that will be introduced if we are correcting an $\alpha$-junction using this edge. Then we can use a method from the previous section to compute an approximation of the shortest system of 1-cuts. However this doesn't use all the volumic information and incoherent cuttings may happen.%[http://wiki.jmfavreau.info/post-doc_2009/projects/volumic_correction/report_june_2010]
+The method consists in defining the length of an edge as the product of the local feature size of the adjacent vertices and the Euclidean length of this edge. It is an estimation of the area that will be introduced if we select this edge in a 1-cut. Then we can use a method from the previous section to compute an approximation of the shortest system of 1-cuts. However this doesn't use all the volumic information and incoherent cuttings may happen.%[http://wiki.jmfavreau.info/post-doc_2009/projects/volumic_correction/report_june_2010]
 \begin{figure}[H]
   \begin{center}
     \includegraphics[height=2cm]{LFS.eps}
     \caption{Local feature size}
   \end{center}
 \end{figure}
-
 Another idea, inspired by the second above algorithm, is to decompose a volume into volumic 3-pants and to optimize them. It is the main idea of the approach described next.
-
 \section{General algorithm}
 \subsection{Overview}
 The generic algorithm is the following:
@@ -294,24 +262,22 @@ Right: Cuts associated to this skeleton. }
 Let B be the set of all intersection points of \K: the MPA basically computes the B-cut locus and uses its connected components as a pants decomposition. \\
 All the resulting pants need not have the same number of boundaries, but assuming that it is the case, we can know precisely the number of such pants:
 \begin{theorem}
-Let p be the number of pants and c the number of cycles of any n-pant decomposition of \S{}.\\
+Let p be the number of pants and c the number of cycles of any n-pants decomposition of \S{}.\\
 Then p = 2(g-1) and c = 3(g-1).
 \end{theorem}
 \textit{Proof}:~~ \\
 For one pant P, according to Euler's formula: $V_P - E_P + F_P$ = 2 - b = - 1.\\
-Since every couple of pants share a number of vertices equals to the number of edges shared, the number of pants is: $\sum_{P pant} (-V_P + E_P - F_P)$ = $V - E + F$ = 2 - 2g. \\
+Since every couple of pants share a number of vertices equals to the number of edges shared, the number of pants is: $\sum_{P ~pant} (-V_P + E_P - F_P)$ = $V - E + F$ = 2 - 2g. \\
 If we duplicate every pant we find 2c = 3g, since every cut has exactly two adjacent pants.
 \fin
-
-However, we can have intersections in this cut locus, and we are not sure to get 2-cuts: Jean Marie Favreau suggested a method to avoid such non manifold cuts, but this is rather complicated and I didn't have the time to investigate it further. \\
+However, we can have intersections in this cut locus, and we are not sure to get 2-cuts: Jean-Marie Favreau suggested a method to avoid such non manifold cuts, but it is rather complicated and I didn't have the time to investigate it further. 
 \subsection{Pant(s) optimization}
 I will first discuss how to optimize a single 2-cut, the next subsection will deal with the problem of selecting a cut to optimize. \\
 We need to distinguish one kind of 2-cut:
 \begin{defi}
-A 2-cut \C{} is an auto 2-cut if the two pants adjacent to \C{} are actually the same pant. \\
+A 2-cut \C{} is an auto 2-cut if the two pants adjacent to \C{} are actually the same pant. 
 \end{defi}
-
-Since the SPA deals with only one pant, every 2-cuts are auto, and I first describe the optimization of an auto 2-cut \C, associated to a pant \P. \\
+Since the SPA deals with only one pant, every 2-cuts are auto, and I first describe the optimization of an auto 2-cut \C, associated to a pant \P. 
 \subsubsection{Optimization of an auto 2-cut \C}
 We first build the network N from \Dual{} the following way:
 \begin{itemize}
@@ -320,13 +286,12 @@ We first build the network N from \Dual{} the following way:
 \item For each boundary \C' of \P{} delete \C', and if \C' $\neq$ \C{}, delete the edges with an end point adjacent to \C'{}.
 \end{itemize}
 The second part of this last point is needed in order to avoid intersections between 2-cuts. \\
-Then, we compute a max flow on N (using Ford Fulkerson algorithm, for example) and we use the min cut - max flow theorem (the reader not familiar with flows on network may first read \cite{Cormen90}) to deduce a \textit{min \C s-t cut} (i.e, a min cut obtained by computing a max flow on \C) \MinC.
-However, \MinC{} is not necessarly a 2-cut, for example \D{\MinC} is not necessarily connected, but in most applications we hope that \MinC{} is indeed a 2-cut, and from now on, \textbf{we assume that every min cut computed this way is a 2-cut}. \\ 
+Then, we compute a max flow on N (using Ford Fulkerson algorithm, for example) and we use the min cut - max flow theorem to deduce a \textit{min \C{} s-t cut} (i.e, a min cut obtained by computing a max flow on \C) \MinC.
+However, \MinC{} is not necessarly a 2-cut (for example \D{\MinC} is not necessarily connected) but in most applications we hope that \MinC{} is indeed a 2-cut, and from now on, \textbf{we assume that every min cut computed this way is a 2-cut}. \\ 
 It is easy to see that, throughout the SPA, the pant structure is kept ((\Sys - \C) $\cup$ \MinC{} is a system of 2-cuts). \\
 Moreover, the result of the SPA is likely to be, in practice, independant from the initial set of cuts. \\
-
-However, it is possible that the best cut \C' intersects \C, and a max flow will not take it into account. \\
-To avoid this problem, I suggested to take a \MinC{} s-t cut as a new cut (so we do two consecutive max flows), which correctness is validated by the theorem: \\
+However, it is possible that the best cut \C' intersects \C, and a max flow will not take it into account (both in the SPA and the MPA). \\
+To avoid this problem, I suggested to take a \MinC{} s-t cut as a new cut (so we do two consecutive max flows), which correctness is validated by the theorem: 
 \begin{theorem}
 \C' doesn't intersect \MinC. 
 \end{theorem}
@@ -339,10 +304,9 @@ To avoid this problem, I suggested to take a \MinC{} s-t cut as a new cut (so we
 \end{center}
 \end{figure}
 Assume \C' intersects \MinC.  \\
-The we can find a shortest \C{} s-t cut (in green in figure \ref{proofauto}) that doesn't intersect \C{} by following \MinC, then \C'{} when \C' and \MinC{}  intersect. \\
+Then we can find a shortest \C{} s-t cut (in green in figure \ref{proofauto}) that doesn't intersect \C{} by following \MinC, then \C'{} when \C' and \MinC{}  intersect. \\
 This contradicts the fact that \MinC{} is a min \C{} s-t cut.
 \fin
-
 \subsubsection{Optimization of a 2-cut \C{} (not auto)}
 \begin{figure}[H]
   \begin{center}
@@ -352,7 +316,7 @@ This contradicts the fact that \MinC{} is a min \C{} s-t cut.
 \end{figure}
 Now we assume that \C{} is adjacent to two different pants \P$_1$ and \P$_2$, let \C$_{i, j}$ be the boundaries of \P$_i$ different from \C. \\
 We need to be careful since we want to avoid non connected min cut. \\
-We build N from \Dual the following way:
+We build N from \Dual{} the following way:
 \begin{itemize}
 \item Find a shortest tree $\mathcal{T}_{1}$ (resp. $\mathcal{T}_{2}$) connecting $\bigcup$ \C$_{1, j}$ (resp. $\bigcup$ \C$_{2, j}$). 
 \item Link s to \C$_{1, j}$ and $\mathcal{T}_{1}$ and link \C$_{2, j}$ and $\mathcal{T}_{2}$ to t.
@@ -368,13 +332,12 @@ Several possible choices were considered:
 \begin{itemize}
 \item Randomly.
 \item Maximum weighted 2-cut first.
-\item (All-Min) I also suggested, espcially in the SPA, to optimize the 2-cut \C{} which lead to the minimum possible \MinC, and we never optimize \MinC.
-\item Optimize the 2-cut \C{} maximizing weight(\C) - weight(\MinC)...
+\item (All-Min) I also suggested, especially in the SPA, to optimize the 2-cut \C{} which lead to the minimum possible \MinC, and to never optimize \MinC later.
 \end{itemize}
 Bounding the number of iteration required for the 2 first points is likely to be very difficult (personal communication with Éric Colin de Verdière). \\
 However the All-Min choice requires $\Omega$(g$^2$) max flow, with the SPA: at the beginning there are g 2-cuts to optimize, so we compute g max flow, then we fix one 2-cut so we compute g - 1 max flow, and so on. \\
 And indeed, g + g - 1 + $\ldots$ + 1 = $\frac{g(g+1)}{2}$ = $\Omega$(g$^2$). \\
-Unfortunately it is difficult to select a "best" method: we can contruct examples such that the resulting cutting given by each of these method is not the optimal and the "quality" of the resulting cutting (i.e, its weight) may depend strongly on the volume we consider, or the initial cutting.
+Unfortunately it is difficult to select a "best" method: we can, for each of these methods, contruct examples such that the resulting cutting given is not the optimal and the "quality" of the resulting cutting (i.e, its weight) may depend strongly on the volume we consider, or the initial cutting.
 %Moreover, the validity of the All-Min choice is validated by:
 %\begin{theorem}
 %Let \C$_1$, $\ldots$, \C$_k$ be the first k 2-cuts chosen by All-Min \\
@@ -383,22 +346,18 @@ Unfortunately it is difficult to select a "best" method: we can contruct example
 %\textit{Proof}:~~ \\
 %Let ... Montrer que il existe cut tel que max flow le donne.
 %\fin
-
 \subsection{Selection of a cutting system}
-When the SPA is finished, there is only one choice of the final system of 2-cuts (we must take all 2-cuts). \\
+When the SPA is finished, there is only one choice for the final system of 2-cuts (we must take all 2-cuts). \\
 However for the MPA this choice is more problematic since there are too many 2-cuts (every system of 2-cuts must contains g cuts). \\
-The most "obvious" choice is to iteratively select the shortest 2-cut, while possible, but this may not be the best choice. \\
-
+The most "obvious" choice is to iteratively select the shortest 2-cut, while possible, but this may not be the best choice. 
 \subsection{Parallelization}
-I suggested the following method to optimize simultaneously several cuts: compute the graph which vertices are the 2-cuts and with an edge between two vertices if the two corresponding cuts share a pant. Then find an independent set  (or an approximation: finding an independent set is NP-hard) in this graph and optimize simultaneously every cut in this set. \\
+I suggested the following method to optimize simultaneously several cuts, with the MPA: compute the graph which vertices are the 2-cuts and with an edge between two vertices if the two corresponding cuts share a pant. Then find an independent set  (or an approximation: finding an independent set is NP-hard) in this graph and optimize simultaneously every cut in this set. \\
 This way we are sure cuts we optimize will not interfere. \\
 When all these optimizations are done, compute an independent set of the remaining vertices (which were not optimized) and optimize such a set. Continue this process until there is no more cut to optimize.
-
 \section{Neighborhood}
 \subsection{The algorithm}
 For simplicity, in all this section we assume that our volumes are made of voxels, unless explicitly stated. \\
 %\textbf{We assume that all the capacities of the edges in \Dual{} are equal to one} (this is the case, for example, if \V{}  is a set of voxels and that we put a capacity on every edge equal to the area of the corresponding face).
-
 The most time consuming part of both SPA and MPA being the computation of a max flow, one may try to improve its time complexity, and indeed, we can act more locally (for the importance of local search and neighborhood, see \cite{Papa98}). \\
 The basic idea of the neighborhood algorithm is that, during Ford Fulkerson algorithm, we can select an augmenting path "near" the previous found paths, which restricts the number of edges to visit. To define precisely what the "near" means, we need a more dense graph:
 \begin{defi}
@@ -408,15 +367,14 @@ We need it to take into account path such as [fig].
 \begin{defi}
 If v is a vertex and p a set of vertices (for example, a path), d(v, p) (and d(p, v)) is the minimal length of a shortest path, in \DualAdj{}, between v and a vertex of p. \\
 Given two set of vertices p and p', d(p, p') = max$_{v \in p}$ d(v, p'). \\
-The p-neighborhood \N{p} is the set of all vertices v such that d(v, p) $\leqslant$ 1. \\
+The p-neighborhood \N{p} is the set of all vertices v such that d(v, p) $\leqslant$ 1. 
 %If \Path{} = $\lbrace p_1, \ldots, p_n \rbrace$ is a set of paths, \N{\Path} = $\Delta$ \N{$p_i$} ( = ($\bigcup$  \N{$p_i$}) -  $\bigcup p_i$), and we define similarly \Ns{\Path}.
 \end{defi}
 \begin{rem}
 d is a distance: d(p, p') = d(p', p), d(p, p') = 0 $\Longleftrightarrow$ p = p' and d(p, p'') $\leqslant$ d(p, p') + d(p', p''). \\
 Moreover, a path p' $\in$ \N{p} if and only if d(p, p') $\leqslant$ 1.
 \end{rem}
-
-Then, to compute a max flow, we can use the following algorithm which I call neighborhood algorithm (the algorithm keep a growing neighborhood N where the paths are searched): \\ 
+Then, to compute a max flow, we can use the following algorithm which I call neighborhood algorithm (the algorithm keep a growing neighborhood N where the paths are searched): 
 \begin{algorithm}
 \caption{Neighborhood algorithm (NA)\label{}}
 Let p$_i$ be a shortest path from s to t in R (using BFS) \;
@@ -427,7 +385,6 @@ N $\leftarrow$ \N{p$_i$} \;
 	N $\leftarrow$ N $\cup$ \N{p} \;
 }
 \end{algorithm} \\
-
 Of course, the first path computed may visit all the reachable edges (as in the classic Ford Fulkerson), but all other paths are searched in the growing neighborhood. \\
 The following theorem shows that we actually get a max flow at the end of the neighborhood algorithm:
 \begin{theorem}
@@ -445,7 +402,6 @@ Let q be the path \N{v} $\cap$ p$_0$. \\
 Since all paths from s to t are homotopic (such that there is no "hole" between them), we can find a path q' in \N{v} with same extremities than q and replace q by q' such that for all vertices w added this way, d(w, \Path) $<$ d(v, \Path). \\
 If we do this with all such vertex v, we create a path p such that d(p, \Path) $<$ m, a contradiction. So m $\leqslant$ 1.
 \fin
-
 \subsection{Complexity}
 \begin{theorem}
 Let p be the shortest path from s to t (we assume that he is already computed with a BFS) and \C{} a min s-t cut. \\
@@ -464,11 +420,10 @@ Let r $\geqslant$ 3.\\
 Almost all r-regular graph of order n has diameter less than K log(n), with K constant (informally, the probability of selecting such a graph tends to 1 as n increases).
 \end{theorem}
 \Dual{} is not exactly regular (every vertex has a degree \textit{inferior} to 4 (for tetrahedra) or 6 (for voxels)) since the vertices on the border of the volume have a smaller degree, but, for well-shaped volume we may expect this bound to be relevant, and we may expect p to be O(log(n)). \\
-Moreover, for our applications, the area of a min cut is small. \\
-
+Moreover, for our applications, the area of a min cut is small. 
 \subsection{Variant}
 Instead of augmenting the neighborhood whenever a s-t path is found, it may be interesting to find path in the neighborhood while possible and to augment the neighborhood by step, only when no path is found. \\
-If no path is found after we augmented the neighborhood, the algorithm stops and reports a max flow. \\
+If no path is found after we augmented the neighborhood, the algorithm stops and reports a max flow. 
 \begin{algorithm}
 \caption{Continue neighborhood algorithm (CNA)\label{}}
 Let p$_i$ be a shortest path from s to t in R (using BFS) \;
@@ -494,14 +449,12 @@ Initially, it was planned that I develop the optimization part of the MPA, and t
 After two weeks working on the core algorithm, which deals with the dual graph so that it is independant from the representation (voxels or tetrahedra), I decided to use tetrahedra, although more complicated to implement than voxels, to be able to work on surfaces, with Blender for example, and use TetGen to tetrahedralize them. \\ 
 I also used TetMeshLib, a library to manage tetrahedral meshes that Marco Attene developed. \\
 To both automatize the different tools of the algorithm and visualize more easily, I wrote a script in Blender Python API. \\
-At the end of the internship, I worked together with Jean Marie Favreau, using GitHub \footnote{The project is available at http://github.com/jmtrivial/OC3D}. \\
-Globally, I wrote about 3000 lines in C++ and 400 in Python and the documentation, built with doxygen, is available at [url]. \\
-
+At the end of the internship, I worked together with Jean-Marie Favreau, using GitHub \footnote{The project is available at http://github.com/jmtrivial/OC3D}. \\
+Globally, I wrote about 3000 lines in C++ and 400 in Python and the documentation, built with doxygen, is available at [url]. 
 \subsection{SGL}
 SGL (Simple Graph Librairy) is a graph librairy I started to develop few months before the internship and that I used in this internship. It relies on \textit{generic programming}: an ADT (Abstract Data Type) defines the required methods and semantic for a class and is used through template parameter. \\
 For example, the class BFS (Breadth First Search) has a Graph template parameter, which must provide, among other, a class named iterator giving a way to iterate over all edges adjacent to a given vertex. \\
-OC3D was designed in a similar way. \\
-
+OC3D was designed in a similar way. 
 \subsection{Data structures}
 \begin{figure}[H]
 \begin{center}
@@ -517,7 +470,6 @@ An edge (i.e, a 2-Cut) of the pants graph is of type \verb!Edge_Cut!:  its extre
 Every \verb!Edge_Dual! in a \verb!Edge_Cut! has the same orientation, i.e their end extremities are in the same pant. \\
 This is needed to know to which vertices we must link the source (or sink) before running Ford Fulkerson algorithm, or to delete the edges out of the pant we optimize (subsection \ref{orientation} explains how to orientate a cut). \\
 To avoid time waste, every 2-Cut has a reverse and a pointer to it.
-
 \subsection{Core algorithm}
 \begin{figure}[H]
 \begin{center}
@@ -527,8 +479,7 @@ To avoid time waste, every 2-Cut has a reverse and a pointer to it.
 \end{figure}
 To improve genericity, the algorithm first construct the dual graph (which depends on the the representation used - voxels or tetrahedra) and then works only on the dual graph. \\
 For that purpose, an object is used to deal with representation-dependant operations, IO\_Base implements the required methods of such an object but the dual graph must be set manually using IO\_Base, IO\_Tet defines how to make the dual graph from tetrahedra and IO\_Voxels from voxels image. \\
-IO\_Tet\_Adj also defines how to build the adjacency-list graph.
-
+IO\_Tet\_Adj also defines how to build the dual-adjacency graph.
 After the dual graph is made, we can search a max flow on it with a class derived from \verb!Max_Flow!, and \verb!Cut_vertices! is a class giving a min cut from a max flow, searching for the set S of every vertices reachable from the source s and setting as the cut the set of edges connecting S and S$^c$.
 \begin{figure}[H]
 \begin{center}
@@ -538,7 +489,7 @@ After the dual graph is made, we can search a max flow on it with a class derive
 \end{figure}
 \subsection{Orientation} \label{orientation}
 When we get a cut, selecting it with Blender for example, we must orientate it. \\
-After discussing it with Jean Marie Favreau and Vincent Barra, the best solution may be the following: \\
+After discussing it with Jean-Marie Favreau and Vincent Barra, the best solution may be the following: \\
 \begin{itemize}
 \item Take an element of the cut (a triangle or a square, say a triangle abc), give an orientation to it, which can be viewed as a permutation $\sigma$ of its vertices.
 \item For each triangle uvw adjacent to it with an edge uv, if $\sigma(u)$ = v,  defines the orientation on t according to the permutation vuw.
@@ -552,9 +503,8 @@ This algorithm is clearly linear (assuming that the number of vertices of an ele
 \caption{An orientation.}
 \end{center}
 \end{figure}
-
 \subsection{Python script}
-The script (which can be found together with a video describing its working) I wrote for Blender uses, with pipeline,  OC3D\_debug, a command-line debugger which can, among other, load a mesh, make the dual graph, optimize cuts step by step and output various information. \\
+The script (which can be found together with a video describing its working at [url]) I wrote for Blender uses, with pipeline,  OC3D\_debug, a command-line debugger which can, among other, load a mesh, make the dual graph, optimize cuts step by step and output various information. \\
 To avoid freezing Blender while optimizing a cut I used several threads and I had to synchronize the threads, OC3D\_debug and TetGen.
 \begin{figure}[H]
 \begin{center}
@@ -562,15 +512,13 @@ To avoid freezing Blender while optimizing a cut I used several threads and I ha
 \caption{Blender Python API interface.}
 \end{center}
 \end{figure}
-
-
 \subsection{Running time comparison} \label{time}
-To compare the algorithms of max flow, I tested them on a slighty modified torus, with various number of vertices. \\
+To compare the algorithms of max flow (the classic Ford Fulkerson, the NA and the CNA), I tested them on a slighty modified torus, with various number of vertices. \\
 The examples can be found at : [url]. \\
-The timing runs were performedon a Dell inspiron 1520 with and Intel Core 2 Duo T7300 Processor (2.0GHz, 4MB L2 cache) and 2048 Mo memory. \\
+The timing runs were performed on a Dell inspiron 1520 with and Intel Core 2 Duo T7300 Processor (2.0GHz, 4MB L2 cache) and 2048 Mo memory. \\
 Compilation was done with Visual C++ 2008 with all optimization flags set for maximum speed. \\
 The times require by the continue neighborhood algorithm is of same order of the time required by TetGen which has  the complexity O(\S$^2$) required by Delaunay tetrahedrization (about 80 seconds for the torus which dual has a complexity 1750000), see \cite{TetGen}.
-I noticed an improvement of the time required by the NA (and CNA) when the quality (i.e, the radius-edge ratio of the tetrahedra) of the tetrahedrization increases, since the higher the quality, the smaller the \Dual\_Adj{} (and then the neighborhood is also small). \\
+I noticed an improvement of the time required by the NA (and CNA) when the quality (i.e, the radius-edge ratio of the tetrahedra) of the tetrahedrization increases, since the higher the quality, the smaller \DualAdj{} (and then the neighborhood is also small). \\
 To perform tests, I used the basic option -q constraining the radius-edge ratio to be less than 2, but is also possible to more constrain the radius-edge ratio (up to 1.414 for example, see \cite{TetGen}), although this may increases the time required by TetGen. \\
 However a drawback of this contrained generation is that the number of vertices of the tetrahedrization increases slighty (for example, the tetrahedrized torus of the figure \ref{optq} has about 50K edges with -q and 40K without).
 \begin{figure}[H]
@@ -591,33 +539,30 @@ Right: with -q. }
 \label{optq}
 \end{center}
 \end{figure}
-
 \begin{table}[htbp]
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline
-Complexity (edges + vertices) of the dual graph & Classic & Neighborhood & Continue \\ \hline
+Complexity (edges + vertices) of the dual graph & Classic & NA & CNA \\ \hline
 200K & 111s & 61s & 29s \\ \hline
 900K & 1147s & 236s & 101s \\ \hline
 1750K & 2975s & 318s & 158s \\ \hline
 \end{tabular}
 \end{center}
 \label{time}
-\caption{Running time in seconds of the optimization of one 2-Cut using several algorithms of max flow (K stands for 1000).}
+\caption{Running time in seconds of the optimization of one 2-Cut on a torus using several algorithms of max flow (K stands for 1000).}
 \end{table}
-
 The advantage of a neighborhood increases significantly as the number of vertices of \Dual{} increases. \\
 I also compared, on the dual graph with complexity 900000, the time required for a BFS at different moments of the algorithms. \\
 I split the execution of the algorithms in different steps defined by the increase of the neighborhood used by the continue neighborhood algorithm (thus, the continue neighborhood algorithm found 1 path before augmenting, then 21, 129 and so on). \\
 Then I compared the number of edges of the neighborhood in which the paths were found, the total time during the step, and the average (shortened Avg) time of a BFS. \\
-The advantage of a neighborhood decreases slighty during the algorithm, since the neighborhood increases as the number of edges visited by a BFS on the whole graph decreases (some edges have then zero capacity and disappear from the residual graph), so the algorithm is likely to be more efficient if the min cut is small (this is especially true for voxels with capacity one, since the number of iterations is directly the number of iterations of the algorithm).
 \begin{table}[H]
 \footnotesize{
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
 \hline
- & \multicolumn{ 3}{c|}{Continue neighborhood} & \multicolumn{ 3}{c|}{Neighborhood} & \multicolumn{ 2}{c|}{Classic} \\ \hline
-Paths found & Edges & Total time & Avg time & Edges & Total time & Avg time & Total time & Avg time \\ \hline
+ & \multicolumn{ 3}{c|}{CNA} & \multicolumn{ 3}{c|}{NA} & \multicolumn{ 2}{c|}{Classic} \\ \hline
+Paths found & Edges in N & Total time & Avg time & Edges in N & Total time & Avg time & Total time & Avg time \\ \hline
 1 & 101 (in path) & 250 & 250 & 101 (in path) & 250 & 250 & 250 & 250 \\ \hline
 21 & 2452 & 41 & 1,95 & 2452 & 49 & 2,33 & 4917 & 234,14 \\ \hline
 129 & 4240 & 283 & 2,19 & 5084 & 446 & 3,46 & 30140 & 233,64 \\ \hline
@@ -630,48 +575,59 @@ Paths found & Edges & Total time & Avg time & Edges & Total time & Avg time & To
 \end{tabular}
 \end{center}
 \label{}
-\caption{Detailed time comparison}
+\caption{Detailed time comparison on a torus with 700K edges (times are without units)}
 }
 \end{table}
+The advantage of a neighborhood decreases slighty during the algorithm, since the neighborhood increases as the number of edges visited by a BFS on the whole graph decreases (some edges have then zero capacity and disappear from the residual graph), so the algorithm is likely to be more efficient if the min cut is small (this is especially true for voxels with capacity one, since the number of iterations is directly the number of iterations of the algorithm).
 I didn't have the time to test this algorithm on voxels, but for non degenerated volume, the first neighborhood will be at most eight times the length of the first path found (if the path is a straight path, there is exactly eight disjoint paths adjacent to it. \\
 For that example, it means that the first neighborhood is likely be about 800 edges instead of 2452 for tetrahedra, three times less. \\
 Then I expect the neighborhood algorithm to be more efficient with voxels.
-
 \begin{figure}[H]
 \begin{center}
 \includegraphics[height=6.cm]{diagram_time.eps}
 \caption{Average time of a BFS with respect to the step in the CNA.}
 \end{center}
 \end{figure}
+\subsection{Computation of the first path}
+Since I used a rather "big" min cut in the previous tests, the time required by the first BFS is rather negligible, but if the min cut is smaller it may be interesting to find a way to avoid this first BFS (for example if the min cut is such that the first 100 paths found gives a max flow, the first BFS takes a time equal to the half of the total time required by the CNA). I describe an algorithm to do this, with the SPA:
+Assume we have a set of cuts \C$_1$, $\ldots$, \C$_g$ we want to optimize. \\
+Before any max flow, we can compute a set of shortest paths p$_1$, $\ldots$, p$_g$ such that p$_j$ is a shortest path from one extremity of an edge of \C$_j$ to the other extremity, without intersecting any of the cuts (I call here such a path \textit{a valid path}). This can be done in O(gV). \\
+Then, if we optimize a cut (say, \C$_1$) we can use p$_1$ as the first path. The max flow on \C$_1$ gives a min \C$_1$ s-t cut \MinC. \\
+Clearly, p$_1$ is also a path from one extremity of an edge of \MinC{} to the other extremity, but this may not be the case for the other paths (p$_j$ may intersect \MinC{}). \\
+Let j $\geqslant$ 2: if p$_j$ doesn't intersect \MinC, p$_j$ is a valid path from a side of \C$_j$ to the other side. \\
+Otherwise, we replace p$_j$ by the path obtained by concatenating p$_j$ before the intersection, then p$_1$ and then the rest of p$_j$. [fig] This can be done in O(\MinC + p$_j$) (we just need to verify the intersection and to link suitably p$_j$ and p). \\
+Since we must do this for all (g-1) cuts, the complexity for "updating" all other paths is O((g-1)(\MinC + p$_j$)), which is likely to be better than the O(V) required by a BFS. \\
+However this may lead to longer paths.
+\begin{figure}[H]
+\begin{center}
+\includegraphics[height=6.cm]{demofirstBFS.eps}
+\caption{Illustration of the method to update a path p$_j$ (in black) to have a valid cut (in red). p$_1$ is in blue.}
+\end{center}
+\end{figure}
 \section{Conclusion}
-Integrated to FAST project.
+Utility: code will be integrated to FAST project.
 \section{Appendix}
 \subsection{Mathematical background}
 \begin{defi}
-is a continuous map \L{} : [0, 1] $\longrightarrow$ \S{} such that \L(0) = \L(1)
+A loop is a continuous map \L{} : [0, 1] $\longrightarrow$ \S{} such that \L(0) = \L(1)
 \end{defi}
-Warning: non separating neq contractible
+TODO 
 
-\begin{small}
+\begin{footnotesize}
 \begin{thebibliography}{1}
 \bibitem{JMThese} J.-M. Favreau. Outils pour le pavage de surfaces. PhD thesis, Blaise Pascal university, 2009.
 \bibitem{EricThese} É. Colin de Verdière. Raccourcissement de courbes et décomposition de surfaces. PhD thesis, Paris 7 university, 2003.
 \bibitem{EricLazarus} É. Colin de Verdière and F. Lazarus. Optimal pants decompositions and
 shortest homotopic cycles on an orientable surface. Proceedings of the 11th Symposium on Graph Drawing , 2003.
-\bibitem{Favreau09} J.-M. Favreau, V. Barra. Conformal Flattening of the Cortical Surface using a Topological and Geometrical Cutting. SEECCM, South-East European Conference on Computational Mechanics, Island of Rhodes, Greece, 2009.
 \bibitem{EricCours} É. Colin de Verdière. Algorithms for graphs on surfaces, M.P.R.I. course Master 2. 2009-2010.
 \bibitem{FAST} Cortical surface mapping using topology correction, partial flattening and 3D shape context-based non-rigid registration for use in quantifying atrophy in Alzheimer's Disease. Preprint submitted to International Journal of Biomedical Imaging, March 2010.
 \bibitem{Erickson02} J. Erickson, S. Har-Peledz. Optimally Cutting a Surface into a Disk. Discrete and Computational Geometry, July 2, 2002.
 \bibitem{Cornea07} N. D. Cornea, D. Silver, P. Min. Curve skeleton properties, applications and algorithms. IEEE Transactions on Visualization and Computer Graphics 13 (2007), pp 530-548.
-\bibitem{Cormen90} T. Cormen, C. Leiserson, R. Rivest. Introduction to algorithms. MIT Press, 1990.
-\bibitem{Diestel02} R. Diestel. Graph Theory, volume 173 of Graduate Texts in Mathematics. Springer-Verlag, 2000.
 \bibitem{Papa98} C. H. Papadimitriou, K. Steiglitz. Combinatorial optimization: Algorithms and Complexity. Dover Publications, 1998.
 \bibitem{TetGen} H. Si. TetGen: User's manual. 2006.
 \bibitem{Bollo} B. Bollobas and W. Fernandez de la Vega. The diameter of random regular
 graphs. Combinatorica 2(1982), 125-134.
 \end{thebibliography}
-\end{small}
+\end{footnotesize}
 
-\textit{Proof}:~~ \\
-\fin
 \end{document}

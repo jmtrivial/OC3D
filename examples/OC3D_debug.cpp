@@ -8,7 +8,7 @@
 #include "Neighborhood.h"
 #include <time.h>
 #include <vector>
-#undef NDEBUG
+#define NDEBUG
 #include <assert.h>
 #include <string>
 #include <iostream>
@@ -69,7 +69,7 @@ string args_to_file(vector<string> &tokens, unsigned int index)
 	return file;
 }
 
-bool details = true;
+bool details = false;
 bool use_neighbors = true;
 bool continue_bfs = true;
 

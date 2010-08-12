@@ -42,7 +42,7 @@ public:
 		/*typename Dual::iterator_all it(IO_T::dual);
 		for(Edge *e = it.beg(); !it.end(); e = it.nxt())
 			dual_adj.insert(new Edge_Adj(e->v(), e->w()));*/
-		for (TetEdges::const_iterator i = IO_T::mesh.Edges().begin(); i != IO_T::mesh.Edges().end(); ++i)
+		/*for (TetEdges::const_iterator i = IO_T::mesh.Edges().begin(); i != IO_T::mesh.Edges().end(); ++i)
 		{
 			TetEdge *e = *i;
 			Tetrahedra adj_tet;
@@ -52,8 +52,8 @@ public:
 			for(Tetrahedra::const_iterator j = adj_tet.begin(); j != adj_tet.end(); ++j)
 					clique.push_back((long int)(*j)->getInfo());
 			make_clique(clique);
-		} 
-		/*for (TetVertices::const_iterator i = IO_T::mesh.Vertices().begin(); i != IO_T::mesh.Vertices().end(); ++i)
+		} */
+		for (TetVertices::const_iterator i = IO_T::mesh.Vertices().begin(); i != IO_T::mesh.Vertices().end(); ++i)
 		{
 			TetVertex *e = *i;
 			Tetrahedra adj_tet;
@@ -63,7 +63,7 @@ public:
 			for(Tetrahedra::const_iterator j = adj_tet.begin(); j != adj_tet.end(); ++j)
 					clique.push_back((int)(*j)->getInfo());
 			make_clique(clique);
-		}*/
+		}
 	}
 };
 }
