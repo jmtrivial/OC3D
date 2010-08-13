@@ -67,7 +67,7 @@ public:
 			
 			std::vector<int> clique;
 			for(Tetrahedra::const_iterator j = adj_tet.begin(); j != adj_tet.end(); ++j)
-					clique.push_back((int)(*j)->getInfo());
+					clique.push_back((long int)(*j)->getInfo());
 			make_clique(clique);
 		}
 	}
