@@ -42,7 +42,7 @@ namespace oc3d
 	{
 	protected:
 
-		/*! Gives an orientation to the cut 
+		/*! Gives an orientation to the cut (indepedent from the volume) 
 		\todo orientate face - crossprod instead */
 		void orientate(Cut *cut)
 		{
