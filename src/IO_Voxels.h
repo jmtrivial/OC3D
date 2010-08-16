@@ -441,10 +441,8 @@ namespace oc3d
         const ImageIndexType current = open.front();
         open.pop();
         it.SetLocation(current);
-        assert(img->GetPixel(current) == 3);
         assert(voxelList.find(Coord3D(current, image)) != voxelList.end());
         const unsigned int idCurrentVertex = voxelList[Coord3D(current, image)];
-        assert(intToVoxel[idCurrentVertex] == current);
         for (unsigned int i = 0; i < 6; ++i)
           if (it.GetPixel(directions6[i]) == 6) {
             open.push(current + directions6[i]);
@@ -453,7 +451,6 @@ namespace oc3d
           else if ((it.GetPixel(directions6[i]) == 5) || (it.GetPixel(directions6[i]) == 7)) {
             assert(voxelList.find(Coord3D(it.GetIndex(directions6[i]), image)) != voxelList.end());
             const unsigned int idInsideVertex = voxelList[Coord3D(it.GetIndex(directions6[i]), image)];
-            assert(intToVoxel[idInsideVertex] == it.GetIndex(directions6[i]));
             result.push_back(IO_B::dual.edge(idInsideVertex, idCurrentVertex));
           }
       }
@@ -548,7 +545,6 @@ namespace oc3d
 #ifndef NDEBUG
       else  {
         std::cout << "WARNING: a pre-cut (location: " << index << ") produced only " << l_cuts.size() << " cut." << std::endl;
-      }
 #endif
     }
 
