@@ -258,10 +258,9 @@ namespace oc3d
     /*! return true if the given voxel is a front voxel */
     static bool isValidFrontNeighborhood(ImagePointer & img, NeighborhoodIteratorType & it) {
       bool result = true;
-
       // first in the 26-neighborhood, add 100 to the voxels that are in the same connected component
       // than the given point
-      for(unsigned int i = 0; i < it.Size(); ++i)
+      for(unsigned int i = 0; i < 26; ++i) {
         if (it.GetPixel(directions26Ordered[i]) != 0) {
           if (i < 6) // 6-connected points are in the same connected component as the given point
             it.SetPixel(directions26Ordered[i], it.GetPixel(directions26Ordered[i]) + 100);
@@ -273,10 +272,13 @@ namespace oc3d
                 break;
               }
             }
-            if (inside)
+            if (inside) {
               it.SetPixel(directions26Ordered[i], it.GetPixel(directions26Ordered[i]) + 100);
+            }
           }
         }
+      }
+
       // translate 103-labeled neighbors into 4-labeled voxels
       bool single = true;
       for (unsigned int i = 0; i < it.Size(); ++i)
@@ -285,7 +287,7 @@ namespace oc3d
           single = false;
         }
       if (single)
-        return result;
+        return false;
 
 
       // get the first connected component labeled 4 in the 6-neighborhood, correct it with 3, then check for other 3 points
@@ -350,13 +352,16 @@ namespace oc3d
       // 3: in the close part (already visited and validated)
       std::queue<ImageIndexType> open;
       open.push(middle);
+      assert(img->GetPixel(middle) != 0);
       img->SetPixel(middle, 2);
+      bool first = true;
 
       while(!open.empty()) {
         ImageIndexType current = open.front();
         open.pop();
         it.SetLocation(current);
-        if (isValidFrontNeighborhood(img, it)) {
+        if (first || isValidFrontNeighborhood(img, it)) {
+          first = false;
           // move the current voxel in the close list
           img->SetPixel(current, 3);
           for (unsigned int i = 0; i < it.Size(); ++i)
