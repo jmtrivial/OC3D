@@ -545,6 +545,7 @@ namespace oc3d
 #ifndef NDEBUG
       else  {
         std::cout << "WARNING: a pre-cut (location: " << index << ") produced only " << l_cuts.size() << " cut." << std::endl;
+      }
 #endif
     }
 
