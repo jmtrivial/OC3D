@@ -539,7 +539,7 @@ namespace oc3d
       // build a pre-cut by CC in the neighborhood
       std::list<std::list<Edge *> > l_cuts = getCutsFromPreCut(img, index);
 
-      if (l_cuts.size() > 1) {
+      if (l_cuts.size() > 1) { // if only one cut associated to the pre-cut, we close it
         // find the biggest one
         unsigned int maxSize = 0;
         class std::list<std::list<Edge *> >::const_iterator big = l_cuts.end();
@@ -560,17 +560,6 @@ namespace oc3d
             }
         }
       }
-#ifndef NDEBUG
-      else  {
-        std::cout << "WARNING: a pre-cut (location: " << index << ") produced only " << l_cuts.size() << " cut." << std::endl;
-        fillCC(img, index, 7, 15);
-        ImageWriterPointer writer = ImageWriter::New();
-        writer->SetFileName("/tmp/precut" + toString(index) + ".nii.gz");
-        writer->SetInput(img);
-        writer->Update();
-        fillCC(img, index, 15, 7);
-      }
-#endif
     }
 
     /*! create initial cuts from pre-cuts. \see propagateFromPoint */
