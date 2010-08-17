@@ -258,12 +258,25 @@ namespace oc3d
     /*! return true if the given voxel is a front voxel */
     static bool isValidFrontNeighborhood(ImagePointer & img, NeighborhoodIteratorType & it) {
       bool result = true;
+
+      // pre-step: if it's a "last voxel", add it
+      bool last = true;
+      for (unsigned int i = 0; i < 6; ++i)
+        if ((it.GetPixel(directions6[i]) == 1) || (it.GetPixel(directions6[i]) == 2)) {
+          last = false;
+          break;
+        }
+      if (last)
+        return true;
+
+
       // first in the 26-neighborhood, add 100 to the voxels that are in the same connected component
       // than the given point
       for(unsigned int i = 0; i < 26; ++i) {
         if (it.GetPixel(directions26Ordered[i]) != 0) {
-          if (i < 6) // 6-connected points are in the same connected component as the given point
+          if (i < 6) { // 6-connected points are in the same connected component as the given point
             it.SetPixel(directions26Ordered[i], it.GetPixel(directions26Ordered[i]) + 100);
+          }
           else { // for the others, check for the neighborhood
             bool inside = false;
             for(unsigned int j = 0; j < 6; ++j) {
@@ -273,6 +286,7 @@ namespace oc3d
               }
             }
             if (inside) {
+              assert(it.GetPixel(directions26Ordered[i]) < 100);
               it.SetPixel(directions26Ordered[i], it.GetPixel(directions26Ordered[i]) + 100);
             }
           }
@@ -286,30 +300,29 @@ namespace oc3d
           it.SetPixel(i, 4);
           single = false;
         }
-      if (single)
-        return false;
 
-
-      // get the first connected component labeled 4 in the 6-neighborhood, correct it with 3, then check for other 3 points
-      bool first = true;
-      for (unsigned int i = 0; i < 6; ++i)
-        if (it.GetPixel(directions6[i]) == 4) {
-          if (first) {
+      if (single) {
+        result = false;
+      }
+      else {
+        // get the first connected component labeled 4 in the 6-neighborhood, correct it with 3
+        for (unsigned int i = 0; i < 6; ++i)
+          if (it.GetPixel(directions6[i]) == 4) {
             fillCC(img, it.GetIndex(directions6[i]), 4, 3);
-            first = false;
+            break;
           }
-          else {
-            it.SetPixel(directions6[i], 3);
-            result = false;
-          }
-        }
+      }
 
-      // reset the other voxels (corner points, and initial connected component)
-      for (unsigned int i = 0; i < it.Size(); ++i)
-        if (it.GetPixel(i) == 4)
+      // reset the other voxels (corner points, and initial connected component), and check for other front points
+      for (unsigned int i = 0; i < it.Size(); ++i) {
+        if (it.GetPixel(i) == 4) {
           it.SetPixel(i, 3);
+          result = false;
+        }
         else if (it.GetPixel(i) > 100)
           it.SetPixel(i, it.GetPixel(i) - 100);
+        assert(it.GetPixel(i) < 100);
+      }
 
       return result;
     }
@@ -550,6 +563,12 @@ namespace oc3d
 #ifndef NDEBUG
       else  {
         std::cout << "WARNING: a pre-cut (location: " << index << ") produced only " << l_cuts.size() << " cut." << std::endl;
+        fillCC(img, index, 7, 15);
+        ImageWriterPointer writer = ImageWriter::New();
+        writer->SetFileName("/tmp/precut" + toString(index) + ".nii.gz");
+        writer->SetInput(img);
+        writer->Update();
+        fillCC(img, index, 15, 7);
       }
 #endif
     }
