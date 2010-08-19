@@ -126,6 +126,9 @@ namespace oc3d
     /*! 6 neighbors in 3D */
     static const OType directions6[6];
 
+    /*! 26 neighbors in 3D, ordered from the first to the last */
+    static const OType directions26Ordered[26];
+
     /*! list of the voxels inside the structure */
     std::map<Coord3D, unsigned int> voxelList;
     std::vector<ImageIndexType> intToVoxel;
@@ -135,6 +138,11 @@ namespace oc3d
       return sqrt((index1[0] - index2[0]) * (index1[0] - index2[0]) +
                   (index1[1] - index2[1]) * (index1[1] - index2[1]) +
                   (index1[2] - index2[2]) * (index1[2] - index2[2]));
+    }
+
+    /*! return true if the given offset is in a 1-cube centered in (0, 0, 0) */
+    static inline bool inside1Nb(const OType & offset) {
+      return (abs(offset[0]) <= 1) && (abs(offset[1]) <= 1) && (abs(offset[2]) <= 1);
     }
 
     /*! given an image, return the number of connected components of the given value */
@@ -251,35 +259,70 @@ namespace oc3d
     static bool isValidFrontNeighborhood(ImagePointer & img, NeighborhoodIteratorType & it) {
       bool result = true;
 
-      // translate 3-labeled neighbors into 4-labeled voxels
+      // pre-step: if it's a "last voxel", add it
+      bool last = true;
+      for (unsigned int i = 0; i < 6; ++i)
+        if ((it.GetPixel(directions6[i]) == 1) || (it.GetPixel(directions6[i]) == 2)) {
+          last = false;
+          break;
+        }
+      if (last)
+        return true;
+
+
+      // first in the 26-neighborhood, add 100 to the voxels that are in the same connected component
+      // than the given point
+      for(unsigned int i = 0; i < 26; ++i) {
+        if (it.GetPixel(directions26Ordered[i]) != 0) {
+          if (i < 6) { // 6-connected points are in the same connected component as the given point
+            it.SetPixel(directions26Ordered[i], it.GetPixel(directions26Ordered[i]) + 100);
+          }
+          else { // for the others, check for the neighborhood
+            bool inside = false;
+            for(unsigned int j = 0; j < 6; ++j) {
+              if (inside1Nb(directions26Ordered[i] + directions6[j]) && (it.GetPixel(directions26Ordered[i] + directions6[j]) > 100)) {
+                inside = true;
+                break;
+              }
+            }
+            if (inside) {
+              assert(it.GetPixel(directions26Ordered[i]) < 100);
+              it.SetPixel(directions26Ordered[i], it.GetPixel(directions26Ordered[i]) + 100);
+            }
+          }
+        }
+      }
+
+      // translate 103-labeled neighbors into 4-labeled voxels
       bool single = true;
       for (unsigned int i = 0; i < it.Size(); ++i)
-        if (it.GetPixel(i) == 3) {
+        if (it.GetPixel(i) == 103) {
           it.SetPixel(i, 4);
           single = false;
         }
-      if (single)
-        return result;
 
-
-      // get the first connected component labeled 4 in the 6-neighborhood, correct it with 3, then check for other 3 points
-      bool first = true;
-      for (unsigned int i = 0; i < 6; ++i)
-        if (it.GetPixel(directions6[i]) == 4) {
-          if (first) {
+      if (single) {
+        result = false;
+      }
+      else {
+        // get the first connected component labeled 4 in the 6-neighborhood, correct it with 3
+        for (unsigned int i = 0; i < 6; ++i)
+          if (it.GetPixel(directions6[i]) == 4) {
             fillCC(img, it.GetIndex(directions6[i]), 4, 3);
-            first = false;
+            break;
           }
-          else {
-            it.SetPixel(directions6[i], 3);
-            result = false;
-          }
-        }
+      }
 
-      // reset the other voxels (corner points)
-      for (unsigned int i = 0; i < it.Size(); ++i)
-        if (it.GetPixel(i) == 4)
+      // reset the other voxels (corner points, and initial connected component), and check for other front points
+      for (unsigned int i = 0; i < it.Size(); ++i) {
+        if (it.GetPixel(i) == 4) {
           it.SetPixel(i, 3);
+          result = false;
+        }
+        else if (it.GetPixel(i) > 100)
+          it.SetPixel(i, it.GetPixel(i) - 100);
+        assert(it.GetPixel(i) < 100);
+      }
 
       return result;
     }
@@ -322,13 +365,16 @@ namespace oc3d
       // 3: in the close part (already visited and validated)
       std::queue<ImageIndexType> open;
       open.push(middle);
+      assert(img->GetPixel(middle) != 0);
       img->SetPixel(middle, 2);
+      bool first = true;
 
       while(!open.empty()) {
         ImageIndexType current = open.front();
         open.pop();
         it.SetLocation(current);
-        if (isValidFrontNeighborhood(img, it)) {
+        if (first || isValidFrontNeighborhood(img, it)) {
+          first = false;
           // move the current voxel in the close list
           img->SetPixel(current, 3);
           for (unsigned int i = 0; i < it.Size(); ++i)
@@ -413,10 +459,8 @@ namespace oc3d
         const ImageIndexType current = open.front();
         open.pop();
         it.SetLocation(current);
-        assert(img->GetPixel(current) == 3);
         assert(voxelList.find(Coord3D(current, image)) != voxelList.end());
         const unsigned int idCurrentVertex = voxelList[Coord3D(current, image)];
-        assert(intToVoxel[idCurrentVertex] == current);
         for (unsigned int i = 0; i < 6; ++i)
           if (it.GetPixel(directions6[i]) == 6) {
             open.push(current + directions6[i]);
@@ -425,7 +469,6 @@ namespace oc3d
           else if ((it.GetPixel(directions6[i]) == 5) || (it.GetPixel(directions6[i]) == 7)) {
             assert(voxelList.find(Coord3D(it.GetIndex(directions6[i]), image)) != voxelList.end());
             const unsigned int idInsideVertex = voxelList[Coord3D(it.GetIndex(directions6[i]), image)];
-            assert(intToVoxel[idInsideVertex] == it.GetIndex(directions6[i]));
             result.push_back(IO_B::dual.edge(idInsideVertex, idCurrentVertex));
           }
       }
@@ -496,7 +539,7 @@ namespace oc3d
       // build a pre-cut by CC in the neighborhood
       std::list<std::list<Edge *> > l_cuts = getCutsFromPreCut(img, index);
 
-      if (l_cuts.size() > 1) {
+      if (l_cuts.size() > 1) { // if only one cut associated to the pre-cut, we close it
         // find the biggest one
         unsigned int maxSize = 0;
         class std::list<std::list<Edge *> >::const_iterator big = l_cuts.end();
@@ -517,11 +560,6 @@ namespace oc3d
             }
         }
       }
-#ifndef NDEBUG
-      else  {
-        std::cout << "WARNING: a pre-cut (location: " << index << ") produced only " << l_cuts.size() << " cut." << std::endl;
-      }
-#endif
     }
 
     /*! create initial cuts from pre-cuts. \see propagateFromPoint */
@@ -721,6 +759,19 @@ namespace oc3d
   const class itk::ConstNeighborhoodIterator<Image>::OffsetType IO_Voxels<Edge, Cut, Dual, Pants, Image>::directions6[6] = {{{-1, 0, 0}}, {{0, -1, 0}}, {{0, 0, -1}},
   {{1, 0, 0}}, {{0, 1, 0}}, {{0, 0, 1}}};
 
+  template<class Edge, class Cut, class Dual, class Pants, class Image>
+  const class itk::ConstNeighborhoodIterator<Image>::OffsetType
+  IO_Voxels<Edge, Cut, Dual, Pants, Image>::directions26Ordered[26] =
+  {// 6-neighbors (6)
+    {{-1, 0, 0}}, {{0, -1, 0}}, {{0, 0, -1}}, {{1, 0, 0}}, {{0, 1, 0}}, {{0, 0, 1}},
+    // 6-neighbors of the 6-neighbors (12)
+    {{-1, 1, 0}}, {{-1, -1, 0}}, {{-1, 0, 1}}, {{-1, 0, -1}},
+    {{1, 1, 0}}, {{1, -1, 0}}, {{1, 0, 1}}, {{1, 0, -1}},
+    {{0, 1, 1}}, {{0, -1, 1}}, {{0, 1, -1}}, {{0, -1, -1}},
+    // 6-neighbors of the 6-neighbors of the 6-neighbors (8)
+    {{1, 1, 1}}, {{1, 1, -1}}, {{1, -1, 1}}, {{1, -1, -1}},
+    {{-1, 1, 1}}, {{-1, 1, -1}}, {{-1, -1, 1}}, {{-1, -1, -1}}};
+  
 }
 
 #endif
