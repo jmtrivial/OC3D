@@ -40,7 +40,7 @@ public:
 	{
 		if(u==v_) return w_;
 		if(u==w_) return v_;
-		return 0;
+		return -1;
 	}
 	/*! \returns True if the edge starts from v */
 	inline bool from (int v) const 
@@ -49,14 +49,6 @@ public:
 	bool operator==(const Edge_Base &e) const
 	{
 		return (e.v() == v_ && e.w() == w_) || (e.w() == v_ && e.v() == w_);
-	}
-
-        /*! return the last vertex, by id */
-	inline bool lastById(int u) const {
-	  if (v_ > w_)
-	    return v_ == u;
-	  else
-	    return w_ == u;
 	}
 };
 
@@ -330,7 +322,7 @@ public:
 			{
 				nxt = cur->next;
 				// TODO: if cur->e has been deleted, cur->e->from(i) cannot be accessed properly
-				if(digraph || cur->e->lastById(i)) // Evite d'avoir des pointeurs invalides
+				if(digraph || i > cur->e->other(i)) // Evite d'avoir des pointeurs invalides
 					delete cur->e;
 				delete cur;
 				cur = nxt;
