@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (MiKTeX 2.8) (preloaded format=latex 2010.8.7)  13 AUG 2010 14:03
+This is pdfTeX, Version 3.1415926-1.40.10 (MiKTeX 2.8) (preloaded format=latex 2010.8.7)  18 AUG 2010 23:16
 entering extended mode
 **report.tex
 (C:\Users\Quentin\OC3D\report\report.tex
@@ -454,7 +454,7 @@ File: 3pant.eps Graphic file (type eps)
  <3pant.eps> [5]
 File: LFS.eps Graphic file (type eps)
  <LFS.eps>
-Overfull \hbox (2.3339pt too wide) in paragraph at lines 241--242
+Overfull \hbox (2.3339pt too wide) in paragraph at lines 244--245
 []\OT1/cmr/m/n/10 Optimize (i.e change the lo-ca-tion while de-creas-ing the we
 ight) ev-ery bound-
  []
@@ -464,111 +464,116 @@ File: skeleton.eps Graphic file (type eps)
  <skeleton.eps>
 File: cutlocus_skeleton.eps Graphic file (type eps)
  <cutlocus_skeleton.eps>
-Underfull \hbox (badness 10000) in paragraph at lines 246--262
+Underfull \hbox (badness 10000) in paragraph at lines 249--265
 
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 283.
+(hyperref)                removing `math shift' on input line 286.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 283.
+(hyperref)                removing `math shift' on input line 286.
 
 [7]
 File: demoauto.eps Graphic file (type eps)
  <demoauto.eps>
-Underfull \hbox (badness 10000) in paragraph at lines 300--307
+Underfull \hbox (badness 10000) in paragraph at lines 303--310
 
  []
 
+[8]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 312.
+(hyperref)                removing `math shift' on input line 315.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 312.
+(hyperref)                removing `math shift' on input line 315.
 
 File: mincut.eps Graphic file (type eps)
-<mincut.eps> [8] [9] [10] [11] [12]
+<mincut.eps> [9] [10] [11] [12]
 File: edges.eps Graphic file (type eps)
  <edges.eps>
-Overfull \hbox (21.36775pt too wide) in paragraph at lines 464--465
+Overfull \hbox (21.36775pt too wide) in paragraph at lines 465--466
  [] 
  []
 
 [13]
 File: IO.eps Graphic file (type eps)
  <IO.eps>
-Overfull \hbox (49.28148pt too wide) in paragraph at lines 479--480
+Overfull \hbox (49.28148pt too wide) in paragraph at lines 480--481
  [] 
  []
 
 File: Max_Flow_.eps Graphic file (type eps)
 <Max_Flow_.eps>
-Overfull \hbox (57.76926pt too wide) in paragraph at lines 489--490
+Overfull \hbox (57.76926pt too wide) in paragraph at lines 490--491
  [] 
  []
 
 [14]
-Underfull \hbox (badness 10000) in paragraph at lines 494--496
+Underfull \hbox (badness 10000) in paragraph at lines 496--498
 
  []
 
 File: orientation.eps Graphic file (type eps)
 <orientation.eps> [15]
+Underfull \hbox (badness 10000) in paragraph at lines 512--518
+
+ []
+
 File: ex_script_.eps Graphic file (type eps)
- <ex_script_.eps>
-Overfull \hbox (46.63342pt too wide) in paragraph at lines 514--515
+<ex_script_.eps>
+Overfull \hbox (46.63342pt too wide) in paragraph at lines 525--526
  [] 
  []
 
+[16]
 File: sectionnoq.eps Graphic file (type eps)
-<sectionnoq.eps>
+ <sectionnoq.eps>
 File: sectionnoqzoom.eps Graphic file (type eps)
  <sectionnoqzoom.eps>
 File: sectionq.eps Graphic file (type eps)
- <sectionq.eps> [16]
-Overfull \hbox (126.51634pt too wide) in paragraph at lines 565--579
+ <sectionq.eps> [17]
+Overfull \hbox (126.51634pt too wide) in paragraph at lines 575--589
  [] 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 558--583
-
- []
-
-[17]
 File: diagram_time.eps Graphic file (type eps)
- <diagram_time.eps>
+<diagram_time.eps> [18]
 File: demofirstBFS.eps Graphic file (type eps)
  <demofirstBFS.eps>
-Underfull \hbox (badness 10000) in paragraph at lines 595--608
+Underfull \hbox (badness 10000) in paragraph at lines 608--621
 
  []
 
-[18] [19]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 637.
- [20]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 637.
+[19]
+Underfull \hbox (badness 10000) in paragraph at lines 622--624
+
+ []
+
+[20]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 673.
+ [21]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 673.
  (C:\Users\Quentin\OC3D\report\report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 637.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 673.
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: 6F0684DF5128631D6CDC0870B15E2B3F;2280.
+(rerunfilecheck)             Checksum: 37E3DDBE1D3C69D420B7CC8D86B0E983;2375.
 
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 7011 strings out of 495286
- 99772 string characters out of 3180412
- 199946 words of memory out of 3000000
+ 7010 strings out of 495286
+ 99765 string characters out of 3180412
+ 198136 words of memory out of 3000000
  10050 multiletter control sequences out of 15000+200000
- 16275 words of font info for 61 fonts, out of 3000000 for 9000
+ 15916 words of font info for 60 fonts, out of 3000000 for 9000
  14 hyphenation exceptions out of 8191
- 33i,18n,31p,553b,441s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 33i,17n,31p,566b,441s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on report.dvi (20 pages, 100032 bytes).
+Output written on report.dvi (21 pages, 105180 bytes).
