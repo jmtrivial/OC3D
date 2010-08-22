@@ -71,7 +71,7 @@ string args_to_file(vector<string> &tokens, unsigned int index)
 
 bool details = false;
 bool use_neighbors = true;
-bool continue_bfs = true;
+bool step = true;
 
 Tetrahedrization mesh; 
 typedef IO_Tet<Edge, Cut, Dual, Pants> IO_T;
@@ -97,10 +97,10 @@ int main(int argc, char *argv[])
 			use_neighbors = !use_neighbors;
 			show((use_neighbors ? "U" : "Don't u") + toString("se neighborhood for Ford Fulkerson algorithm"));
 		}
-		else if(cmd == "continue")
+		else if(cmd == "step")
 		{
-			continue_bfs = !continue_bfs;
-			show((continue_bfs ? "U" : "Don't u") + toString("se the variant of neighborhood algorithm searching all possible paths before augmentating"));
+			step = !step;
+			show((step ? "U" : "Don't u") + toString("se the variant of neighborhood algorithm searching all possible paths before augmentating"));
 		}
 		else if(cmd == "details")
 		{
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 				if(use_neighbors)
 				{
 					Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(),
-						io_tet_adj.get_t(), io_tet_adj, continue_bfs, details);
+						io_tet_adj.get_t(), io_tet_adj, step, details);
 					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_adj.dual);
 					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Neighborhood<> > OptimalNPants;
 					OptimalNPants::optimize(io_tet_adj, neighborhood, cut_vertices);
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 				if(use_neighbors)
 				{ 
 					Neighborhood<> neighborhood(io_tet_adj.dual, io_tet_adj.dual_adj, io_tet_adj.get_s(),
-						io_tet_adj.get_t(), io_tet_adj, continue_bfs, details);
+						io_tet_adj.get_t(), io_tet_adj, step, details);
 					Cut_Vertices<Edge, Dual> cut_vertices(io_tet_adj.dual);
 					typedef OptimalNPants<type_flow, type_flow, Edge, Cut, Dual, Pants, Neighborhood<> > OptimalNPants;
 					OptimalNPants::optimize(num, io_tet_adj, neighborhood, cut_vertices);

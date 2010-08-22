@@ -18,6 +18,7 @@
 
 namespace oc3d
 {
+/*! Find a max flow in a volume using Neighborhood algorithm */
 template<typename type_flow = double, class Edge = Edge_Dual<type_flow>, class Edge_Adj = sgl::Edge_Base, 
         class Graph = sgl::Graph_List<Edge>, class Dual_Adj = sgl::Graph_List<Edge_Adj>, class Proc = sgl::NoNullCap<Edge> > 
 class Neighborhood : public sgl::Max_Flow<type_flow, Edge, Graph>
@@ -32,7 +33,7 @@ private:
 	const int size_G;
 	const Dual_Adj &dual_adj;
 	IO &io;
-	const bool continue_bfs, details;
+	const bool step, details;
 	std::vector<bool> edges_in_N;
 	std::vector<int> toLink;
 	std::vector<bool> in_cylinder; 
@@ -123,8 +124,10 @@ private:
 public:
 	Graph N; // Neighborhood
 
-	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, IO &io, bool continue_bfs = true, bool details = false) : 
-	sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), size_G(G.size()), dual_adj(dual_adj), io(io), continue_bfs(continue_bfs), 
+	/*!
+	\param step Specify if the neighborhood must be computed by step */
+	Neighborhood(const Graph &G, const Dual_Adj &dual_adj, int s, int t, IO &io, bool step = true, bool details = false) : 
+	sgl::Max_Flow<type_flow, Edge, Graph>(G,s,t), size_G(G.size()), dual_adj(dual_adj), io(io), step(step), 
 	details(details), proc(G.V(), t), PRECISION(1./10000), N(G.V(), false)
     { }
 
@@ -161,7 +164,7 @@ public:
 			N.insert(e);
 
 		sgl::BFS<Edge, sgl::NoNullCap<Edge>, Graph> bfs(N, proc);
-		if(!continue_bfs)
+		if(!step)
 		{
 			t1 = clock();
 			while(bfs((*this).s))

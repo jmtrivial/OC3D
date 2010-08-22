@@ -319,7 +319,7 @@ def gui():
 	
 	# Options
 	#Button("Save all", EVENT_SAVE_CONFIG, col_separation*3, bottom + 2*height, width, height)
-	Continue_Toggle = Toggle("Continue", EVENT_CONTINUE, col_separation*3, bottom + 3*height, width, height, Continue_Toggle.val, str("Enable the variant of neighborhood algorithm searching all possible paths before augmentating "))
+	Continue_Toggle = Toggle("Step", EVENT_CONTINUE, col_separation*3, bottom + 3*height, width, height, Continue_Toggle.val, str("Enable the variant of neighborhood algorithm searching all possible paths before augmentating "))
 	Neighbors_Toggle = Toggle("Neighborhood", EVENT_NEIGHBORHOOD, col_separation*3, bottom + 2*height, width, height, Neighbors_Toggle.val, "Enable the use of neighborhood during max flow")
 	Button("Load all", EVENT_LOAD_ALL, col_separation*3, bottom + height, width, height, "Select a .off file and load all related files")
 	Button("Exit",EVENT_EXIT , col_separation*3, bottom, width, height)
@@ -412,7 +412,7 @@ def bevent(evt):
 		last_cmd.append((CMD_PASS, 0))
 	
 	elif evt == EVENT_CONTINUE:
-		oc3d.stdin.write("continue\n")
+		oc3d.stdin.write("step\n")
 		last_cmd.append((CMD_PASS, 0))
 	
 	elif evt == EVENT_DETAILS:
