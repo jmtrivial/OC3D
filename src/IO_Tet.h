@@ -19,6 +19,7 @@
 
 namespace oc3d
 {
+/*! Build dual graph from tetrahedra */
 template<class Edge, class Cut, class Dual, class Pants> class IO_Tet : public IO_Base<Edge, Cut, Dual, Pants>
 {
 protected:

@@ -160,8 +160,7 @@ public:
 /*! Computes shortest path tree, stores it in SPT and the distances in dist 
 \warning Edges must have positive weights 
 \see Bellman for negative weights 
-\todo sameEdges
-\todo vector<bool> addToQ? */
+\todo sameEdges*/
 template<typename type_wt = int, class Edge = Edge_Weight<type_wt>, class Graph = Graph_List<Edge>, class Tree = Tree_List<Edge> >
 class Dijkstra
 { 
@@ -265,8 +264,7 @@ public:
 /*! \example bellman.cpp
 \image html exbellman.jpg */
 
-/*! Computes shortest path tree, stores it in SPT and the distances in dist, with arbitrary edges
-\todo addToQ? yes since queue finds in O(n) (priority_queue finds in O(lg n) */
+/*! Computes shortest path tree, stores it in SPT and the distances in dist, with arbitrary edges */
 template<typename type_wt, class Edge, class Graph, class Tree> 
 class Bellman<true, type_wt, Edge, Graph, Tree>
 {

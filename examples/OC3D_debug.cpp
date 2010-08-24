@@ -69,7 +69,7 @@ string args_to_file(vector<string> &tokens, unsigned int index)
 	return file;
 }
 
-bool details = false;
+bool details = true;
 bool use_neighbors = true;
 bool step = true;
 

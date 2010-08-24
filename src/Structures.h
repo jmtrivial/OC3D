@@ -24,6 +24,7 @@ template<typename type> inline type max_val() // for old compilators (acm-icpc).
 	return std::numeric_limits<type>::max();
 }
 
+/*! Edge with two extremities */
 class Edge_Base
 { 
 protected:
@@ -58,7 +59,7 @@ template<typename type_wt> std::ostream &operator<<(std::ostream &os, const Edge
 	return os;
 };
 
-/*!  Basic edge with weight 
+/*!  Edge with weight 
 \todo Class Vertex */
 template<typename type_wt = int> class Edge_Weight : virtual public Edge_Base
 {
@@ -82,7 +83,7 @@ template<typename type_wt> std::ostream &operator<<(std::ostream &os, const Edge
 	return os;
 };
 
-/*! Tree_List, slighty different from Graph ADT (insert)
+/*! Tree
 \warning Direction in the Tree_List may not correspond to the direction of the edges (from e->v() to e->w()) */
 template<class Edge = Edge_Base> class Tree_List
 {
@@ -182,6 +183,7 @@ public:
 	friend class iterator_all;
 };
 
+/*! Rooted tree with a distance from root */
 template<class Edge = Edge_Base, class Tree = Tree_List<Edge> > class Tree_Dist : public Tree
 {
 	std::vector<int> distance; // Distance from source
@@ -447,7 +449,7 @@ public:
 	friend class iterator_all;
 };
 
-/*!  Ierates through the edges from a vertex */
+/*! Ierates through the edges from a vertex */
 template<class Edge = Edge_Base > class Graph_List<Edge>::iterator
 { 
 	const Graph_List<Edge> &G;
@@ -465,7 +467,7 @@ public:
 	inline bool end() { return (t == NULL); }
 };
 
-/*!  Ierates through all edges */
+/*! Ierates through all edges */
 template<class Edge = Edge_Base > class Graph_List<Edge>::iterator_all
 { 
 	const Graph_List<Edge> &G;
@@ -520,7 +522,7 @@ public:
 	{ return end_; }
 };
 
-/*!  Matrix adjacency graph */
+/*! Matrix adjacency graph */
 template<class Edge = Edge_Base > class Graph_Matrix
 { 
 	int Vcnt, Ecnt; bool digraph;

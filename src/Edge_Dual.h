@@ -10,9 +10,9 @@
 
 #include "Flow.h"
 
-/*! Edge in the dual graph */
 namespace oc3d
 {
+/*! Edge in the dual graph */
 template<typename type_flow = double, typename type_wt = type_flow> 
 class Edge_Dual : public sgl::Edge_Flow<type_flow>, public sgl::Edge_Weight<type_wt>
 {

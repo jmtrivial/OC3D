@@ -38,6 +38,7 @@ namespace oc3d
 		vect(double x, double y, double z) : x(x), y(y), z(z) {} 
 	};
 
+	/*! Class for I/O and dual creation */
 	template<class Edge, class Cut, class Dual, class Pants> class IO_Base
 	{
 	protected:
